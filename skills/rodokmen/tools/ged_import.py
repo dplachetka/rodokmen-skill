@@ -207,15 +207,16 @@ def main():
     if as_json:
         print(format_osoby({"P": P}), end="")
         return
-    print("\nFRONTA ZÁPISŮ (nejmladší známá událost s místem; lhůty pro archiv: narození 100, sňatky 75, úmrtí 75 let):")
+    print("\nFRONTA ZÁPISŮ (nejmladší známá událost s místem; lhůty pro archiv: narození 100, sňatky 75, úmrtí 75 let\n"
+          "od POSLEDNÍHO zápisu ve svazku – „asi online“ znamená, že je dost starý zápis, ne celý svazek):")
     now = datetime.date.today().year
     for k, n, what, d, p in queue:
         y = year(d)
         limit = {"úmrtí": 75, "sňatek": 75}.get(what, 100)
         if not y:
             where = ""
-        elif now - y > limit:
-            where = "  → matriky online"
+        elif now - y > limit:   # svazek mohl pokračovat dál a do archivu jde až s posledním zápisem
+            where = "  → asi online (rozhoduje poslední zápis ve svazku)"
         elif what == "úmrtí" and now - y > 30:   # § 25b: po 30 letech vydá matriční úřad výpis komukoli
             where = "  → matriční úřad (výpis komukoli)"
         else:
