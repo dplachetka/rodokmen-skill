@@ -21,6 +21,7 @@ for _s in (sys.stdout, sys.stderr):   # UTF-8 výstup i na Windows bez -X utf8 (
 API = "https://aron.vychodoceskearchivy.cz/api/aron"
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 CACHE = os.path.join(ROOT, "pracovni", ".cache_aron")
+SOUBEZNE = 3   # dlaždic najednou – šetrně k serveru archivu (reference/soukromi.md), běží i 3–4 pomocníci naráz
 
 
 def magick():
@@ -98,7 +99,7 @@ def fetch_image(dzi_url, level_offset=1, out="page.jpg", crop=None):
                 f.write(get(url, binary=True))
             return job
 
-        with cf.ThreadPoolExecutor(8) as ex:
+        with cf.ThreadPoolExecutor(SOUBEZNE) as ex:
             list(ex.map(dl, jobs))
         # a tile with c > 0 (r > 0) carries `ov` extra pixels on its left (top) edge;
         # crop every tile to its own ts x ts cell, then append rows and columns
