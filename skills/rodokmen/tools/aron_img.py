@@ -58,13 +58,19 @@ def volume(apu_id):
         return json.load(f)
 
 
-def tiles_by_order(vol):
-    out = {}
-    for dao in vol.get("digitalObjects", []):
-        for f in dao["files"]:
-            if f["type"] == "TILE":
-                out[f["order"]] = f["referencedFile"]
-    return out
+def scans(vol):
+    """Snímky svazku: {číslo snímku: (id digitálního objektu, id zobrazeného souboru, adresa dlaždic .dzi)}.
+    Svazek může mít víc digitálních objektů (sad snímků); berou se podle jejich `order`. Číslo snímku je `order`
+    souboru, pokud je v celém svazku jedinečné, jinak (číslování v každé sadě od 1) pořadí 1…N přes všechny sady.
+    Stahování, odkaz i počet snímků tak vždy mluví o stejném snímku."""
+    rows = []
+    for dao in sorted(vol.get("digitalObjects", []), key=lambda d: d.get("order") or 0):
+        pub = {f["order"]: f["id"] for f in dao["files"] if f["type"] == "PUBLISHED"}
+        for f in sorted((f for f in dao["files"] if f["type"] == "TILE"), key=lambda f: f["order"]):
+            rows.append((f["order"], (dao["id"], pub.get(f["order"]), f["referencedFile"])))
+    if len({o for o, _ in rows}) == len(rows):
+        return dict(rows)
+    return {i: row for i, (_, row) in enumerate(rows, 1)}
 
 
 def fetch_image(dzi_url, level_offset=1, out="page.jpg", crop=None):
@@ -123,10 +129,10 @@ def fetch_image(dzi_url, level_offset=1, out="page.jpg", crop=None):
 if __name__ == "__main__":
     apu = sys.argv[1]
     vol = volume(apu)
-    tiles = tiles_by_order(vol)
+    sc = scans(vol)
     if sys.argv[2] == "info":
         print(vol["name"], "|", vol.get("description"))
-        print("scans:", len(tiles))
+        print("scans:", len(sc))
         sys.exit(0)
     if sys.argv[2] == "svazek":
         root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -134,7 +140,7 @@ if __name__ == "__main__":
         sv = json.load(open(path, encoding="utf-8")) if os.path.exists(path) else {}
         fond, _, rest = vol["name"].partition(": ")
         sv[apu[:8]] = dict(archiv=fond if rest else "", portal="ARON", svazek=rest or vol["name"],
-                           popis=(vol.get("description") or "")[:300], snimku=len(tiles),
+                           popis=(vol.get("description") or "")[:300], snimku=len(sc),
                            url=f"https://aron.vychodoceskearchivy.cz/apu/{vol['id']}")
         with open(path, "w", encoding="utf-8") as f:
             json.dump(sv, f, ensure_ascii=False, indent=1)
@@ -142,13 +148,15 @@ if __name__ == "__main__":
         sys.exit(0)
     if sys.argv[2] == "link":
         n = int(sys.argv[3])
-        dao = vol["digitalObjects"][0]
-        pub = [f for f in dao["files"] if f["type"] == "PUBLISHED" and f["order"] == n][0]
-        print(f"https://aron.vychodoceskearchivy.cz/apu/{apu}/dao/{dao['id']}/file/{pub['id']}")
+        if n not in sc or not sc[n][1]:
+            sys.exit(f"Snímek {n} ve svazku není (snímků: {len(sc)}).")
+        print(f"https://aron.vychodoceskearchivy.cz/apu/{apu}/dao/{sc[n][0]}/file/{sc[n][1]}")
         sys.exit(0)
     n = int(sys.argv[2])
     lo = int(sys.argv[3]) if len(sys.argv) > 3 else 1
     out = sys.argv[4] if len(sys.argv) > 4 else f"{apu[:8]}_{n:04d}.jpg"
     crop = tuple(float(v) for v in sys.argv[5].split(",")) if len(sys.argv) > 5 else None
-    path, dims = fetch_image(tiles[n], lo, out, crop)
+    if n not in sc:
+        sys.exit(f"Snímek {n} ve svazku není (snímků: {len(sc)}).")
+    path, dims = fetch_image(sc[n][2], lo, out, crop)
     print(path, "full size", dims)
