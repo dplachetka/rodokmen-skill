@@ -34,7 +34,7 @@ Náhled spouštěj na pozadí a uživateli pošli odkaz. Vzhled si ověř sám (
 - **Přihlášení:** otázka, na kterou zná odpověď jen rodina (ne snadno dohledatelná na sociálních sítích).
   Odpověď se porovnává bez diakritiky a velkých písmen. Na serveru i v cookie prohlížeče je jen její otisk (SHA-256),
   samotná odpověď se nikam neukládá. Krátkou nebo běžnou odpověď (jméno, obec) ale jde z otisku uhádnout zkoušením,
-  proto ať ji uživatel nepoužívá jako heslo jinde. Bez odpovědi nasazení (`npm run nasadit`, `deploy-caprover`)
+  proto ať ji uživatel nepoužívá jako heslo jinde. Bez odpovědi nasazení (`npm run nasadit`, `kontejner`, `deploy-caprover`)
   skončí chybou; otevřený web jen výslovně přes `"otevreny": true` v `prihlaseni`.
   Je to lehká ochrana proti náhodným návštěvníkům, ne bankovní zabezpečení – citlivé věci na web nepatří.
 - `uvod.foto` = klíč obrázku ve `vyrezy/` (ulož přes `vyrez.py`).
@@ -68,7 +68,11 @@ zkus v `launch.json` `"runtimeExecutable": "node"` a `"runtimeArgs": ["web/node_
 (Astro 7 má spouštěč `astro.mjs`, ne `astro.js`). Server běží jen na tomto počítači – nepřidávej `--host`.
 
 ## Vlastní server (pokročilé)
-- Docker: `web/Dockerfile` (build Astro → nginx s `nginx.conf` z `nginx.sablona.conf`). Před buildem image vždy `npm run data`.
+- Podman: `cd web && npm run kontejner` – zkontroluje přihlašovací odpověď, převede data a sestaví image `rodokmen-web`
+  podle `web/Dockerfile` (build Astro → nginx s `nginx.conf` z `nginx.sablona.conf`). Vyzkoušení:
+  `podman run --rm -p 8080:80 rodokmen-web` → http://localhost:8080. Image pak nahraj na server (`podman save` / registr).
+  Nestavěj image holým `podman build` – bez `npm run data -- --nasazeni` by mohl vzniknout web bez přihlášení.
+  Na macOS a Windows potřebuje Podman běžící virtuální stroj (`podman machine init`, `podman machine start` – dej uživateli).
 - CapRover: `npm run deploy-caprover` (vyžaduje nainstalovaný a přihlášený `caprover` CLI).
 
 ## Úpravy vzhledu
