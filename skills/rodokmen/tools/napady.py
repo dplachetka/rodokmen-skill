@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Náměty na zajímavosti: projde data/osoby.py a vypíše věci, ze kterých bývají hezké „fun facts“.
+"""Náměty na zajímavosti: projde data/osoby.json a vypíše věci, ze kterých bývají hezké „fun facts“.
 
 Použití (z kořene projektu): python3 -I tools/napady.py [složka projektu]
 
@@ -17,6 +17,9 @@ for _s in (sys.stdout, sys.stderr):   # UTF-8 výstup i na Windows bez -X utf8 (
     if hasattr(_s, "reconfigure"):
         _s.reconfigure(encoding="utf-8", errors="replace")
 
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))   # python3 -I složku skriptu do sys.path nepřidá
+from nacti_osoby import nacti_osoby
+
 ROOT = sys.argv[1] if len(sys.argv) > 1 else os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 DATE = r"(\d{1,2})\.\s*(\d{1,2})\.\s*(\d{4})"
 EPIDEMIE = {1771: "hladomor", 1772: "hladomor a tyfus", 1805: "tyfus", 1831: "cholera", 1832: "cholera", 1836: "cholera",
@@ -25,8 +28,7 @@ EPIDEMIE = {1771: "hladomor", 1772: "hladomor a tyfus", 1805: "tyfus", 1831: "ch
 
 
 def load():
-    ns = {}
-    exec(open(os.path.join(ROOT, "data", "osoby.py"), encoding="utf-8").read(), ns)
+    ns = nacti_osoby(os.path.join(ROOT, "data"))
     return ns["P"], ns.get("LINES", {}), ns.get("SAME", {})
 
 

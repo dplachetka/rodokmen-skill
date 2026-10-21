@@ -1,11 +1,14 @@
 #!/usr/bin/env python3
-"""Vějíř předků (360°) z data/osoby.py jako SVG.
+"""Vějíř předků (360°) z data/osoby.json jako SVG.
 Použití: fan_chart.py <out_dir>                         (plakát: SVG + HTML s nadpisem a legendou, PNG přes Chrome, je-li k dispozici)
          fan_chart.py <out_file.svg> --web <hrefs.json>  (holé klikací SVG pro web – volá ho export_web.py)"""
 import html, json, math, os, re, subprocess, sys
 for _s in (sys.stdout, sys.stderr):   # UTF-8 výstup i na Windows bez -X utf8 (cp1250 neumí třeba „→“)
     if hasattr(_s, "reconfigure"):
         _s.reconfigure(encoding="utf-8", errors="replace")
+
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))   # python3 -I složku skriptu do sys.path nepřidá
+from nacti_osoby import nacti_osoby
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 OUT = os.path.abspath(sys.argv[1]) if len(sys.argv) > 1 else os.path.join(ROOT, "vystupy")
@@ -18,8 +21,7 @@ CHROME = next((c for c in ("/Applications/Google Chrome.app/Contents/MacOS/Googl
                            "google-chrome", "chromium", "chromium-browser")
                if os.path.exists(c) or __import__("shutil").which(c)), None)
 
-ns = {}
-exec(open(os.path.join(ROOT, "data", "osoby.py"), encoding="utf-8").read(), ns)
+ns = nacti_osoby(os.path.join(ROOT, "data"))
 P, LINES = ns["P"], ns.get("LINES", {})
 WEBCFG = json.load(open(os.path.join(ROOT, "data", "web.json"), encoding="utf-8")) if os.path.exists(os.path.join(ROOT, "data", "web.json")) else {}
 

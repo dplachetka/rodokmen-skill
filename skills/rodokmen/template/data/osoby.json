@@ -1,0 +1,9 @@
+{
+ "_popis": "Předci podle Kekulého čísel (1 = výchozí osoba, otec osoby n = 2n, matka = 2n+1), rody LINES, boční příbuzní SIDE, otázky ISSUES, HYPOTEZY, SAME. Formát: reference/data.md ve skillu rodokmen.",
+ "P": {},
+ "LINES": {},
+ "SIDE": [],
+ "ISSUES": [],
+ "HYPOTEZY": [],
+ "SAME": {}
+}

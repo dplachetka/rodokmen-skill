@@ -6,7 +6,7 @@ Použití (z kořene projektu):
   python3 -I tools/ged_import.py dokumenty/strom.ged "Jméno Příjmení" -> předci této osoby s Kekulého čísly
                                                                         (1 = ona, 2 = otec, 3 = matka…), všechny
                                                                         události, poznámky a FRONTA ZÁPISŮ k vyhledání
-  … "Jméno Příjmení" --osoby   -> totéž jako kostra pro data/osoby.py (stav "fam", ke kontrole a doplnění)
+  … "Jméno Příjmení" --osoby   -> totéž jako kostra pro data/osoby.json (stav "fam", ke kontrole a doplnění)
 
 Fronta zápisů: u každého předka nejmladší známá událost s místem (úmrtí, pak sňatek, pak narození) –
 úmrtní a oddací zápisy uvádějí datum a místo narození i rodiče, proto se hledá od nejmladšího zápisu.
@@ -14,11 +14,14 @@ E-maily a adresy ze stromu se nevypisují.
 Kódování: UTF-8; starší soubory s hlavičkou „1 CHAR ANSI“ (Brother's Keeper) se čtou jako Windows-1250 a česká data
 („SRPEN 1945“, „PODZIM 1951“, „1926 NEBO 1927“, „11.11.1934“) se převedou na tvar „8. 1945“, „podzim 1951“…
 """
-import datetime, re, sys
+import datetime, os, re, sys
 from collections import defaultdict
 for _s in (sys.stdout, sys.stderr):   # UTF-8 výstup i na Windows bez -X utf8 (cp1250 neumí třeba „→“)
     if hasattr(_s, "reconfigure"):
         _s.reconfigure(encoding="utf-8", errors="replace")
+
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))   # python3 -I složku skriptu do sys.path nepřidá
+from nacti_osoby import format_osoby
 
 EVENTS = {"BIRT": "*", "CHR": "* (křest)", "DEAT": "†", "BURI": "† (pohřeb)", "MARR": "×"}
 MONTHS = {m: i for i, m in enumerate("JAN FEB MAR APR MAY JUN JUL AUG SEP OCT NOV DEC".split(), 1)}
@@ -153,7 +156,7 @@ def main():
         sys.exit(__doc__)
     recs = read(sys.argv[1])
     args = [a for a in sys.argv[2:] if not a.startswith("--")]
-    as_py = "--osoby" in sys.argv
+    as_json = "--osoby" in sys.argv
     if not args:
         for r in recs.values():
             if r["_type"] == "INDI":
@@ -169,9 +172,7 @@ def main():
             if p:
                 tree[kk] = p
                 todo.append(kk)
-    queue = []
-    if as_py:
-        print("P = {")
+    queue, P = [], {}
     for k in sorted(tree):
         ind = tree[k]
         ev = events(ind, recs)
@@ -180,16 +181,16 @@ def main():
             if tag == "MARR":
                 facts.append(" ".join(x for x in ("×", d, p, extra) if x))
             elif d or p:   # příčinu úmrtí jen do výpisu, ne do kostry dat (zdravotní údaj)
-                facts.append(" ".join(x for x in (EVENTS[tag], d, p) if x) + (f" ({extra})" if extra and not as_py else ""))
+                facts.append(" ".join(x for x in (EVENTS[tag], d, p) if x) + (f" ({extra})" if extra and not as_json else ""))
         facts += [first(n, "OCCU") or n.get("val", "") for n in sub(ind, "OCCU")]
         notes = [re.sub(r"\s+", " ", re.sub(r"<[^>]+>", " ", n.get("val", ""))).strip() for n in sub(ind, "NOTE")]
         notes = [n for n in notes if n]
         b = next((year(d) for t, d, p, x in ev if t == "BIRT"), None)
         dd = next((year(d) for t, d, p, x in ev if t == "DEAT"), None)
         y = f"{b}–{dd}" if b and dd else (f"* {b}" if b else (f"† {dd}" if dd else ""))
-        if as_py:
-            note = " ".join(notes)   # !r = platný Python i pro uvozovky a „\“ ve jménech a poznámkách (osoby.py se spouští přes exec)
-            print(f' {k}: dict(n={name(ind)!r}, y={y!r}, st="fam", f={facts!r}, r=[]' + (f', note={note[:300]!r}' if note else "") + "),")
+        if as_json:
+            note = " ".join(notes)
+            P[k] = dict(n=name(ind), y=y, st="fam", f=facts, r=[], **({"note": note[:300]} if note else {}))
         else:
             print(f"\n{k} | {name(ind)} | {y}")
             for f in facts:
@@ -203,8 +204,8 @@ def main():
                 t, d, p = max(hit, key=lambda e: year(e[1]) or 0)
                 queue.append((k, name(ind), {"DEAT": "úmrtí", "BURI": "úmrtí", "MARR": "sňatek"}.get(t, "narození"), d, p))
                 break
-    if as_py:
-        print("}")
+    if as_json:
+        print(format_osoby({"P": P}), end="")
         return
     print("\nFRONTA ZÁPISŮ (nejmladší známá událost s místem; lhůty pro archiv: narození 100, sňatky 75, úmrtí 75 let):")
     now = datetime.date.today().year

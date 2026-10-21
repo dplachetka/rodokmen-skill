@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Export dat rodokmenu (data/*) do webu ve složce web/.
 
-Čte data/osoby.py, data/zaznamy.json, data/svazky.json, data/prepisy.json, data/zvyrazneni.json,
+Čte data/osoby.json, data/zaznamy.json, data/svazky.json, data/prepisy.json, data/zvyrazneni.json,
 data/mista.json, data/web.json, data/dokumenty.json a markdownové poznámky. Zapisuje
 web/src/data/site.json, web/src/generated/*, web/public/{img,zdroje}, web/public/prihlaseni.html,
 web/nginx.conf a web/netlify/edge-functions/brana.js.
@@ -14,6 +14,8 @@ for _s in (sys.stdout, sys.stderr):   # UTF-8 výstup i na Windows bez -X utf8 (
         _s.reconfigure(encoding="utf-8", errors="replace")
 
 TOOLS = os.path.dirname(os.path.abspath(__file__))
+sys.path.insert(0, TOOLS)   # python3 -I složku skriptu do sys.path nepřidá
+from nacti_osoby import nacti_osoby
 ROOT = os.path.dirname(TOOLS)
 DATA = os.path.join(ROOT, "data")
 WEB = os.path.join(ROOT, "web")
@@ -36,8 +38,10 @@ def jload(name, default):
 
 
 def load_people():
-    ns = {}
-    exec(open(os.path.join(DATA, "osoby.py"), encoding="utf-8").read(), ns)
+    try:
+        ns = nacti_osoby(DATA)
+    except ValueError as e:   # starý osoby.py nebo chyba v JSON – hláška s řádkem místo výpisu chyby Pythonu
+        sys.exit(f"CHYBA: {e}")
     for name, default in (("P", {}), ("SIDE", []), ("LINES", {}), ("ISSUES", []), ("HYPOTEZY", []), ("SAME", {})):
         ns.setdefault(name, default)
     return ns
@@ -183,7 +187,7 @@ def main():
     ns = load_people()
     P, LINES, SIDE, ISSUES = ns["P"], ns["LINES"], ns["SIDE"], ns["ISSUES"]
     if 1 not in P:
-        sys.exit("V data/osoby.py chybí výchozí osoba (číslo 1).")
+        sys.exit("V data/osoby.json chybí výchozí osoba (číslo 1).")
     SAME = ns["SAME"]                       # alias Kekulé → kanonické Kekulé (předek v rodokmenu vícekrát)
     cfg = jload("web.json", {})
     login = cfg.get("prihlaseni") or {}
@@ -375,7 +379,7 @@ def main():
     targets = dict(osoba=people, zdroj=recs, rod=lines, rodina=families)
     texts = {f: open(os.path.join(gen_dir, f), encoding="utf-8").read() for f in ("pribeh.md", "zajimavosti.md")}
     texts["web.json"] = json.dumps(cfg, ensure_ascii=False)
-    texts["osoby.py (hypotézy)"] = json.dumps(hypotheses, ensure_ascii=False)
+    texts["osoby.json (hypotézy)"] = json.dumps(hypotheses, ensure_ascii=False)
     broken = [(f, m.group(0)) for f, t in texts.items()
               for m in re.finditer(r"/(osoba|zdroj|rod|rodina)/([^/\s)\"'#?<>\]]+)", t) if m.group(2) not in targets[m.group(1)]]
     for f, link in dict.fromkeys(broken):

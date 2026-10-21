@@ -52,6 +52,14 @@ def main():
     dst = os.path.abspath(os.path.expanduser(sys.argv[1]))
     demo = "--ukazka" in sys.argv
     os.makedirs(dst, exist_ok=True)
+    # starší projekt: data/osoby.py → data/osoby.json dřív, než šablona přidá prázdný osoby.json
+    sys.path.insert(0, os.path.join(SKILL, "tools"))
+    from nacti_osoby import prevod
+    try:
+        if prevod(dst):
+            print("data/osoby.py převedeno na data/osoby.json (původní soubor: pracovni/osoby_puvodni.py)")
+    except ValueError as e:
+        sys.exit(f"CHYBA při převodu data/osoby.py na osoby.json: {e}\nOpravte to a spusťte novy_projekt.py znovu.")
     copy_tree(os.path.join(SKILL, "template", "ukazka" if demo else "data"), os.path.join(dst, "data"))
     if demo:
         for sub in ("vyrezy", "zdroje"):

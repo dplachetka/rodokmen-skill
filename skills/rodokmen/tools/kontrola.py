@@ -10,6 +10,9 @@ for _s in (sys.stdout, sys.stderr):   # UTF-8 výstup i na Windows bez -X utf8 (
     if hasattr(_s, "reconfigure"):
         _s.reconfigure(encoding="utf-8", errors="replace")
 
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))   # python3 -I složku skriptu do sys.path nepřidá
+from nacti_osoby import SEKCE, nacti_osoby
+
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 DATA = os.path.join(ROOT, "data")
 
@@ -21,11 +24,13 @@ def jload(name, default):
 
 def main():
     err, warn = [], []
-    ns = {}
     try:
-        exec(open(os.path.join(DATA, "osoby.py"), encoding="utf-8").read(), ns)
+        ns = nacti_osoby(DATA)
     except Exception as e:  # noqa: BLE001
-        sys.exit(f"CHYBA: data/osoby.py nejde načíst: {e}")
+        sys.exit(f"CHYBA: data/osoby.json nejde načíst: {e}")
+    for name in ns:
+        if name not in SEKCE:
+            err.append(f"osoby.json: neznámá sekce '{name}' – platné jsou {', '.join(SEKCE)}")
     P, SIDE, LINES, SAME = ns.get("P", {}), ns.get("SIDE", []), ns.get("LINES", {}), ns.get("SAME", {})
     zaz = jload("zaznamy.json", [])
     svazky, prep, hl = jload("svazky.json", {}), jload("prepisy.json", {}), jload("zvyrazneni.json", {})

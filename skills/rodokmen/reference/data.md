@@ -3,11 +3,11 @@
 Všechna data jsou v `data/`. Web se z nich generuje (`npm run data`), nikdy needituj `web/src/data/site.json` ručně.
 Po změnách spusť `python3 -I tools/kontrola.py`. Ukázku vyplněných dat má `SKILL_DIR/template/ukazka/`.
 
-## `osoby.py` – předci
+## `osoby.json` – předci
 Kekulého čísla: 1 = výchozí osoba, otec osoby n = 2n, matka = 2n+1.
 | číslo | kdo |
 |---|---|
-| 1 | výchozí osoba (u ženy `sex="F"`) |
+| 1 | výchozí osoba (u ženy `"sex": "F"`) |
 | 2, 3 | otec, matka |
 | 4–7 | prarodiče (4, 5 otcovi rodiče; 6, 7 matčini) |
 | 8–15 | pradědečci a prababičky = **8 rodů** (`LINES`) |
@@ -15,28 +15,48 @@ Kekulého čísla: 1 = výchozí osoba, otec osoby n = 2n, matka = 2n+1.
 
 Otec předka 22 je 44, matka 45; dítě předka 45 je 22 (45 // 2). Muži mají sudá čísla.
 
-```python
-P = {
- 8: dict(n="Jan Novák", y="1890–1944", st="doc",
-         f=["* 14. 2. 1890 Holice čp. 112", "kovář", "× 20. 6. 1919 Holice Josefa Pokorná", "† 1944 Holice"],
-         r=["holice_krest_jan_novak_1890", "holice_snatek_jan_novak_josefa_pokorna_1919"],
-         note="Proč nejistota / rozpor / odkud údaj"),
- 9: dict(n="Josefa Pokorná", y="* 1895", st="doc", f=[...], r=[...]),
- 33: dict(n="otec neuveden", st="unk", f=[], note="Nemanželský syn; otec v matrice není."),
+Soubor má sekce `P`, `LINES`, `SIDE`, `ISSUES`, `HYPOTEZY`, `SAME` a jeden řádek na osobu (rod, příbuzného, otázku):
+```json
+{
+ "_popis": "…",
+ "P": {
+  "8": {"n": "Jan Novák", "y": "1890–1944", "st": "doc", "f": ["* 14. 2. 1890 Holice čp. 112", "kovář", "× 20. 6. 1919 Holice Josefa Pokorná", "† 1944 Holice"], "r": ["holice_krest_jan_novak_1890", "holice_snatek_jan_novak_josefa_pokorna_1919"], "note": "Proč nejistota / rozpor / odkud údaj"},
+  "9": {"n": "Josefa Pokorná", "y": "* 1895", "st": "doc", "f": ["…"], "r": ["…"]},
+  "33": {"n": "otec neuveden", "st": "unk", "f": [], "note": "Nemanželský syn; otec v matrice není."}
+ },
+ "LINES": {
+  "8": ["Novákové", "Kováři z Holic…"]
+ },
+ "SIDE": [
+  {"k": 16, "n": "Josef Novák (1865–1920)", "t": "Bratr Jana. Kovář v …", "r": ["klic_zapisu"]}
+ ],
+ "ISSUES": [
+  ["Kdy se narodil Jan Novák?", "Otevřené: rodina říká 1850, v Holicích 1848–1852 nenalezen."]
+ ],
+ "HYPOTEZY": [
+  {"rod": 8, "nadpis": "Hypotéza: Novákové z Lhoty", "text": "…", "polozky": [["Jan Novák", "kmotr 1681…"]], "zaznamy": ["klic"]}
+ ],
+ "SAME": {"350": 140}
 }
 ```
-- `n` jméno (ženy rodným příjmením), `y` roky pro přehledy (`"* 1895"`, `"1890–1944"`, `"asi 1720–1785"`, `"1680 – před 1740"`,
-  `"† 1940"` když známe jen úmrtí; nic nevíme → `""`).
+- Je to JSON: texty v dvojitých uvozovkách (uvozovka v textu `\"`, raději ale „české“), čárka mezi položkami, za
+  poslední ne; čísla osob jako klíče v uvozovkách. Komentáře JSON nemá – poznámky patří do `note`. Po úpravě
+  `kontrola.py` ukáže případnou chybu i s řádkem. Klíče začínající `_` nástroje přeskakují.
+- `n` jméno (ženy rodným příjmením, u nejistého čtení „(?)“), `y` roky pro přehledy (`"* 1895"`, `"1890–1944"`,
+  `"asi 1720–1785"`, `"1680 – před 1740"`, `"† 1940"` když známe jen úmrtí; nic nevíme → `""`).
 - `f` fakta: začínají `*` (narození), `×` (sňatek), `†` (úmrtí) nebo jsou volný text (řemeslo, bydliště).
   Názvy obcí ve faktech používá mapa (`mista.json` → `re`).
 - `r` klíče zápisů ze `zaznamy.json`. `st` viz `matriky.md`: `doc` přečteno v matrice, `prob` pravděpodobné,
   `fam` od rodiny (i strom, který si rodina vede sama, např. GEDCOM z jejího MyHeritage), `mh` cizí strom z internetu, `unk`.
-- `LINES = {8: ("Novákové", "Kováři z Holic…"), …}` – jen čísla 8–15; název rodu = příjmení v množném čísle.
-- `SIDE` – sourozenci a další příbuzní: `dict(k=<číslo předka>, n="Josef Novák (1865–1920)", t="text", r=[klíče])`.
-- `ISSUES` – dvojice `("Otázka", "Vyřešeno: … / Hypotéza: … / Otevřené: …")` → stránka „Co hledáme“ (vyřešené se skryjí).
-  Jde na web – nepiš sem citlivé věci (příčiny úmrtí, rodinné spory) bez souhlasu.
-- `HYPOTEZY` – `dict(rod=8, nadpis="…", text="…", polozky=[("jméno", "text")], zaznamy=[klíče])` → stránka rodu.
-- `SAME = {350: 140}` – předek, který je v rodokmenu dvakrát (alias → hlavní číslo; alias v `P` může mít `f=["TÁŽ OSOBA jako 140"]`).
+- `note` proč je údaj nejistý, rozpory, odkud se vzal. Žijící lidé: jen jméno a rok narození, `"note": "Žijící – údaje jen základní."`
+- `LINES` – jen čísla 8–15: `[název rodu, jedna věta o rodu]`; název rodu = příjmení v množném čísle.
+- `SIDE` – sourozenci a další příbuzní: `k` = číslo předka, ke kterému patří, `n`, `t` text, `r` klíče zápisů.
+- `ISSUES` – dvojice `[otázka, odpověď]`, odpověď začíná „Vyřešeno: …“ (na webu se skryje), „Hypotéza: …“ nebo
+  „Otevřené: …“ → stránka „Co hledáme“. Jde na web – nepiš sem citlivé věci (příčiny úmrtí, rodinné spory) bez souhlasu.
+- `HYPOTEZY` – hypotézy o původu rodu nad rámec doložené linie → stránka rodu (`rod` = číslo 8–15).
+- `SAME` – předek, který je v rodokmenu dvakrát (alias → hlavní číslo; alias v `P` může mít `"f": ["TÁŽ OSOBA jako 140"]`).
+- Starší projekt má místo toho `data/osoby.py`: převede ho `python3 -I tools/nacti_osoby.py prevod` (dělá to i
+  `novy_projekt.py` při aktualizaci nástrojů). Starý soubor se při tom nespouští, odloží se do `pracovni/osoby_puvodni.py`.
 
 ## `zaznamy.json` – zápisy
 ```json

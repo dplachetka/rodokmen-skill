@@ -117,15 +117,16 @@ v archivu ani online ale ještě není. Zapiš do `archivni_dotazy.md`.
 - Python: `python -I -X utf8 tools/<nástroj>.py` (ne `python3` – bývá to nefunkční alias z Microsoft Store). Bez `-X utf8`
   je výstup do roury v cp1250: čeština se rozbije a skripty spadnou na „≈“ a „→“ (nástroje skillu si výstup přepnou
   do UTF-8 samy, vlastní jednorázové skripty ne – `-X utf8` proto používej vždy). Totéž platí při
-  přesměrování do souboru (soubor z `… --osoby > x.py` by jinak vznikl v cp1250; ve Windows PowerShellu 5.1 `>` dokonce
+  přesměrování do souboru (soubor z `… --osoby > x.json` by jinak vznikl v cp1250; ve Windows PowerShellu 5.1 `>` dokonce
   zapisuje UTF-16 – přesměrovávej v Git Bash). Proměnná `PYTHONUTF8` s `-I` nefunguje.
 - ImageMagick je `magick`, nikdy `convert` (`convert` je ve Windows systémový nástroj na převod disku z FAT na NTFS).
   Po instalaci přes winget je `magick` v PATH až po restartu Claude Code. Písmo pro `-annotate`: `-font C:/Windows/Fonts/arial.ttf`.
 - Limit délky příkazové řádky je 32 767 znaků – stovky souborů (dlaždic) v jednom příkazu `magick` neprojdou
   (WinError 206); skládej po řádcích.
 - Skripty `.sh` přes Git Bash (`bash tools/…`). Markdown a JSON neupravuj `sed -i` (escapy v Git Bash rozbijí soubor),
-  ale nástrojem pro úpravu souborů nebo Pythonem (`newline="\n"`, u JSON `ensure_ascii=False, indent=1` jako nástroje).
+  ale nástrojem pro úpravu souborů nebo Pythonem (`newline="\n"`, u JSON `ensure_ascii=False, indent=1` jako nástroje;
+  `osoby.json` má jeden řádek na osobu – viz `reference/data.md`).
 - Windows nerozlišuje velikost písmen v názvech (`o_29.jpg` = `O_29.jpg`) – náhled a plné rozlišení odliš předponou
   (`nahled_`, `plne_`), jinak se přepíšou.
-- Datové soubory zapisuj v UTF-8 **bez BOM** (Windows PowerShell 5.1 s `-Encoding UTF8` přidá BOM a `osoby.py` pak nejde načíst).
+- Datové soubory zapisuj v UTF-8 **bez BOM** (Windows PowerShell 5.1 s `-Encoding UTF8` přidá BOM a soubory `.json` pak nejdou načíst).
 

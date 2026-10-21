@@ -10,7 +10,7 @@ pak konec `research_log.md` a sekci „Rozpracováno“.
 ## Kde co je
 | Soubor | Obsah |
 |---|---|
-| `data/osoby.py` | Přímí předci podle Kekulého čísla + rody, boční příbuzní, otevřené otázky, hypotézy. |
+| `data/osoby.json` | Přímí předci podle Kekulého čísla + rody, boční příbuzní, otevřené otázky, hypotézy. |
 | `data/zaznamy.json` | Každý použitý zápis z matriky (klíč = název obrázku). |
 | `data/svazky.json` | Matriční svazky (archiv, signatura, odkaz). |
 | `data/prepisy.json` | Přepis originálu a český překlad každého zápisu. |
@@ -26,7 +26,7 @@ pak konec `research_log.md` a sekci „Rozpracováno“.
 | `web/` | Rodinný web. `cd web && npm run data && npm run build`, náhled `npm run preview`. |
 
 ## Pravidla
-1. Než něco ohlásím jako nové, prohledám `osoby.py`, `zaznamy.json` a `research_log.md` (jméno, místo, rok).
+1. Než něco ohlásím jako nové, prohledám `osoby.json`, `zaznamy.json` a `research_log.md` (jméno, místo, rok).
 2. Údaj je „doloženo“ (doc) jen tehdy, když jsem ho přečetl přímo na snímku. Čtení od pomocníků ověřím sám.
 3. Každé hledání (i neúspěšné) zapíšu do `research_log.md`.
 4. Nejistá čtení označím (?) – nic nedomýšlím.
