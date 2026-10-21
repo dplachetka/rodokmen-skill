@@ -206,12 +206,19 @@ def main():
     if as_py:
         print("}")
         return
-    print("\nFRONTA ZÁPISŮ (nejmladší známá událost s místem; lhůty pro archiv: narození 100, sňatky 75, úmrtí 30 let):")
+    print("\nFRONTA ZÁPISŮ (nejmladší známá událost s místem; lhůty pro archiv: narození 100, sňatky 75, úmrtí 75 let):")
     now = datetime.date.today().year
     for k, n, what, d, p in queue:
         y = year(d)
-        limit = {"úmrtí": 30, "sňatek": 75}.get(what, 100)
-        where = "" if not y else ("  → matriky online" if now - y > limit else "  → zatím jen matriční úřad (lhůta)")
+        limit = {"úmrtí": 75, "sňatek": 75}.get(what, 100)
+        if not y:
+            where = ""
+        elif now - y > limit:
+            where = "  → matriky online"
+        elif what == "úmrtí" and now - y > 30:   # § 25b: po 30 letech vydá matriční úřad výpis komukoli
+            where = "  → matriční úřad (výpis komukoli)"
+        else:
+            where = "  → zatím jen matriční úřad (lhůta)"
         print(f"  {k:>4} {n}: {what} {d} {p}".rstrip() + where)
 
 

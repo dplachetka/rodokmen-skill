@@ -104,7 +104,7 @@ s vymyšlenou rodinou a spustí náhled.
 | 4. Web | díváte se a říkáte, co upravit | staví web a ukazuje náhled |
 | 5. Zveřejnění | založíte účet na Netlify, schválíte obsah | nasadí web s přihlášením rodinnou otázkou |
 
-Matriky jsou online jen do určitého data: narození starší než 100 let, sňatky 75 a úmrtí 30 let.
+Matriky jsou online jen do určitého data: narození starší než 100 let, sňatky 75 a úmrtí 75 let.
 O mladší údaje se žádá na matričním úřadě. Claude vám řekne, kdy to je potřeba.
 
 ## Co je v repozitáři

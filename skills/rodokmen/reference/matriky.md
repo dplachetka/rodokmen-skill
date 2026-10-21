@@ -13,9 +13,10 @@ berní rula 1654 (jen hospodáři), gruntovní/pozemkové knihy (kdo vlastnil kt
 vojenské záznamy, domovské listy, parte. Viz `portaly.md` a `playbook.md` §2.
 
 ## Lhůty (zákon 301/2000 Sb.)
-Do archivu (a tedy online) jde svazek, až od jeho **posledního** zápisu uplyne: narození **100 let**, sňatky **75**, úmrtí **30**.
+Do archivu (a tedy online) jde svazek, až od jeho **posledního** zápisu uplyne: narození **100 let**, sňatky **75**, úmrtí **75** (§ 23).
 Mladší knihy jsou na matričním úřadě obce s rozšířenou působností / pověřeném úřadě – výpis dostane přímý příbuzný
-(žádost + doklady o příbuzenství). Zapiš do `archivni_dotazy.md`.
+(žádost + doklady o příbuzenství). Výjimka: od zápisu úmrtí staršího **30 let** vydá úřad výpis komukoli (§ 25b),
+v archivu ani online ale ještě není. Zapiš do `archivni_dotazy.md`.
 
 ## Jak vypadá hledání v praxi
 1. **Obec → farnost.** Malé vesnice patřily k faře v sousední obci; popis svazku vyjmenovává všechny obce farnosti.
