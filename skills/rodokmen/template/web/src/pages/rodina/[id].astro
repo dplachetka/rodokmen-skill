@@ -2,6 +2,7 @@
 import Base from '../../layouts/Base.astro';
 import PersonLink from '../../components/PersonLink.astro';
 import Record from '../../components/Record.astro';
+import SideCard from '../../components/SideCard.astro';
 import { people, families, lineByK, records, href } from '../../lib/data.js';
 
 export function getStaticPaths() {
@@ -45,9 +46,12 @@ const title = [father?.name ?? (f.fatherUnknown ? 'otec neuveden' : 'neznámý o
     {children.map((c) => <li><PersonLink slug={c.slug} /> – přímý předek ({c.rel})</li>)}
   </ul>
   {f.side.length > 0 && (
-    <div class="grid2">{f.side.map((s) => <div class="card"><h3>{s.name}{s.years && ` (${s.years})`}</h3><p class="small">{s.text}</p></div>)}</div>
+    <div class="grid2">{f.side.map((s) => <SideCard s={s} />)}</div>
   )}
-  <p class="small muted">Další sourozence zatím systematicky nehledáme – tady jsou jen ti, na které jsme narazili.</p>
+  <p class="small muted">{{
+    done: 'Sourozence jsme dohledali všechny.',
+    partial: 'Sourozence jsme hledali jen částečně – tady jsou ti, které jsme zatím našli.',
+  }[people[f.child]?.sibStatus] ?? 'Další sourozence zatím systematicky nehledáme – tady jsou jen ti, na které jsme narazili.'}</p>
 
   {f.records.length > 0 && (
     <>

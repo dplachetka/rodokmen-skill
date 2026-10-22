@@ -8,7 +8,7 @@ const nodes = Object.fromEntries(Object.entries(byK).map(([k, p]) => {
   return [k, {
     s: href.person(p.slug), n: p.name, y: p.years, c: p.line ? lineByK[p.line]?.color : null, a: alias ? 1 : 0,
     fu: p.fatherUnknown ? 1 : 0, b: p.sibStatus ?? 'none',
-    sd: alias ? [] : p.side.map((e) => ({ n: e.name, r: e.rel ?? 'příbuzný', y: e.years ?? '', kind: e.kind ?? 'other', t: e.text,
+    sd: alias ? [] : p.side.map((e) => ({ n: e.name, r: e.rel ?? 'příbuzný', y: e.years ?? '', kind: e.kind ?? 'other', t: e.text, f: e.facts ?? [], st: e.status ?? '',
       z: e.records.filter((r) => records[r]).map((r) => [href.record(r), records[r].date]) })),
   }];
 }));
@@ -219,7 +219,7 @@ const json = JSON.stringify(nodes).replace(/</g, '\\u003c');
         const e2 = N[k].sd[i];
         info.innerHTML = `<button type="button" class="tree-info-x" data-close aria-label="Zavřít">×</button>
           <strong>${esc(e2.n)}</strong> <span class="muted">${esc(e2.r)}${e2.y ? ' · ' + esc(e2.y) : ''} – ${esc(N[k].n)}</span>
-          <p>${esc(e2.t)}</p>${e2.z.length ? `<p class="small">Zápisy: ${e2.z.map(([u, d]: string[]) => `<a href="${esc(u)}">${esc(d)}</a>`).join(' · ')}</p>` : ''}`;
+          ${e2.st ? `<p class="small muted">${esc(e2.st)}</p>` : ''}${e2.f.length ? `<ul class="small">${e2.f.map((x: string) => `<li>${esc(x)}</li>`).join('')}</ul>` : ''}${e2.t ? `<p>${esc(e2.t)}</p>` : ''}${e2.z.length ? `<p class="small">Zápisy: ${e2.z.map(([u, d]: string[]) => `<a href="${esc(u)}">${esc(d)}</a>`).join(' · ')}</p>` : ''}`;
         info.hidden = false;
       } else {
         info.hidden = true;

@@ -275,8 +275,8 @@
   "15": ["Vondráčkové", "Hrnčíři z Luže, dům čp. 88 pod poutním kostelem na Chlumku."]
  },
  "SIDE": [
-  {"k": 8, "n": "Marie Nováková", "v": "sestra", "y": "1892–1970", "t": "Sestra Jana, provdaná do Ostřetína.", "r": []},
-  {"k": 8, "n": "Václav Novák", "v": "bratr", "y": "1896–1916", "t": "Bratr Jana, padl v 1. světové válce u Doberdò.", "r": []},
+  {"k": 8, "n": "Marie Nováková", "v": "sestra", "y": "1892–1970", "st": "fam", "f": ["* 1892 Holice čp. 112", "× 1913 Ostřetín"], "t": "Sestra Jana, provdaná do Ostřetína.", "r": []},
+  {"k": 8, "n": "Václav Novák", "v": "bratr", "y": "1896–1916", "st": "fam", "f": ["* 1896 Holice čp. 112", "† 1916 Doberdò"], "t": "Bratr Jana, padl v 1. světové válce u Doberdò.", "r": []},
   {"k": 26, "n": "Antonín Kučera", "v": "bratr", "y": "1869–1941", "t": "Bratr Josefa, převzal mlýn v Třemošnici.", "r": []}
  ],
  "ISSUES": [

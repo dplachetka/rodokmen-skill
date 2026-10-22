@@ -4,6 +4,7 @@ import PersonLink from '../../components/PersonLink.astro';
 import Record from '../../components/Record.astro';
 import Pedigree from '../../components/Pedigree.astro';
 import MobileTree from '../../components/MobileTree.astro';
+import SideCard from '../../components/SideCard.astro';
 import { people, families, lineByK, records, dateKey, href, statusClass } from '../../lib/data.js';
 
 export function getStaticPaths() {
@@ -55,11 +56,7 @@ const path = [...p.path].reverse().filter(Boolean);
     <>
       <h2>Příbuzní mimo přímou linii</h2>
       <div class="grid2">
-        {p.side.map((s) => (
-          <div class="card"><h3>{s.name}{s.years && ` (${s.years})`}</h3><p class="small">{s.text}</p>
-            {s.records.length > 0 && <p class="small">Zápisy: {s.records.filter((r) => records[r]).map((r, i) => <>{i > 0 && ' · '}<a href={href.record(r)}>{records[r].date}</a></>)}</p>}
-          </div>
-        ))}
+        {p.side.map((s) => <SideCard s={s} />)}
       </div>
     </>
   )}
