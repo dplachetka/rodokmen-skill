@@ -1,13 +1,13 @@
 <!-- Metodická příručka (anglicky): rešeršní zpráva „Professional Genealogy in the Czech Lands & Central Europe —
 Operating Playbook“, stav 2026-10-09. Autor ve zprávě není uveden. Podle stylu (štítky [FACT]/[INFERENCE], „this run“,
 „via subagent“) jde nejspíš o výstup výzkumného nástroje s umělou inteligencí. Do skillu je zařazena jako pracovní
-podklad, bez nároku na autorství a beze změn obsahu kromě opravy české lhůty pro knihy úmrtí (níže). Licence MIT repozitáře se na tento soubor nevztahuje.
+podklad, bez nároku na autorství a beze změn obsahu kromě opravy české lhůty pro knihy úmrtí (níže) a doplněného §13 (zkušenosti z projektů skillu, ne ze zprávy). Licence MIT repozitáře se na tento soubor nevztahuje.
 Jste-li autor a nesouhlasíte se zařazením, ozvěte se prosím na sarsonj@gmail.com – soubor upravíme nebo odstraníme.
 Pozor: jde o rešerši k datu 2026-10-09 – adresy, lhůty a ceny ověř, než se na ně spolehneš.
 OPRAVA: české knihy úmrtí jdou do archivu (a online) až po 75 letech od posledního zápisu (zákon 301/2000 Sb., § 23),
 ne po 30, jak zpráva původně tvrdila. 30 let je jen lhůta, po které matriční úřad vydá výpis ze zápisu úmrtí
 komukoli (§ 25b). Platí CZ 100/75/75 – opraveno v TL;DR, §0 (řádek 0.11), §1 bod 4 a §4, označeno [CORRECTED].
-Čti po částech podle potřeby (obsah: §0 opravy, §1 hlavní zjištění, §2 prameny po zemích, §3 časová osa, §4 lhůty, §5 metoda a šablony, §6+ nástroje a ceny). -->
+Čti po částech podle potřeby (obsah: §0 opravy, §1 hlavní zjištění, §2 prameny po zemích, §3 časová osa, §4 lhůty, §5 metoda a šablony, §13 zkušenosti z projektů skillu, §6+ nástroje a ceny). -->
 
 # Professional Genealogy in the Czech Lands & Central Europe — Operating Playbook, State of 2026-10-09
 
@@ -717,3 +717,33 @@ Tests:
 
 
 Each source is named inline next to the claim it supports, with this run's status ("seen"/"opened" 2026-10-09) in §0, §2 and §8. Per house formatting rules there is no separate bibliography. Portal URLs carried over from the baseline (AHMP, SOA portals, Acta Publica, digi.archives.cz, Digitální badatelna NA, Kramerius, VÚA) were **not re-opened in this run** and keep their baseline status.
+
+
+## 13. Field notes from projects using the skill (added 2026-10-23, not part of the original report)
+
+
+Lessons from real research done with this skill (Eastern Bohemia, 2026), generalised. They are practice notes, not
+sourced findings, and carry no tag. Detailed how-to is in `matriky.md` and `portaly.md`.
+
+1. **Link households through house numbers.** A post-1878 birth index (it gives house number and parents) combined with the
+   whole 1921 census of the village (house – owner – surnames) shows which households of the name exist at all and which
+   house is the family seat. Where the registers after ~1837 are missing, this is the best indirect proof.
+2. **The 1921 census is the bridge into the 20th century.** It lists religion: a bride "without confession" with a recorded
+   exit from the church points to a **civil marriage register** of the district office (1919–1949), not the parish book.
+   The column "living in the municipality since" gives a likely marriage date for in-married spouses. Birth dates in the
+   1921 census are often wrong (day or month), so a failed register search based on them proves nothing.
+3. **Census 1869 and 1880** (district offices) often have register extracts (baptism with parents) attached for people
+   born elsewhere and for children – a substitute where the register itself is not online or lost.
+4. **Marriage entries after ~1860 cite the baptism** of bride and groom ("baptismal book tom. XXVIII pag. 201"); follow
+   the citation instead of searching.
+5. **Indexes cover less than they seem.** An archive's index for a volume often covers only some villages or years, and
+   per-village sections restart their page numbering ("Pag. 1" for each village). Check page headers first (a contact
+   sheet of all headers is the fastest way).
+6. **Godparents reveal moves.** A godmother described as "wife of N., gardener at No. 6" in a stranger's baptism may be the
+   only trace that a family moved. Read the godparent and witness columns when going through a book for one family.
+7. **Family lore "we come from X"** often refers to 20th-century relatives the family visited, not to ancestors. Ask who
+   went there, when, to whom, and in which language before searching the old registers of X.
+8. **Regional digital libraries** (county Kramerius instances) hold local newspapers, town histories and directories
+   missing from the national library; lists of house owners and veterans' associations there have resolved identities.
+9. **Career soldiers 1918–1950** married and had children recorded only in military registers (on request at the
+   Military Historical Archive); legionnaires' records (ČsOL database) give the post-war local branch, i.e. residence.
