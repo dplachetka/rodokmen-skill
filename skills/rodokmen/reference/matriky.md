@@ -30,14 +30,43 @@ v archivu ani online ale ještě není. Zapiš do `archivni_dotazy.md`.
    (Otava = Wotawa, Vávra = Wawra). Knihy pro více obcí bývají řazené po obcích, rejstřík na konci.
    **Když matrika chybí** (není online nebo se nedochovala), zkus rejstřík – bývá vedený zvlášť a přežil i tam, kde kniha
    ne. Zápis v rejstříku dokládá datum, místo a otce; zapiš ho jako `prob` (opis, ne originál) a matriku zkus později.
+   **Rejstřík s oddíly podle obcí:** čísla stran v rejstříku bývají strany *oddílu obce* (každá obec začíná znovu „Pag. 1“),
+   ne knihy – úvodní list oddílu poznáš podle nadpisu obce. **Rejstřík ARON často pokrývá jen část svazku** (některé obce,
+   některá léta; bývá to v popisu svazku) – než mu uvěříš, projdi záhlaví stran (kontaktní list, viz níže).
+   **Rejstřík bez rodičů** a znáš jen datum narození (třeba ze sčítání): projdi všechna písmena (dvoustrany na ~1600 px)
+   a hledej řádky s rokem – a pamatuj, že data ze sčítání bývají chybná (neúspěch nic nedokazuje).
 4. **Bez indexu: listuj chronologicky.** Odhadni pozici podle let na prvních a posledních snímcích svazku (půlení intervalu).
+   Rychlá orientace: **kontaktní list** – z každého snímku vyřízni záhlaví (rok, obec, číslo strany) nebo levý sloupec
+   s datem a jménem a slož je do mřížky (`magick … +append`, řádky `-append`); na jeden pohled je vidět, kde je hledaný
+   rok nebo měsíc, a otevřeš jen ten snímek.
 5. **Přečti celý zápis**, pak se podívej i na okolí (dvojčata, další děti stejných rodičů).
 6. **Sňatek se obvykle konal ve farnosti nevěsty** (v jejím bydlišti) – hledej ho nejdřív tam, pak ve faře ženicha.
    Nedaří se? Ve křtu dítěte bývá (Praha ~1880–1890) připsané datum a místo sňatku rodičů – ověř ho v oddaných.
+   Naopak **oddací zápisy po ~1860** často odkazují na křest snoubenců („křestní kniha … tom. XXVIII pag. 201“) – podle
+   toho najdeš křest hned.
 7. **Rodina v katolické matrice chybí? Zkus evangelickou nebo židovskou.** Po toleranci (1781) vedly vlastní matriky
    evangelické sbory (a. v. i h. v.), jeden sbor pokrýval desítky obcí; v ARONu mají signatury „R …“ a `aron_search.py`
    je najde podle obce. Ve východních Čechách časté (Rychnovsko, Dobrušsko, Opočensko). Židovské matriky viz `portaly.md`.
    Ve 20. století (1920–1945) zkus i **civilní matriky** lidí bez vyznání u okresních úřadů (vyzkoušeno v SOA Třeboň, viz `portaly.md`).
+   Že jde o člověka bez vyznání, prozradí **sčítání 1921** (sloupec náboženství, případně datum výstupu z církve).
+8. **Čti i kmotry a svědky.** Kmotra „manželka Jana X, zahradníka z č. 6“ u cizího křtu bývá jediná stopa, že se rodina
+   přestěhovala; svědci a kmotři z rodiny ukážou sourozence a švagry.
+9. **Rodina přes čísla domů:** rejstřík narozených po ~1878 (uvádí číslo domu a rodiče) + celé sčítání 1921 obce
+   (přehled „číslo domu – majitel – příjmení“) ukážou, které domácnosti se jménem ve vsi vůbec jsou a který dům je rodový.
+   Když chybí matriky, je to nejlepší nepřímý důkaz (zapisuj jako `prob` s odůvodněním).
+
+## Sčítání lidu (1869, 1880, 1890–1910, 1921)
+- **Sčítání 1921 je nejlepší most pro 20. století:** domácnost s daty narození, rodištěm, náboženstvím a povoláním.
+  Hodí se i u nevěsty s neznámým bydlištěm – stačí znát obec sňatku nebo pozdějšího bydliště a projít celé sčítání obce
+  (i díly mimo známé číslo domu – čísla domů se měnila).
+- **Sloupec „od kdy bydlí v obci“** u přivdaných žen a přiženěných mužů dává pravděpodobné datum sňatku (kde hledat oddací zápis).
+- **Data narození ve sčítání 1921 bývají chybná** (jiný den nebo měsíc) – neúspěch v matrice podle nich nic nedokazuje.
+  Tužkou dopsané číslice sčítacího komisaře (poslední dvojčíslí roku narození) pomáhají u přepsaných let.
+- **Jak číst celé sčítání obce:** přečti záhlaví listů (číslo domu, majitel) na odhadnutých snímcích (často dům n ≈ snímek
+  2n−1, zadní strana listu prázdná) a dolaď půlením; vložený lístek (hostinec, nájemník) posune číslování o snímek.
+- **Sčítání 1869 a 1880** (okresní úřady, v ARONu) mívají u přespolních a u dětí **přiložené lístky z matriky** (výpis křtu
+  s rodiči) – dají jména rodičů, která sčítání jinak neuvádí; sčítání 1880 má přesná data narození. Náhrada za matriku,
+  která není online nebo chybí.
 
 ## Čtení písma
 - Kurentový rejstřík: stáhni plné rozlišení a rozřež stránku na čtvrtiny (sloupec jmen + data),
@@ -106,6 +135,14 @@ v archivu ani online ale ještě není. Zapiš do `archivni_dotazy.md`.
 - Shell je zsh: `for a in "x y z"; do set -- $a` slova nerozdělí (v zsh `${=a}`); `ls F*` bez shody = chyba
   „no matches found“; `echo ====` je chyba (`=` na začátku slova). Složitější smyčky pouštěj přes `bash -c '…'`.
 - ImageMagick: seznam souborů předávej jako jednotlivé argumenty, ne jednou proměnnou s mezerami.
+  `files=$(ls …); for f in $files` v zsh nedělí na řádky – použij `for f in $D/*.jpg`.
+- **ImageMagick `-crop 40%x12%+53%+11%` nedělá, co čekáš:** procenta platí jen pro šířku a výšku výřezu, posun `+53%+11%`
+  se bere v pixelech (výřez pak vyjde z levého horního rohu). Posun spočítej v pixelech z `magick identify -format "%w %h"`,
+  nebo použij `vyrez.py` / `overit.py` (zlomky 0–1).
+- **Stažené složky z ARON:** název souboru obsahuje i kód fondu (např. `_00190_`), takže vzor `*_00190_*` chytí všechny
+  snímky a `magick` vyrobí stovky výstupů. Vždy celý jedinečný prefix (`*<KÓD SVAZKU>_00NNN_*`).
+- **Pomocníci a cena:** u menších úkolů (rejstřík, ~10 snímků) čti sám, bez pomocníka. Do zadání: „nejdřív zvětši jen sloupec
+  jmen, celý zápis otevři až u kandidáta“ – šetří kredity; na celou knihu (desítky snímků) pomocník na Sonnetu stačí.
   `-annotate` potřebuje písmo: `-font /System/Library/Fonts/Supplemental/Arial.ttf`.
 - Ověření čtení: `python3 -I tools/overit.py <snímek> x0,y0,x1,y1 pracovni/over [v]` (zlomky 0–1, ne pixely) – zápis rozdělený na dvě poloviny
   zmenšené na 1900 px (dvoustrana je jinak nečitelná).
