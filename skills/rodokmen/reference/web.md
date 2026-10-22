@@ -27,7 +27,8 @@ Náhled spouštěj na pozadí a uživateli pošli odkaz. Vzhled si ověř sám (
  "prihlaseni": {"uvod": "Tenhle web je jen pro rodinu.", "otazka": "Jak se jmenoval pes u babičky v Holicích?", "odpoved": "Alík"},
  "uvod": {"nadpis": "Lákavý nadpis", "odstavce": ["2–3 věty, které chytí"], "foto": "klic_obrazku_ve_vyrezech", "foto_popis": "…"},
  "pribeh": {"menu": "Příběh Nováků", "rod": 8, "tlacitko": "Přečíst příběh Nováků"},
- "zajimavosti_na_uvodu": [{"nadpis": "Nejstarší předek", "text": "Kovář Jan, asi 1825."}]
+ "zajimavosti_na_uvodu": [{"nadpis": "Nejstarší předek", "text": "Kovář Jan, asi 1825."}],
+ "citlive_schvaleno": ["osoba 26: nemanželsk"]
 }
 ```
 - `kontakt.jmeno` je ve 3. pádě („Napište Petrovi na …“).
@@ -37,6 +38,7 @@ Náhled spouštěj na pozadí a uživateli pošli odkaz. Vzhled si ověř sám (
   proto ať ji uživatel nepoužívá jako heslo jinde. Bez odpovědi nasazení (`npm run nasadit`, `kontejner`, `deploy-caprover`)
   skončí chybou; otevřený web jen výslovně přes `"otevreny": true` v `prihlaseni`.
   Je to lehká ochrana proti náhodným návštěvníkům, ne bankovní zabezpečení – citlivé věci na web nepatří.
+- `citlive_schvaleno` = citlivé údaje, které uživatel schválil ke zveřejnění (`kontrola.py` je pak nehlásí; na web nejde), viz `soukromi.md`.
 - `uvod.foto` = klíč obrázku ve `vyrezy/` (ulož přes `vyrez.py`).
 - `pribeh`: `menu` a `tlacitko` pojmenuj podle hlavního rodu („Příběh Novákových“), `rod` = číslo rodu (8–15).
   Bez vyplněného `uvod` ukáže úvodní stránka aspoň název a `lead` příběhu. Viz `pribehy.md`.

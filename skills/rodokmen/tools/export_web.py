@@ -343,7 +343,7 @@ def build_site(cfg):
                        records=[r for r in h.get("zaznamy", []) if r in recs]) for h in ns["HYPOTEZY"]]
 
     has_story = os.path.exists(os.path.join(DATA, "pribeh.md"))
-    public_cfg = {k: v for k, v in cfg.items() if k != "prihlaseni"}
+    public_cfg = {k: v for k, v in cfg.items() if k not in ("prihlaseni", "citlive_schvaleno")}   # interní, na web nejdou
     public_cfg["maPribeh"] = has_story
     site = dict(config=public_cfg, places=places, root=slugs[1], aliases={a: slugs[a] for a in SAME}, people=people,
                 families=families, records=records, lines=lines,

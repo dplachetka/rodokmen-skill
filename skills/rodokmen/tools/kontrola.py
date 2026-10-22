@@ -158,14 +158,19 @@ def main():
     citlive = re.compile(r"sebevra|vzal[a]? si život|oběsil|zastřelil[a]? se|utopil[a]? se|alkohol|vězen|kriminál|"
                          r"rozvod|rozvedl|psychiatr|léčebn|duševn|rakovin|nemanželsk|cizoložst|dluh|exekuc|interrupc|potrat", re.I)
 
-    def recent(text):   # 20. století a později – staré matriční údaje (nemanželské dítě v 18. stol.) nevadí
-        return any(int(y) >= 1900 for y in re.findall(r"\b(19\d\d|20\d\d)\b", text))
-    texty = [("ISSUES", i if isinstance(i, str) else " ".join(i)) for i in ns.get("ISSUES", [])]
+    # Nedávné = osoba narozená 1870 a později (její potomci žijí); bez roku narození podle roků v textu.
+    # Staré matriční údaje (nemanželské dítě v 18. stol.) nevadí, ani když poznámka zmíní sčítání 1921.
+    def recent(text, narozen=None, vychozi=False):
+        if narozen:
+            return narozen >= 1870
+        return vychozi or any(int(y) >= 1900 for y in re.findall(r"\b(19\d\d|20\d\d)\b", text))
+    otazka = lambda x: re.sub(r"[:\s]+", " ", (x if isinstance(x, str) else x[0]))[:40].strip()   # stálý název i po přidání otázek
+    texty = [(f"otázka {otazka(x)}", x if isinstance(x, str) else " ".join(x), None, False) for x in ns.get("ISSUES", [])]
     for k, p in P.items():
         text = " ".join(p.get("f", [])) + " " + p.get("note", "")
-        roky = [int(y) for y in re.findall(r"\b1[5-9]\d\d|20\d\d\b", p.get("y", "") + " " + text)]
-        texty.append((f"osoba {k}", text + (" 1900" if roky and min(roky) >= 1870 or k < 8 else "")))
-    texty += [(f"boční příbuzný {s.get('n')}", " ".join([s.get("n", ""), s.get("t", "")] + s.get("f", []))) for s in SIDE]
+        texty.append((f"osoba {k}", text, rok_narozeni(p.get("y", ""), p.get("f", []), p.get("n", "")), k < 8))
+    texty += [(f"boční příbuzný {s.get('n')}", " ".join([s.get("n", ""), s.get("t", "")] + s.get("f", [])),
+               rok_narozeni(s.get("y", ""), s.get("f", []), s.get("n", "")), False) for s in SIDE]
     for k, p in P.items():
         w = zijici(f"osoba {k} {p.get('n')}", p.get("y", ""), p.get("f", []), p.get("n", ""), p.get("f", []) + [p.get("note", "")])
         if w:
@@ -176,12 +181,19 @@ def main():
             warn.append(w)
     for f in ("zajimavosti.md", "pribeh.md"):
         if os.path.exists(os.path.join(DATA, f)):
-            texty += [(f, odst) for odst in open(os.path.join(DATA, f), encoding="utf-8").read().split("\n\n")]
-    for kde, text in texty:
+            texty += [(f, odst, None, False) for odst in open(os.path.join(DATA, f), encoding="utf-8").read().split("\n\n")]
+    # co uživatel výslovně schválil ke zveřejnění: web.json → "citlive_schvaleno": ["osoba 26: nemanželsk", "*: dluh", "ISSUES 3"]
+    schvaleno = {s.strip().lower() for s in cfg.get("citlive_schvaleno", [])}
+    for kde, text, narozen, vychozi in texty:
         m = citlive.search(text)
-        if m and recent(text):
-            warn.append(f"CITLIVÉ ({kde}): „…{text[max(0, m.start() - 40):m.end() + 40].strip()}…“ – jde na web; "
-                        f"zeptej se uživatele, jestli to tam smí být (reference/soukromi.md)")
+        if not m or not recent(text, narozen, vychozi):
+            continue
+        slovo = m.group(0).lower()
+        if {kde.lower(), f"{kde.lower()}: {slovo}", f"*: {slovo}"} & schvaleno:
+            continue
+        warn.append(f"CITLIVÉ ({kde}): „…{text[max(0, m.start() - 40):m.end() + 40].strip()}…“ – jde na web; zeptej se uživatele, "
+                    f"jestli to tam smí být (reference/soukromi.md). Schválí-li to, přidej do data/web.json "
+                    f"\"citlive_schvaleno\": \"{kde}: {slovo}\"")
 
     if not os.path.exists(os.path.join(DATA, "pribeh.md")) and LINES:
         hlavni = min(LINES)

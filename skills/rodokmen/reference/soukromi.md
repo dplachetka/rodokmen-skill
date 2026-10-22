@@ -13,6 +13,10 @@
 `python3 -I tools/kontrola.py` hlásí `CITLIVÉ` u textů z 20. století (sebevražda, nemoc, rozvod, dluhy, nemanželské dítě…),
 které jdou na web – v poznámkách osob, ve „Co hledáme“ (`ISSUES`), u bočních příbuzných, v zajímavostech a v příběhu.
 Údaje z rodinného stromu (GEDCOM) a od rodiny bývají právě takové – pro výzkum ano, na web jen se souhlasem.
+U osob a bočních příbuzných rozhoduje rok narození (od 1870 dál), ne libovolný rok v textu – nemanželské dítě z 19. století
+se nehlásí, i když poznámka zmíní sčítání 1921. Co uživatel výslovně schválí, zapiš do `data/web.json` →
+`"citlive_schvaleno": ["osoba 26: nemanželsk"]` (přesný řetězec napíše hláška; `"*: dluh"` platí všude, jen název místa
+platí pro všechna slova v něm). Tento seznam na web nejde.
 1. Seznam žijících osob na webu a co o nich web říká.
 2. Rodinné fotky a dokumenty – souhlasí ti, kdo jsou na nich (nebo jejich rodina)?
 3. Přihlašovací otázka a odpověď (`web.json`) – nastavená a dost těžká?
