@@ -193,6 +193,8 @@ Podrobně `reference/web.md`. Ve zkratce:
 Výchozí cesta je **Netlify** (zdarma): `npm run nasadit`. Přihlášení k Netlify a první propojení webu jsou interaktivní –
 dej je uživateli jako `! npx netlify-cli login` atd. (postup v `reference/web.md`). Pokročilá varianta: vlastní server (Podman/CapRover).
 Nic nezveřejňuj bez výslovného souhlasu uživatele.
+Bez webu: `python3 -I tools/jeden_soubor.py` udělá celý rodokmen jako jeden soubor HTML (s JS a bez JS) k poslání
+e-mailem nebo přes WhatsApp – **nemá přihlášení**, takže stejná pravidla jako pro zveřejnění (`reference/web.md`, `soukromi.md`).
 
 ## Poznámky pro správce skillu
 Skill se zlepšuje podle zkušeností lidí, kteří ho používají. Proto **průběžně zapisuj do `poznamky_pro_skill.md`**
@@ -259,4 +261,5 @@ Nedělej to pořád. Postup:
 | `kontrola.py` | kontrola dat; hlásí i citlivé údaje na webu a kdy psát příběh |
 | `export_web.py` | data → web (volá ho `npm run data`) |
 | `fan_chart.py vystupy/` | vějíř předků jako plakát k tisku |
+| `jeden_soubor.py [složka] [--jen-js \| --jen-bez-js] [--bez-obrazku] [--bez-deniku]` | celý rodokmen jako jeden soubor HTML ke sdílení bez webu (dvě verze: s JS a bez JS) |
 | `nacti_osoby.py prevod` / `sourozenci [--nanecisto]` | starý `data/osoby.py` → `data/osoby.json`; boční příbuzní ze starého tvaru (roky ve jméně) na nový |

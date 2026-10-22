@@ -9,7 +9,7 @@
 - Citlivé věci z nedávné minulosti (sebevraždy, věznění, nemoci) – zeptej se uživatele, jestli a jak je zmínit.
 - Matriční údaje starší než lhůty jsou veřejné, ale ohleduplnost platí i pro ně (zbytečně nezesměšňovat).
 
-## Před zveřejněním webu projdi s uživatelem
+## Před zveřejněním webu (i před odesláním souboru z `jeden_soubor.py`) projdi s uživatelem
 `python3 -I tools/kontrola.py` hlásí `CITLIVÉ` u textů z 20. století (sebevražda, nemoc, rozvod, dluhy, nemanželské dítě…),
 které jdou na web – v poznámkách osob, ve „Co hledáme“ (`ISSUES`), u bočních příbuzných, v zajímavostech a v příběhu.
 Údaje z rodinného stromu (GEDCOM) a od rodiny bývají právě takové – pro výzkum ano, na web jen se souhlasem.
@@ -30,6 +30,10 @@ Teprve pak `npm run nasadit`.
 ## Archivní portály
 Jsou zdarma a veřejné, ale servery mají omezené síly: stahuj jen snímky, které opravdu čteš, žádné celé svazky naráz,
 paralelně maximálně pár požadavků. Citace vždy až na úroveň snímku (aby to šlo zkontrolovat).
+
+## Rodokmen v jednom souboru
+Soubor z `jeden_soubor.py` nemá přihlášení: kdo ho dostane (a komu ho přepošle), vidí všechno včetně poznámek a zápisů.
+Proto stejný postup jako před zveřejněním webu a výslovný souhlas uživatele; upozornění `ŽIJÍCÍ?` a `CITLIVÉ` nástroj vypíše.
 
 ## Data v gitu a sdílení
 Projekt obsahuje osobní údaje rodiny. Když ho uživatel chce mít na GitHubu, pak **jen jako soukromé (private) repo**.

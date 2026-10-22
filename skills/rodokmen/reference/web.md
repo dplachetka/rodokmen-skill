@@ -83,6 +83,20 @@ a po úpravě zkontroluj web na mobilu i počítači.
 ## Vějíř jako plakát
 `python3 -I tools/fan_chart.py vystupy/` → SVG a HTML (a PNG, je-li nainstalovaný Google Chrome, na Windows i Microsoft Edge) k tisku.
 
+## Rodokmen v jednom souboru (ke sdílení bez webu)
+`python3 -I tools/jeden_soubor.py` vytvoří ve `vystupy/` dva soubory HTML se vším, co je na webu (stejná data jako
+`npm run data`), včetně zmenšených výřezů zápisů – bez serveru, bez internetu, pošle se e-mailem, na flashce, přes WhatsApp:
+| soubor | pro koho |
+|---|---|
+| `rodokmen.html` | počítač a prohlížeč v telefonu: navíc hledání, přibližování vějíře, stromový graf, filtr zápisů; bez JavaScriptu funguje taky |
+| `rodokmen-bez-js.html` | náhled přílohy v telefonu (iPhone Mail/Soubory/WhatsApp, Android) a pošta, která soubory se skripty blokuje |
+- Velikost hlavně podle obrázků (142 výřezů ≈ 13 MB): menší `--sirka 800 --kvalita 40`, úplně bez `--bez-obrazku`;
+  dlouhý deník vynechá `--bez-deniku`; jen jeden soubor `--jen-js` / `--jen-bez-js`. Potřebuje ImageMagick.
+- **Soubor nemá přihlášení** – kdo ho dostane, vidí všechno. Před vytvořením nástroj vypíše upozornění `ŽIJÍCÍ?`
+  a `CITLIVÉ` z `kontrola.py`; vyřeš je s uživatelem a soubor dávej jen s jeho souhlasem (`reference/soukromi.md`).
+- Mapa bez internetu je jen přibližný obrys Česka s obcemi (výřez podle obcí); přesná mapa s podkladem je na webu.
+- Bez JavaScriptu se panely otvírají přes `#kotvy`: Zpět v prohlížeči panel zavře, Zavřít skočí na začátek stránky.
+
 ## Aktualizace staršího projektu
 Znovu spusť `python3 -I SKILL_DIR/tools/novy_projekt.py <složka projektu>`. Data (`data/`, výřezy) zůstanou, `tools/` se přepíše
 a soubory ve `web/`, které se liší od nové šablony, taky – staré verze uloží do `pracovni/zaloha_web_<datum>/` a vypíše jejich seznam.

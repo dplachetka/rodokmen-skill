@@ -1,5 +1,7 @@
 # pracovní soubory a stažené stránky (nejdou na web ani do historie)
 pracovni/
+# vytvořené výstupy (vějíř k tisku, rodokmen v jednom souboru – velké, dají se kdykoli vytvořit znovu)
+vystupy/
 __pycache__/
 .DS_Store
 Thumbs.db
