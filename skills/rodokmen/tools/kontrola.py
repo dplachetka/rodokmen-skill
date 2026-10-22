@@ -43,6 +43,39 @@ def zemrel(y, facts, name):
         or any(re.search(r"\d{4}\s*[–-]\s*\S", t) for t in (y or "", jmeno))
 
 
+def tvar(ns):
+    """Tvar sekcí osoby.json – špatný tvar by shodil zbytek kontroly i export webu (npm run data)."""
+    chyby = []
+    seznam_textu = lambda v: isinstance(v, list) and all(isinstance(x, str) for x in v)
+    for k, p in (ns.get("P") or {}).items():
+        if not isinstance(p, dict) or not isinstance(p.get("n"), str):
+            chyby.append(f"P {k}: osoba musí být objekt aspoň se jménem n, je {str(p)[:60]!r}")
+            continue
+        for pole in ("f", "r"):
+            if pole in p and not seznam_textu(p[pole]):
+                chyby.append(f"P {k} ({p['n']}): {pole} musí být seznam textů")
+        if not isinstance(p.get("y", ""), str):
+            chyby.append(f"P {k} ({p['n']}): y musí být text (\"1850–1910\", \"* 1895\")")
+    for i, s in enumerate(ns.get("SIDE") or []):
+        if not isinstance(s, dict) or not isinstance(s.get("n"), str) or "k" not in s:
+            chyby.append(f"SIDE #{i + 1}: musí být objekt s k (číslo předka) a n (jméno), je {str(s)[:60]!r}")
+        elif any(pole in s and not seznam_textu(s[pole]) for pole in ("f", "r")):
+            chyby.append(f"SIDE {s['n']}: f a r musí být seznamy textů")
+    for k, v in (ns.get("LINES") or {}).items():
+        if not (isinstance(v, list) and len(v) == 2 and all(isinstance(x, str) for x in v)):
+            chyby.append(f"LINES {k}: musí být [název rodu, jedna věta], je {str(v)[:60]!r}")
+    for i, q in enumerate(ns.get("ISSUES") or []):
+        if not (isinstance(q, str) or isinstance(q, list) and len(q) == 2 and all(isinstance(x, str) for x in q)):
+            chyby.append(f"ISSUES #{i + 1}: musí být [otázka, odpověď], je {str(q)[:60]!r}")
+    for i, h in enumerate(ns.get("HYPOTEZY") or []):
+        if not isinstance(h, dict):
+            chyby.append(f"HYPOTEZY #{i + 1}: musí být objekt {{\"rod\": 8, \"nadpis\": …, \"text\": …}}, je {str(h)[:60]!r}")
+        elif not isinstance(h.get("nadpis", ""), str) or not isinstance(h.get("text", ""), str) \
+                or not all(isinstance(x, list) and len(x) == 2 for x in h.get("polozky", [])) or not seznam_textu(h.get("zaznamy", [])):
+            chyby.append(f"HYPOTEZY #{i + 1} ({h.get('nadpis', '?')}): nadpis a text jsou texty, polozky dvojice [jméno, text], zaznamy klíče")
+    return chyby
+
+
 def zijici(kde, y, facts, name, texts):
     """Žijící lidé smí být na webu jen se jménem a rokem narození (reference/soukromi.md)."""
     rok = rok_narozeni(y, facts, name)
@@ -67,6 +100,11 @@ def main():
     for name in ns:
         if name not in SEKCE:
             err.append(f"osoby.json: neznámá sekce '{name}' – platné jsou {', '.join(SEKCE)}")
+    spatne = tvar(ns)
+    if spatne:
+        for e in spatne:
+            print("CHYBA:", e)
+        sys.exit("Opravte tvar data/osoby.json (reference/data.md), jinak nepůjde ani npm run data.")
     P, SIDE, LINES, SAME = ns.get("P", {}), ns.get("SIDE", []), ns.get("LINES", {}), ns.get("SAME", {})
     zaz = jload("zaznamy.json", [])
     svazky, prep, hl = jload("svazky.json", {}), jload("prepisy.json", {}), jload("zvyrazneni.json", {})
@@ -94,6 +132,11 @@ def main():
                 err.append(f"osoba {k} ({p.get('n')}) cituje neexistující zápis '{r}'")
         if st == "doc" and not p.get("r"):
             warn.append(f"osoba {k} ({p.get('n')}) je 'doc' (doloženo), ale necituje žádný zápis")
+        y = (p.get("y") or "").strip()
+        if not y and any(f.strip().startswith("*") and re.search(r"\d{4}", f) for f in p.get("f", [])):
+            warn.append(f"osoba {k} ({p.get('n')}): fakta mají narození, ale y je prázdné – web ukáže osobu bez roku")
+        elif re.fullmatch(r"(asi\s+)?\d{4}", y):
+            warn.append(f"osoba {k} ({p.get('n')}): y \"{y}\" je nejasné – narození, nebo úmrtí? Napiš \"* {y}\", \"† {y}\" nebo rozsah")
     for s in SIDE:
         if s.get("k") not in P:
             err.append(f"boční příbuzný '{s.get('n')}' patří k neexistující osobě {s.get('k')}")
