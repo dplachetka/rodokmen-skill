@@ -5,8 +5,8 @@ Použití: python3 <skill>/tools/novy_projekt.py <cílová složka> [--ukazka]
   --ukazka   nakopíruje i vymyšlená ukázková data (rodina Novákových), aby šel web hned vyzkoušet
 
 Vytvoří: data/ (prázdné kostry nebo ukázka), web/ (Astro web), tools/ (kopie nástrojů),
-vyrezy/, zdroje/, dokumenty/, pracovni/, CLAUDE.md, .gitignore, .gitattributes (konce řádků LF i na Windows)
-a .claude/launch.json (náhled v Claude desktop).
+vyrezy/, zdroje/, dokumenty/, pracovni/, CLAUDE.md, .gitignore, .gitattributes (konce řádků LF i na Windows),
+.claude/launch.json (náhled v Claude desktop) a .claude/agents/ (pomocník ctenar-matrik).
 Existující data nepřepisuje.
 Aktualizace staršího projektu (znovu spustit na stejnou složku): tools/ se přepíše vždy a soubory webu,
 které se liší od nové šablony, taky – jejich staré verze se nejdřív uloží do pracovni/zaloha_web_<datum>/.
@@ -120,6 +120,11 @@ def main():
     for d in ("vyrezy", "zdroje", "dokumenty", "pracovni"):
         os.makedirs(os.path.join(dst, d), exist_ok=True)
     os.makedirs(os.path.join(dst, ".claude"), exist_ok=True)
+    # pomocníci (.claude/agents/ctenar-matrik.md – Sonnet, kontaktní listy): jako web – liší-li se, záloha a nová verze
+    agents = os.path.join(dst, ".claude", "agents")
+    agents_backup = os.path.join(dst, "pracovni", "zaloha_pomocnici_" + stamp)
+    changed_agents = copy_tree(os.path.join(SKILL, "template", ".claude", "agents"), agents,
+                               agents_backup if os.path.isdir(agents) else None)
     gitignore = doplnit_gitignore(dst)
     for name in ("CLAUDE.md", ".gitignore", ".gitattributes", "poznamky_pro_skill.md", os.path.join(".claude", "launch.json")):
         out = os.path.join(dst, name)
@@ -128,6 +133,8 @@ def main():
     with open(os.path.join(dst, ".skill_verze"), "w", encoding="utf-8") as f:   # SKILL.md podle něj nabídne aktualizaci
         f.write(open(os.path.join(SKILL, "VERZE"), encoding="utf-8").read())
     print("Projekt připraven:", dst)
+    if changed_agents:
+        print(f"Pomocníci aktualizováni ({', '.join(changed_agents)}); původní verze v {agents_backup}.")
     if gitignore:
         print(".gitignore doplněn o: " + ", ".join(gitignore) + " (už uložené soubory z nich vyndá `git rm -r --cached <cesta>` + commit)")
     if changed:
