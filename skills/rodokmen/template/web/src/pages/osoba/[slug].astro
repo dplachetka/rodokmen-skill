@@ -5,7 +5,7 @@ import Record from '../../components/Record.astro';
 import Pedigree from '../../components/Pedigree.astro';
 import MobileTree from '../../components/MobileTree.astro';
 import SideCard from '../../components/SideCard.astro';
-import { people, families, lineByK, records, dateKey, href, statusClass } from '../../lib/data.js';
+import { people, families, lineByK, records, dateKey, href, statusClass, sideGroups, sideTitle } from '../../lib/data.js';
 
 export function getStaticPaths() {
   return Object.keys(people).map((slug) => ({ params: { slug } }));
@@ -52,14 +52,12 @@ const path = [...p.path].reverse().filter(Boolean);
     )}
   </div>
 
-  {p.side.length > 0 && (
+  {sideGroups(p.side).map(([g, list]) => (
     <>
-      <h2>Příbuzní mimo přímou linii</h2>
-      <div class="grid2">
-        {p.side.map((s) => <SideCard s={s} />)}
-      </div>
+      <h2>{sideTitle[g]}</h2>
+      <div class="grid2">{list.map((s) => <SideCard s={s} />)}</div>
     </>
-  )}
+  ))}
 
   <h2>Předci</h2>
   <p class="small"><a href={`/strom/#k=${p.k}`}>Stromový graf od této osoby →</a></p>

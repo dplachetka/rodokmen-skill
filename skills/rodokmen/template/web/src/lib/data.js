@@ -31,4 +31,14 @@ export function dateKey(date) {
 export const genName = (g) =>
   ['výchozí osoba', 'rodiče', 'prarodiče', 'praprarodiče'][g] ?? `${g}. generace (${'pra'.repeat(g - 1)}rodiče)`;
 
+// Lidé z SIDE ve skupinách podle druhu vztahu (export_web.side_kind): sourozenci, další příbuzní, nepříbuzní, bez vztahu.
+// Bez vztahu `v` se nikdo nezařadí mezi sourozence ani mezi cizí – zůstane ve vlastní skupině, nic se neschová.
+export const sideGroups = (side) => [
+  ['sib', side.filter((s) => s.kind === 'sib')],
+  ['kin', side.filter((s) => ['spouse', 'child', 'kin'].includes(s.kind))],
+  ['non', side.filter((s) => s.kind === 'non')],
+  ['unknown', side.filter((s) => !['sib', 'spouse', 'child', 'kin', 'non'].includes(s.kind))],
+].filter(([, list]) => list.length);
+export const sideTitle = { sib: 'Sourozenci', kin: 'Další příbuzní', non: 'Lidé kolem rodiny', unknown: 'Vztah zatím neuveden' };
+
 export const statusClass = (st) => ({ doc: 'st-doc', prob: 'st-prob', fam: 'st-fam', mh: 'st-mh' })[st] ?? 'st-unk';

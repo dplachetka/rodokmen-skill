@@ -8,7 +8,7 @@ const nodes = Object.fromEntries(Object.entries(byK).map(([k, p]) => {
   return [k, {
     s: href.person(p.slug), n: p.name, y: p.years, c: p.line ? lineByK[p.line]?.color : null, a: alias ? 1 : 0,
     fu: p.fatherUnknown ? 1 : 0, b: p.sibStatus ?? 'none',
-    sd: alias ? [] : p.side.map((e) => ({ n: e.name, r: e.rel ?? 'příbuzný', y: e.years ?? '', kind: e.kind ?? 'other', t: e.text, f: e.facts ?? [], st: e.status ?? '',
+    sd: alias ? [] : p.side.map((e) => ({ n: e.name, r: e.rel || 'vztah neuveden', y: e.years ?? '', kind: e.kind ?? 'other', t: e.text, f: e.facts ?? [], st: e.status ?? '',
       z: e.records.filter((r) => records[r]).map((r) => [href.record(r), records[r].date]) })),
   }];
 }));
@@ -85,7 +85,8 @@ const json = JSON.stringify(nodes).replace(/</g, '\\u003c');
     const sibLabel = (k: number) => {
       const p = N[k], n = p.sd.length;
       if (n) {
-        const word = p.sd.every((e: any) => e.kind === 'sib') ? 'sourozenci' : 'příbuzní';
+        const sibs = p.sd.filter((e: any) => e.kind === 'sib').length;
+        const word = sibs === n ? 'sourozenci' : sibs ? 'sourozenci a další' : 'příbuzní a další';
         return `<button type="button" class="tc-sib${p.b === 'done' ? '' : ' todo'}" data-sib="${k}" title="${p.b === 'done' ? 'Sourozenci dohledáni' : 'Sourozenci možná nejsou všichni'}">${sib.has(k) ? '▾' : '▸'} ${word} (${n})</button>`;
       }
       return `<span class="tc-sib none">${p.b === 'done' ? 'bez sourozenců' : p.b === 'partial' ? 'sourozenci: hledáno částečně' : 'sourozenci nehledáni'}</span>`;

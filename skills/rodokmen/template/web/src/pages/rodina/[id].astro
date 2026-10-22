@@ -3,7 +3,7 @@ import Base from '../../layouts/Base.astro';
 import PersonLink from '../../components/PersonLink.astro';
 import Record from '../../components/Record.astro';
 import SideCard from '../../components/SideCard.astro';
-import { people, families, lineByK, records, href } from '../../lib/data.js';
+import { people, families, lineByK, records, href, sideGroups, sideTitle } from '../../lib/data.js';
 
 export function getStaticPaths() {
   return Object.keys(families).map((id) => ({ params: { id } }));
@@ -14,6 +14,7 @@ const mother = f.mother ? people[f.mother] : null;
 const children = f.children.map((s) => people[s]);
 const line = f.line ? lineByK[f.line] : null;
 const title = [father?.name ?? (f.fatherUnknown ? 'otec neuveden' : 'neznámý otec'), mother?.name ?? 'neznámá matka'].join(' a ');
+const groups = sideGroups(f.side);
 ---
 <Base title={`Rodina: ${title}`}>
   <p class="crumbs">Rodina{line && <> · <a href={href.line(line.slug)}>rod {line.name}</a></>}</p>
@@ -45,13 +46,17 @@ const title = [father?.name ?? (f.fatherUnknown ? 'otec neuveden' : 'neznámý o
   <ul class="facts">
     {children.map((c) => <li><PersonLink slug={c.slug} /> – přímý předek ({c.rel})</li>)}
   </ul>
-  {f.side.length > 0 && (
-    <div class="grid2">{f.side.map((s) => <SideCard s={s} />)}</div>
-  )}
+  {groups.filter(([g]) => g === 'sib').map(([, list]) => <div class="grid2">{list.map((s) => <SideCard s={s} />)}</div>)}
   <p class="small muted">{{
     done: 'Sourozence jsme dohledali všechny.',
     partial: 'Sourozence jsme hledali jen částečně – tady jsou ti, které jsme zatím našli.',
   }[people[f.child]?.sibStatus] ?? 'Další sourozence zatím systematicky nehledáme – tady jsou jen ti, na které jsme narazili.'}</p>
+  {groups.filter(([g]) => g !== 'sib').map(([g, list]) => (
+    <>
+      <h2>{sideTitle[g]}</h2>
+      <div class="grid2">{list.map((s) => <SideCard s={s} />)}</div>
+    </>
+  ))}
 
   {f.records.length > 0 && (
     <>

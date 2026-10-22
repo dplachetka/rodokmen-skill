@@ -27,6 +27,19 @@ LINE_COLORS = {8: "#EFB45F", 9: "#F09A78", 10: "#E58AA6", 11: "#B99AE0",
 STATUS = {"doc": "doloženo matrikou", "prob": "pravděpodobné", "fam": "údaj od rodiny",
           "mh": "jen z cizího rodokmenu", "unk": "neznámé"}
 SIDE_KIND = {"bratr": "sib", "sestra": "sib", "manžel": "spouse", "manželka": "spouse", "syn": "child", "dcera": "child"}
+# role lidí, kteří nejsou příbuzní (učeň v domě, kmotr, svědek…) – na webu „Lidé kolem rodiny“, ne mezi dětmi
+NEPRIBUZNI = ("učeň", "tovaryš", "čeledín", "čeledínka", "služebná", "služka", "děvečka", "podruh", "podruhyně",
+              "nájemník", "nájemnice", "soused", "sousedka", "kmotr", "kmotra", "svědek", "svědkyně", "poručník", "pěstoun")
+
+
+def side_kind(v):
+    """Druh bočního záznamu podle vztahu v: sib, spouse, child, kin (jiný příbuzný), non (nepříbuzný), unknown (bez v)."""
+    v = (v or "").strip().lower()
+    if not v:
+        return "unknown"
+    if v in SIDE_KIND:
+        return SIDE_KIND[v]
+    return "non" if "nepříbuz" in v or v.split()[0] in NEPRIBUZNI else "kin"
 SIB_STATUS = {"hotovo": "done", "částečně": "partial"}
 KINDS = {"N": "křest / narození", "O": "sňatek", "Z": "úmrtí", "I": "rejstřík", "S": "sčítání lidu", "J": "jiný pramen"}
 
@@ -241,8 +254,8 @@ def main():
             child=slugs.get(k // 2) if k > 1 else None, spouse=slugs.get(k ^ 1) if k > 1 else None,
             family=None, ownFamily=None, path=path,
             side=[dict(name=s["n"], text=s.get("t", ""), facts=s.get("f", []), st=s.get("st", ""), status=STATUS.get(s.get("st"), ""),
-                       records=[r for r in s.get("r", []) if r in recs], rel=s.get("v") or "příbuzný",
-                       years=years(s.get("y")), kind=SIDE_KIND.get((s.get("v") or "").lower(), "other")) for s in SIDE if s["k"] == k],
+                       records=[r for r in s.get("r", []) if r in recs], rel=s.get("v") or "",
+                       years=years(s.get("y")), kind=side_kind(s.get("v"))) for s in SIDE if s["k"] == k],
             sibStatus=SIB_STATUS.get(p.get("sour"), "none"),
             docs=[dict(img=d["img"], caption=d["popis"]) for d in docs_cfg if k in d.get("osoby", [])],
             children=[slugs[c] for c in [k // 2] + [a // 2 for a in aliases_of.get(k, [])] if k > 1 and c in slugs],

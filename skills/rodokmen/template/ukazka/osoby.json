@@ -277,7 +277,8 @@
  "SIDE": [
   {"k": 8, "n": "Marie Nováková", "v": "sestra", "y": "1892–1970", "st": "fam", "f": ["* 1892 Holice čp. 112", "× 1913 Ostřetín"], "t": "Sestra Jana, provdaná do Ostřetína.", "r": []},
   {"k": 8, "n": "Václav Novák", "v": "bratr", "y": "1896–1916", "st": "fam", "f": ["* 1896 Holice čp. 112", "† 1916 Doberdò"], "t": "Bratr Jana, padl v 1. světové válce u Doberdò.", "r": []},
-  {"k": 26, "n": "Antonín Kučera", "v": "bratr", "y": "1869–1941", "t": "Bratr Josefa, převzal mlýn v Třemošnici.", "r": []}
+  {"k": 26, "n": "Antonín Kučera", "v": "bratr", "y": "1869–1941", "t": "Bratr Josefa, převzal mlýn v Třemošnici.", "r": []},
+  {"k": 8, "n": "Josef Hruška", "v": "učeň", "y": "* 1905", "t": "Kovářský učeň v kovárně Jana Nováka, Holice čp. 112, podle sčítání 1921. Nepříbuzný.", "r": []}
  ],
  "ISSUES": [
   ["Odkud přišel Jakub Novák do Ostřetína?", "Otevřené: jeho křest je starší než ostřetínské matriky (1690); zkusit soupis poddaných 1651 a berní rulu."],
