@@ -55,8 +55,8 @@ def years(y):
         if re.search(r"\bpo\b", tail or y):
             return "žil " + ys[-1]
         return "† " + ("před " if "před" in y else "") + ys[-1]
-    if y.startswith("*"):
-        return "* " + ys[0]
+    if y.startswith("*"):   # „* asi 1945“ → „* ≈1945“, „* 1882 ?“ → „* 1882?“
+        return "* " + ("≈" if re.search(r"\b(asi|kolem)\b|≈", y) else "") + ys[0] + ("?" if "?" in y else "")
     if len(ys) == 1:
         return approx + ys[0] + ("–?" if dash else "")
     second = "?" if "před" in tail else ("po " if re.search(r"\bpo\b", tail) else "") + \

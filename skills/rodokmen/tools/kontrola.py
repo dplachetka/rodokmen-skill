@@ -11,7 +11,7 @@ for _s in (sys.stdout, sys.stderr):   # UTF-8 výstup i na Windows bez -X utf8 (
         _s.reconfigure(encoding="utf-8", errors="replace")
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))   # python3 -I složku skriptu do sys.path nepřidá
-from nacti_osoby import SEKCE, nacti_osoby
+from nacti_osoby import SEKCE, nacti_osoby, roky_ve_jmene
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 DATA = os.path.join(ROOT, "data")
@@ -23,13 +23,12 @@ def jload(name, default):
 
 
 STAVY = ("doc", "prob", "fam", "mh", "unk")
-ROKY_VE_JMENU = re.compile(r"\s*\(([^()]*\d{4}[^()]*)\)\s*$")   # „Josef Plachetka (* 1931)“
 
 
 def rok_narozeni(y, facts, name):
     """Rok narození z y („* 1931“, „asi 1844–1900“), z faktu „* 30. 3. 1931 …“ nebo ze jména „Josef X (* 1931)“."""
-    m = ROKY_VE_JMENU.search(name or "")
-    for text in [y or ""] + [f.strip() for f in facts if f.strip().startswith("*")] + [m.group(1) if m else ""]:
+    m = roky_ve_jmene(name)
+    for text in [y or ""] + [f.strip() for f in facts if f.strip().startswith("*")] + [m[1] if m else ""]:
         if text and not text.lstrip().startswith(("†", "?")):
             r = re.search(r"\d{4}", text)
             if r:
@@ -38,8 +37,8 @@ def rok_narozeni(y, facts, name):
 
 
 def zemrel(y, facts, name):
-    m = ROKY_VE_JMENU.search(name or "")
-    jmeno = m.group(1) if m else ""
+    m = roky_ve_jmene(name)
+    jmeno = m[1] if m else ""
     return any("†" in t for t in [y or "", jmeno] + list(facts)) \
         or any(re.search(r"\d{4}\s*[–-]\s*\S", t) for t in (y or "", jmeno))
 
@@ -105,7 +104,7 @@ def main():
             err.append(f"boční příbuzný '{s.get('n')}': neznámý stav '{s['st']}'")
         if s.get("st") == "doc" and not s.get("r"):
             warn.append(f"boční příbuzný '{s.get('n')}' je 'doc' (doloženo), ale necituje žádný zápis")
-        if not s.get("y") and ROKY_VE_JMENU.search(s.get("n", "")):
+        if not s.get("y") and roky_ve_jmene(s.get("n", "")):
             warn.append(f"boční příbuzný '{s.get('n')}': roky jsou ve jméně – přesuň je do 'y' "
                         f"(python3 -I tools/nacti_osoby.py sourozenci)")
     for a, c in SAME.items():

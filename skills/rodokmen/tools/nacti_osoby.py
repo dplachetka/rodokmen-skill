@@ -8,8 +8,13 @@ Převod starého projektu (osoby.py → osoby.json, původní soubor do pracovni
   python3 -I tools/nacti_osoby.py prevod
 Dělá ho i novy_projekt.py při aktualizaci projektu. Starý soubor se při převodu nespouští: rozebere se (ast)
 a přijmou se jen přiřazení hodnot.
+
+Boční příbuzní ve starém tvaru (roky ve jméně, vztah jen v textu):
+  python3 -I tools/nacti_osoby.py sourozenci [--nanecisto]
+„Josef Plachetka (* 1931)“ → n „Josef Plachetka“, y „* 1931“; text „Bratr Zdeňka, …“ → v „bratr“. Nic jiného nemění,
+fakta z textu do f přepiš ručně (u žijících je raději vynech, viz kontrola.py). --nanecisto jen vypíše, co by změnil.
 """
-import ast, json, os, shutil, sys
+import ast, json, os, re, shutil, sys
 
 SEKCE = ("P", "LINES", "SIDE", "ISSUES", "HYPOTEZY", "SAME")
 POPIS = ("Předci podle Kekulého čísel (1 = výchozí osoba, otec osoby n = 2n, matka = 2n+1), rody LINES, boční "
@@ -50,7 +55,9 @@ def format_osoby(data):
     """Text osoby.json: co osoba (rod, příbuzný, otázka), to jeden řádek – dobře se v tom hledá i upravuje."""
     one = lambda v: json.dumps(v, ensure_ascii=False)
     parts = [f' "_popis": {one(data.get("_popis", POPIS))}']
-    for name in SEKCE + tuple(sorted(k for k in data if k not in SEKCE and not k.startswith("_"))):
+    extra = sorted(k for k in data if k not in SEKCE and not k.startswith("_"))   # neznámé sekce – nahlásí kontrola.py
+    own = sorted(k for k in data if k.startswith("_") and k != "_popis")       # vlastní poznámky projektu (_odlozeno…)
+    for name in SEKCE + tuple(extra) + tuple(own):
         v = data.get(name, [] if name in ("SIDE", "ISSUES", "HYPOTEZY") else {})
         if not isinstance(v, (dict, list)):
             parts.append(f" {one(name)}: {one(v)}")
@@ -132,9 +139,68 @@ def prevod(root):
     return True
 
 
+VZTAHY = ("bratr", "sestra", "manžel", "manželka", "syn", "dcera")
+
+
+def roky_ve_jmene(name):
+    """„Josef Plachetka (* 1931)“ → („Josef Plachetka“, „* 1931“); závorka jen s roky života (číslice, * † ≈ ?, asi,
+    před, po…). „Jan Plachetka (svědek 1902)“ roky života nemá → None."""
+    m = re.match(r"^(.*?)\s*\(([^()]*\d{4}[^()]*)\)\s*$", name or "")
+    if not m or not re.fullmatch(r"(?:[\s*†≈?\d–\-/.,]|asi|kolem|před|po|mezi|nebo|a\b)+", m.group(2)):
+        return None
+    return m.group(1), re.sub(r"\s*-\s*", "–", m.group(2).strip())
+
+
+def sourozenci(data_dir, ulozit=True):
+    """Roky ze jména do y a vztah ze začátku textu do v u bočních příbuzných. Vrací seznam změn (jako text)."""
+    path = os.path.join(data_dir, "osoby.json")
+    with open(path, encoding="utf-8-sig") as f:
+        data = json.load(f)                      # syrově, ať zůstane _popis i pořadí
+    zmeny = []
+    for s in data.get("SIDE", []):
+        old = dict(s)
+        m = roky_ve_jmene(s.get("n", ""))
+        if m and not s.get("y"):
+            s["n"], s["y"] = m
+        w = re.match(r"\s*(\w+)", s.get("t", ""))
+        if not s.get("v") and w and w.group(1).lower() in VZTAHY:
+            s["v"] = w.group(1).lower()
+        if s != old:
+            order = ["k", "n", "v", "y"]     # nová pole hned za jméno, ať jde řádek dobře číst
+            s_new = {k: s[k] for k in order if k in s} | {k: v for k, v in s.items() if k not in order}
+            s.clear(); s.update(s_new)
+            zmeny.append(f"  {old.get('n')}  →  n={s['n']!r}" + (f", y={s['y']!r}" if s.get("y") != old.get("y") else "")
+                         + (f", v={s['v']!r}" if s.get("v") != old.get("v") else ""))
+    if zmeny and ulozit:
+        text = format_osoby(data)
+        with open(path, encoding="utf-8-sig") as f:
+            puvodni = json.load(f)
+        nove = json.loads(text)
+        # pojistka: kromě převedených polí (n, y, v u SIDE) se nesmí změnit nic – jinak neukládat
+        assert {k: v for k, v in puvodni.items() if k != "SIDE"} == {k: v for k, v in nove.items() if k != "SIDE"} \
+            and len(puvodni.get("SIDE", [])) == len(nove.get("SIDE", [])) \
+            and all({k: v for k, v in a.items() if k not in ("n", "y", "v")} == {k: v for k, v in b.items() if k not in ("n", "y", "v")}
+                    for a, b in zip(puvodni.get("SIDE", []), nove.get("SIDE", []))), \
+            "převod by změnil i jiné údaje – nic jsem neuložil, nahlas to prosím (poznamky_pro_skill.md)"
+        tmp = path + ".tmp"
+        with open(tmp, "w", encoding="utf-8") as f:
+            f.write(text)
+        os.replace(tmp, path)
+    return zmeny
+
+
 if __name__ == "__main__":
-    if sys.argv[1:] != ["prevod"]:
-        sys.exit(__doc__)
     root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-    print("data/osoby.py převedeno na data/osoby.json (původní soubor: pracovni/osoby_puvodni.py)" if prevod(root)
-          else "Není co převádět (chybí data/osoby.py, nebo už existuje data/osoby.json).")
+    if sys.argv[1:] == ["prevod"]:
+        print("data/osoby.py převedeno na data/osoby.json (původní soubor: pracovni/osoby_puvodni.py)" if prevod(root)
+              else "Není co převádět (chybí data/osoby.py, nebo už existuje data/osoby.json).")
+    elif sys.argv[1:2] == ["sourozenci"]:
+        zkouska = "--nanecisto" in sys.argv
+        zmeny = sourozenci(os.path.join(root, "data"), ulozit=not zkouska)
+        print((f"{'Změnil bych' if zkouska else 'Upraveno'} {len(zmeny)} bočních příbuzných:" if zmeny
+               else "Boční příbuzní už jsou v novém tvaru, není co měnit."))
+        print("\n".join(zmeny))
+        if zmeny and not zkouska:
+            print("Fakta z textu (data narození, sňatky, úmrtí) přepiš do f ručně; pak python3 -I tools/kontrola.py.")
+    else:
+        sys.exit(__doc__)
