@@ -275,9 +275,9 @@
   "15": ["Vondráčkové", "Hrnčíři z Luže, dům čp. 88 pod poutním kostelem na Chlumku."]
  },
  "SIDE": [
-  {"k": 8, "n": "Marie Nováková (1892–1970)", "t": "Sestra Jana, provdaná do Ostřetína.", "r": []},
-  {"k": 8, "n": "Václav Novák (1896–1916)", "t": "Bratr Jana, padl v 1. světové válce u Doberdò.", "r": []},
-  {"k": 26, "n": "Antonín Kučera (1869–1941)", "t": "Bratr Josefa, převzal mlýn v Třemošnici.", "r": []}
+  {"k": 8, "n": "Marie Nováková", "v": "sestra", "y": "1892–1970", "t": "Sestra Jana, provdaná do Ostřetína.", "r": []},
+  {"k": 8, "n": "Václav Novák", "v": "bratr", "y": "1896–1916", "t": "Bratr Jana, padl v 1. světové válce u Doberdò.", "r": []},
+  {"k": 26, "n": "Antonín Kučera", "v": "bratr", "y": "1869–1941", "t": "Bratr Josefa, převzal mlýn v Třemošnici.", "r": []}
  ],
  "ISSUES": [
   ["Odkud přišel Jakub Novák do Ostřetína?", "Otevřené: jeho křest je starší než ostřetínské matriky (1690); zkusit soupis poddaných 1651 a berní rulu."],

@@ -20,7 +20,7 @@ Soubor má sekce `P`, `LINES`, `SIDE`, `ISSUES`, `HYPOTEZY`, `SAME` a jeden řá
 {
  "_popis": "…",
  "P": {
-  "8": {"n": "Jan Novák", "y": "1890–1944", "st": "doc", "f": ["* 14. 2. 1890 Holice čp. 112", "kovář", "× 20. 6. 1919 Holice Josefa Pokorná", "† 1944 Holice"], "r": ["holice_krest_jan_novak_1890", "holice_snatek_jan_novak_josefa_pokorna_1919"], "note": "Proč nejistota / rozpor / odkud údaj"},
+  "8": {"n": "Jan Novák", "y": "1890–1944", "st": "doc", "f": ["* 14. 2. 1890 Holice čp. 112", "kovář", "× 20. 6. 1919 Holice Josefa Pokorná", "† 1944 Holice"], "r": ["holice_krest_jan_novak_1890", "holice_snatek_jan_novak_josefa_pokorna_1919"], "note": "Proč nejistota / rozpor / odkud údaj", "sour": "částečně"},
   "9": {"n": "Josefa Pokorná", "y": "* 1895", "st": "doc", "f": ["…"], "r": ["…"]},
   "33": {"n": "otec neuveden", "st": "unk", "f": [], "note": "Nemanželský syn; otec v matrice není."}
  },
@@ -28,7 +28,7 @@ Soubor má sekce `P`, `LINES`, `SIDE`, `ISSUES`, `HYPOTEZY`, `SAME` a jeden řá
   "8": ["Novákové", "Kováři z Holic…"]
  },
  "SIDE": [
-  {"k": 16, "n": "Josef Novák (1865–1920)", "t": "Bratr Jana. Kovář v …", "r": ["klic_zapisu"]}
+  {"k": 16, "n": "Josef Novák", "v": "bratr", "y": "1865–1920", "t": "Bratr Jana. Kovář v …", "r": ["klic_zapisu"]}
  ],
  "ISSUES": [
   ["Kdy se narodil Jan Novák?", "Otevřené: rodina říká 1850, v Holicích 1848–1852 nenalezen."]
@@ -49,8 +49,12 @@ Soubor má sekce `P`, `LINES`, `SIDE`, `ISSUES`, `HYPOTEZY`, `SAME` a jeden řá
 - `r` klíče zápisů ze `zaznamy.json`. `st` viz `matriky.md`: `doc` přečteno v matrice, `prob` pravděpodobné,
   `fam` od rodiny (i strom, který si rodina vede sama, např. GEDCOM z jejího MyHeritage), `mh` cizí strom z internetu, `unk`.
 - `note` proč je údaj nejistý, rozpory, odkud se vzal. Žijící lidé: jen jméno a rok narození, `"note": "Žijící – údaje jen základní."`
+- `sour` (volitelné) stav hledání sourozenců předka: `"hotovo"` = všichni dohledáni, `"částečně"`; chybí = zatím nehledáno –
+  stromový graf (`/strom/`) u ostatních ukazuje „sourozenci nehledáni“ jako připomínku, co dohledat.
 - `LINES` – jen čísla 8–15: `[název rodu, jedna věta o rodu]`; název rodu = příjmení v množném čísle.
-- `SIDE` – sourozenci a další příbuzní: `k` = číslo předka, ke kterému patří, `n`, `t` text, `r` klíče zápisů.
+- `SIDE` – sourozenci a další příbuzní: `k` = číslo předka, ke kterému patří, `n` jméno (bez let), `t` text, `r` klíče zápisů;
+  volitelně `v` vztah k předkovi (`bratr`, `sestra`, `manžel`, `manželka`, `syn`, `dcera`, jinak volně, např. `učeň`)
+  a `y` roky jako u předků (`"* 1931"`, `"1893–1960"`). Stromový graf podle nich kreslí kartičky příbuzných vedle předka.
 - `ISSUES` – dvojice `[otázka, odpověď]`, odpověď začíná „Vyřešeno: …“ (na webu se skryje), „Hypotéza: …“ nebo
   „Otevřené: …“ → stránka „Co hledáme“. Jde na web – nepiš sem citlivé věci (příčiny úmrtí, rodinné spory) bez souhlasu.
 - `HYPOTEZY` – hypotézy o původu rodu nad rámec doložené linie → stránka rodu (`rod` = číslo 8–15).
