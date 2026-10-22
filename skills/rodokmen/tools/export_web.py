@@ -15,7 +15,7 @@ for _s in (sys.stdout, sys.stderr):   # UTF-8 výstup i na Windows bez -X utf8 (
 
 TOOLS = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, TOOLS)   # python3 -I složku skriptu do sys.path nepřidá
-from nacti_osoby import NEPRIBUZNI, nacti_osoby, roky_ve_jmene
+from nacti_osoby import NEPRIBUZNI, nacti_osoby, roky_ve_jmene, years   # years: krátké roky pro web i vějíř, jediné místo
 ROOT = os.path.dirname(TOOLS)
 DATA = os.path.join(ROOT, "data")
 WEB = os.path.join(ROOT, "web")
@@ -91,27 +91,6 @@ def norm_answer(text):
     t = unicodedata.normalize("NFD", text)
     t = "".join(c for c in t if not unicodedata.combining(c)).lower()
     return re.sub(r"[^a-z0-9]", "", t)
-
-
-def years(y):
-    y = (y or "").strip()
-    ys = re.findall(r"\d{4}", y)
-    if not ys:
-        return ""
-    approx = "≈" if re.match(r"^(asi|≈)", y) else ""
-    head, dash, tail = y.partition("–")
-    if y.startswith(("?", "†")) or (dash and not re.search(r"\d", head)) or re.match(r"po\b", y):
-        # neznámé narození: ukázat jen úmrtí („? – před 1743“ → „† před 1743“, „– po 1921“ → „žil 1921“)
-        if re.search(r"\bpo\b", tail or y):
-            return "žil " + ys[-1]
-        return "† " + ("před " if "před" in y else "") + ys[-1]
-    if y.startswith("*"):   # „* asi 1945“ → „* ≈1945“, „* 1882 ?“ → „* 1882?“
-        return "* " + ("≈" if re.search(r"\b(asi|kolem)\b|≈", y) else "") + ys[0] + ("?" if "?" in y else "")
-    if len(ys) == 1:
-        return approx + ys[0]
-    second = "?" if "před" in tail else ("po " if re.search(r"\bpo\b", tail) else "") + \
-        ("≈" if re.search(r"(asi|≈)", tail) else "") + ys[-1]
-    return f"{approx}{ys[0]}–{second}"
 
 
 def born(y, facts):

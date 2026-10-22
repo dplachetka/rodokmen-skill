@@ -140,6 +140,37 @@ def prevod(root):
     return True
 
 
+def years(y):
+    """Krátké roky z pole y pro web i vějíř (jediné místo, používá export_web.py i fan_chart.py):
+    „asi 1720–1785“ → „≈1720–1785“, „* asi 1844“ → „* ≈1844“, „* 1853/1855“ → „* 1853/55“, „* 1795 (?)“ → „* 1795?“,
+    „1829 – po 1895“ → „1829–po 1895“, „1680 – před 1740“ → „1680–?“, „1890 –“ → „1890–?“,
+    „mezi 1700 a 1705 – 1760“ → „1700/05–1760“; bez narození: „? – před 1743“ → „† před 1743“,
+    „† asi 1859 (?)“ → „† ≈1859?“, „po 1921“, „– po 1921“, „† po 1698“ → „žil 1921“ (žil v tom roce)."""
+    y = re.sub(r"\s*[–-]\s*", "–", (y or "").strip())
+    if not re.search(r"\d{4}", y):
+        return ""
+
+    def part(s):
+        m = re.search(r"mezi\s+(\d{4})\s+a\s+(\d{2,4})", s) or re.search(r"(\d{4})(?:\s*/\s*(\d{2,4}))?", s)
+        v = m.group(1) + ("/" + m.group(2)[-2:] if m.group(2) else "")
+        pre = ("≈" if re.search(r"(^|\s)(asi|kolem)\b|≈", s) else "po " if re.search(r"(^|\s)po\s", s)
+               else "před " if re.search(r"(^|\s)před\s", s) else "")
+        return pre + v + ("?" if "?" in s[m.start():] else "")
+
+    if y.startswith("†"):                                    # jen úmrtí
+        return ("žil " + part(y[1:]).removeprefix("po ")) if re.search(r"(^|\s)po\s", y) else "† " + part(y[1:])
+    if y.startswith("*"):                                    # jen narození („* asi 1828, † před 1885“ → „* ≈1828“)
+        return "* " + part(re.split(r"[,;†]", y[1:])[0])
+    head, dash, tail = y.partition("–")
+    if not re.search(r"\d", head) or re.match(r"po\s", y):   # neznámé narození
+        s = tail if dash else y
+        return ("žil " + part(s).removeprefix("po ")) if re.search(r"(^|\s)po\s", s) else "† " + part(s)
+    if not re.search(r"\d", tail):
+        return part(head) + ("–?" if dash else "")
+    second = "?" if re.search(r"(^|\s)(před|mezi)\s", tail) else part(tail)
+    return f"{part(head)}–{second}"
+
+
 VZTAHY = ("bratr", "sestra", "sourozenci", "bratři", "sestry", "manžel", "manželka", "syn", "dcera", "strýc", "teta",
           "bratranec", "sestřenice", "švagr", "švagrová", "synovec", "neteř")
 # role lidí, kteří nejsou příbuzní (na webu „Lidé kolem rodiny“, ne mezi dětmi); používá i export_web.py

@@ -8,7 +8,7 @@ for _s in (sys.stdout, sys.stderr):   # UTF-8 výstup i na Windows bez -X utf8 (
         _s.reconfigure(encoding="utf-8", errors="replace")
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))   # python3 -I složku skriptu do sys.path nepřidá
-from nacti_osoby import nacti_osoby
+from nacti_osoby import nacti_osoby, years   # years: krátké roky pro web i vějíř, jediné místo
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 OUT = os.path.abspath(sys.argv[1]) if len(sys.argv) > 1 else os.path.join(ROOT, "vystupy")
@@ -41,27 +41,6 @@ MAXF = {5: 26, 6: 22, 7: 18, 8: 14, 9: 11, 10: 9}
 def mix(hex_, t):
     r, g, b = (int(hex_[i:i + 2], 16) for i in (1, 3, 5))
     return "#%02X%02X%02X" % tuple(round(c + (255 - c) * t) for c in (r, g, b))
-
-
-def years(y):
-    y = (y or "").strip()
-    ys = re.findall(r"\d{4}", y)
-    if not ys:
-        return ""
-    approx = "≈" if re.match(r"^(asi|≈)", y) else ""
-    head, dash, tail = y.partition("–")
-    if y.startswith(("?", "†")) or (dash and not re.search(r"\d", head)) or re.match(r"po\b", y):
-        # neznámé narození: ukázat jen úmrtí („? – před 1743“ → „† před 1743“, „– po 1921“ → „žil 1921“)
-        if re.search(r"\bpo\b", tail or y):
-            return "žil " + ys[-1]
-        return "† " + ("před " if "před" in y else "") + ys[-1]
-    if y.startswith("*"):   # „* asi 1945“ → „* ≈1945“, „* 1882 ?“ → „* 1882?“
-        return "* " + ("≈" if re.search(r"\b(asi|kolem)\b|≈", y) else "") + ys[0] + ("?" if "?" in y else "")
-    if len(ys) == 1:
-        return approx + ys[0] + ("–?" if dash else "")
-    second = "?" if "před" in tail else ("po " if re.search(r"\bpo\b", tail) else "") + \
-        ("≈" if re.search(r"(asi|≈)", tail) else "") + ys[-1]
-    return f"{approx}{ys[0]}–{second}"
 
 
 def pt(r, a):
