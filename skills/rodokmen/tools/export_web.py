@@ -15,7 +15,7 @@ for _s in (sys.stdout, sys.stderr):   # UTF-8 výstup i na Windows bez -X utf8 (
 
 TOOLS = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, TOOLS)   # python3 -I složku skriptu do sys.path nepřidá
-from nacti_osoby import NEPRIBUZNI, nacti_osoby
+from nacti_osoby import NEPRIBUZNI, nacti_osoby, roky_ve_jmene
 ROOT = os.path.dirname(TOOLS)
 DATA = os.path.join(ROOT, "data")
 WEB = os.path.join(ROOT, "web")
@@ -112,6 +112,27 @@ def years(y):
     second = "?" if "před" in tail else ("po " if re.search(r"\bpo\b", tail) else "") + \
         ("≈" if re.search(r"(asi|≈)", tail) else "") + ys[-1]
     return f"{approx}{ys[0]}–{second}"
+
+
+def born(y, facts):
+    """Řadicí klíč narození: „1890-02-14“ z faktu „* 14. 2. 1890 …“, jinak rok („1890“) z faktu nebo z let y; neznámé → ""."""
+    for f in facts:
+        f = f.strip()
+        if f.startswith("*"):
+            m = re.search(r"(\d{1,2})\.\s*(\d{1,2})\.\s*(\d{4})", f)
+            if m:
+                return f"{m[3]}-{int(m[2]):02d}-{int(m[1]):02d}"
+            m = re.search(r"\d{4}", f)
+            if m:
+                return m[0]
+    y = (y or "").strip()
+    m = re.search(r"\d{4}", y) if not y.startswith(("†", "?")) else None
+    return m[0] if m else ""
+
+
+def by_birth(items):
+    """Podle narození, neznámé na konec (pořadí mezi nimi zůstane jako v datech)."""
+    return sorted(items, key=lambda x: (x["born"] == "", x["born"]))
 
 
 def gen(k):
@@ -243,16 +264,18 @@ def main():
             path.append(slugs.get(c))
             c //= 2
         people[slugs[k]] = dict(
-            k=k, slug=slugs[k], name=p["n"], y=p.get("y", ""), years=years(p.get("y")), st=p.get("st", "unk"),
+            k=k, slug=slugs[k], name=p["n"], y=p.get("y", ""), years=years(p.get("y")), born=born(p.get("y"), p.get("f", [])),
+            st=p.get("st", "unk"),
             status=STATUS.get(p.get("st"), ""), gen=gen(k), sex="M" if k == 1 and p.get("sex", "M") == "M" or k > 1 and k % 2 == 0 else "F",
             rel=relation(k), line=line_of(k), facts=p.get("f", []), note=p.get("note", ""), records=[r for r in p.get("r", []) if r in recs],
             father=slugs.get(2 * k), mother=slugs.get(2 * k + 1),
             fatherUnknown=(2 * k in P and placeholder(P[2 * k])), motherUnknown=(2 * k + 1 in P and placeholder(P[2 * k + 1])),
             child=slugs.get(k // 2) if k > 1 else None, spouse=slugs.get(k ^ 1) if k > 1 else None,
             family=None, ownFamily=None, path=path,
-            side=[dict(name=s["n"], text=s.get("t", ""), facts=s.get("f", []), st=s.get("st", ""), status=STATUS.get(s.get("st"), ""),
+            side=by_birth([dict(name=s["n"], born=born(s.get("y") or (roky_ve_jmene(s["n"]) or ("", ""))[1], s.get("f", [])),
+                       text=s.get("t", ""), facts=s.get("f", []), st=s.get("st", ""), status=STATUS.get(s.get("st"), ""),
                        records=[r for r in s.get("r", []) if r in recs], rel=s.get("v") or "",
-                       years=years(s.get("y")), kind=side_kind(s.get("v"))) for s in SIDE if s["k"] == k],
+                       years=years(s.get("y")), kind=side_kind(s.get("v"))) for s in SIDE if s["k"] == k]),
             sibStatus=SIB_STATUS.get(p.get("sour"), "none"),
             docs=[dict(img=d["img"], caption=d["popis"]) for d in docs_cfg if k in d.get("osoby", [])],
             children=[slugs[c] for c in [k // 2] + [a // 2 for a in aliases_of.get(k, [])] if k > 1 and c in slugs],

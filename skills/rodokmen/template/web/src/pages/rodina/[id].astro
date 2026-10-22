@@ -15,6 +15,10 @@ const children = f.children.map((s) => people[s]);
 const line = f.line ? lineByK[f.line] : null;
 const title = [father?.name ?? (f.fatherUnknown ? 'otec neuveden' : 'neznámý otec'), mother?.name ?? 'neznámá matka'].join(' a ');
 const groups = sideGroups(f.side);
+// všechny děti rodiny v pořadí narození: přímý předek (zvýrazněný) i sourozenci; bez známého narození na konec
+const sibs = groups.find(([g]) => g === 'sib')?.[1] ?? [];
+const kids = [...children.map((p) => ({ p, born: p.born ?? '' })), ...sibs.map((s) => ({ s, born: s.born ?? '' }))]
+  .sort((a, b) => Number(a.born === '') - Number(b.born === '') || a.born.localeCompare(b.born));
 ---
 <Base title={`Rodina: ${title}`}>
   <p class="crumbs">Rodina{line && <> · <a href={href.line(line.slug)}>rod {line.name}</a></>}</p>
@@ -43,10 +47,15 @@ const groups = sideGroups(f.side);
   )}
 
   <h2>Děti</h2>
-  <ul class="facts">
-    {children.map((c) => <li><PersonLink slug={c.slug} /> – přímý předek ({c.rel})</li>)}
-  </ul>
-  {groups.filter(([g]) => g === 'sib').map(([, list]) => <div class="grid2">{list.map((s) => <SideCard s={s} />)}</div>)}
+  <div class="grid2">
+    {kids.map((x) => x.p ? (
+      <div class="card direct">
+        <h3><PersonLink slug={x.p.slug} /></h3>
+        <div class="chips"><span class="chip">přímý předek – {x.p.rel}</span></div>
+        {x.p.facts.some((t) => /^[*†]/.test(t.trim())) && <ul class="facts small">{x.p.facts.filter((t) => /^[*†]/.test(t.trim())).map((t) => <li>{t}</li>)}</ul>}
+      </div>
+    ) : <SideCard s={x.s} />)}
+  </div>
   <p class="small muted">{{
     done: 'Sourozence jsme dohledali všechny.',
     partial: 'Sourozence jsme hledali jen částečně – tady jsou ti, které jsme zatím našli.',
