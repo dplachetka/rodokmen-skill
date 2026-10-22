@@ -30,7 +30,7 @@ Najdeš v ní `tools/` (nástroje), `template/` (šablona projektu a webu) a `re
    **Verze:** porovnej soubor `.skill_verze` v projektu se `SKILL_DIR/VERZE`. Chybí-li, nebo se liší, řekni jednou větou,
    že je nová verze skillu, a nabídni aktualizaci projektu: `python3 -I SKILL_DIR/tools/novy_projekt.py <složka projektu>`
    (data zůstanou, změněné soubory webu se zazálohují do `pracovni/`), pak ve `web/` `npm install`. Po souhlasu ji udělej
-   a podle výpisu převezmi ze zálohy případné úpravy vzhledu (viz `reference/web.md`). Odmítne-li, připomeň to až příště.
+   a podle výpisu převezmi ze záloh v `pracovni/` úpravy vzhledu i nástrojů upravených v projektu (viz `reference/web.md`). Odmítne-li, připomeň to až příště.
    Má projekt ještě starý `data/osoby.py` místo `data/osoby.json`? Aktualizace ho převede (bez ní nástroje nepoběží) –
    pak v `data/STAV.md` oprav název souboru a ulož do gitu.
 2. Projekt ještě není → **Fáze 0**.

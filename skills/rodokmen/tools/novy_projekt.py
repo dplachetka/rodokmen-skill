@@ -10,8 +10,10 @@ a .claude/launch.json (náhled v Claude desktop).
 Existující data nepřepisuje.
 Aktualizace staršího projektu (znovu spustit na stejnou složku): tools/ se přepíše vždy a soubory webu,
 které se liší od nové šablony, taky – jejich staré verze se nejdřív uloží do pracovni/zaloha_web_<datum>/.
+Nástroje upravené v projektu se před přepsáním uloží do pracovni/zaloha_nastroje_<datum>/ (pozná je podle otisků
+v .skill_nastroje.json); nástroje, které skill nemá (vlastní skripty projektu), zůstanou beze změny.
 """
-import filecmp, os, shutil, sys, time
+import filecmp, hashlib, json, os, shutil, sys, time
 for _s in (sys.stdout, sys.stderr):   # UTF-8 výstup i na Windows bez -X utf8 (cp1250 neumí třeba „→“)
     if hasattr(_s, "reconfigure"):
         _s.reconfigure(encoding="utf-8", errors="replace")
@@ -23,6 +25,10 @@ def copy(src, out):
     if os.path.islink(out):   # nepsat přes symlink mimo projekt
         os.remove(out)
     shutil.copy2(src, out)
+
+
+def fingerprint(path):
+    return hashlib.sha256(open(path, "rb").read()).hexdigest()
 
 
 def copy_tree(src, dst, backup=None):
@@ -66,19 +72,34 @@ def main():
             src = os.path.join(SKILL, "template", "ukazka_" + sub)
             if os.path.isdir(src):
                 copy_tree(src, os.path.join(dst, sub))
+    stamp = time.strftime("%Y%m%d-%H%M%S")
     web = os.path.join(dst, "web")
-    backup = os.path.join(dst, "pracovni", "zaloha_web_" + time.strftime("%Y%m%d-%H%M%S"))
+    backup = os.path.join(dst, "pracovni", "zaloha_web_" + stamp)
     changed = copy_tree(os.path.join(SKILL, "template", "web"), web, backup if os.path.isdir(web) else None)
     tools = os.path.join(dst, "tools")
     os.makedirs(tools, exist_ok=True)
-    for f in os.listdir(os.path.join(SKILL, "tools")):
+    # nástroje vždy aktualizovat – ale ty, které se v projektu upravily, nejdřív zazálohovat (jinak by se úprava ztratila);
+    # .skill_nastroje.json pamatuje otisky naposledy nainstalovaných verzí, podle nich se upravené pozná
+    record = os.path.join(dst, ".skill_nastroje.json")
+    known = json.load(open(record, encoding="utf-8")) if os.path.exists(record) else None
+    tools_backup = os.path.join(dst, "pracovni", "zaloha_nastroje_" + stamp)
+    edited, prints = [], {}
+    for f in sorted(os.listdir(os.path.join(SKILL, "tools"))):
         if f.endswith((".py", ".sh")) and f != "novy_projekt.py":
-            copy(os.path.join(SKILL, "tools", f), os.path.join(tools, f))   # nástroje vždy aktualizovat
+            new, out = os.path.join(SKILL, "tools", f), os.path.join(tools, f)
+            if os.path.isfile(out) and not os.path.islink(out) and not filecmp.cmp(new, out, shallow=False) \
+                    and (known is None or known.get(f) != fingerprint(out)):
+                os.makedirs(tools_backup, exist_ok=True)
+                shutil.copy2(out, os.path.join(tools_backup, f))
+                edited.append(f)
+            copy(new, out)
             if f.endswith(".sh"):   # skill naklonovaný na Windows (core.autocrlf) má CRLF – Git Bash by skript nespustil
-                p = os.path.join(tools, f)
-                data = open(p, "rb").read()
+                data = open(out, "rb").read()
                 if b"\r\n" in data:
-                    open(p, "wb").write(data.replace(b"\r\n", b"\n"))
+                    open(out, "wb").write(data.replace(b"\r\n", b"\n"))
+            prints[f] = fingerprint(out)
+    with open(record, "w", encoding="utf-8") as fh:
+        json.dump(prints, fh, indent=1, sort_keys=True)
     for d in ("vyrezy", "zdroje", "dokumenty", "pracovni"):
         os.makedirs(os.path.join(dst, d), exist_ok=True)
     os.makedirs(os.path.join(dst, ".claude"), exist_ok=True)
@@ -94,6 +115,13 @@ def main():
         for f in changed:
             print("  web/" + f)
         print("Pokud jste vzhled webu upravovali, převezměte úpravy ze zálohy. Pak `npm install` a `npm run data` ve web/.")
+    if edited:
+        print(f"Nástroje, které se v projektu lišily ({len(edited)}), nová verze přepsala. Původní jsou v {tools_backup}:")
+        for f in edited:
+            print("  tools/" + f)
+        print("Úpravy z nich převezměte do nových verzí (porovnejte soubory), jinak se ztratí."
+              + ("" if known is not None else " Projekt zatím neměl záznam verzí nástrojů,"
+                 " takže v seznamu můžou být i neupravené nástroje starší verze skillu."))
 
 
 if __name__ == "__main__":

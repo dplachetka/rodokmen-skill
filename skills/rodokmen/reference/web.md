@@ -86,5 +86,8 @@ a po úpravě zkontroluj web na mobilu i počítači.
 ## Aktualizace staršího projektu
 Znovu spusť `python3 -I SKILL_DIR/tools/novy_projekt.py <složka projektu>`. Data (`data/`, výřezy) zůstanou, `tools/` se přepíše
 a soubory ve `web/`, které se liší od nové šablony, taky – staré verze uloží do `pracovni/zaloha_web_<datum>/` a vypíše jejich seznam.
-Upravoval-li jsi s uživatelem vzhled (styly, stránky), převezmi úpravy ze zálohy (porovnej soubory) a ověř web. Pak ve `web/`
+Upravoval-li jsi s uživatelem vzhled (styly, stránky), převezmi úpravy ze zálohy (porovnej soubory) a ověř web.
+Nástroje upravené v projektu (třeba `export_web.py`) uloží aktualizace před přepsáním do `pracovni/zaloha_nastroje_<datum>/`
+a vypíše je – úpravu přenes do nové verze (nová verze mohla stejné místo změnit jinak, tak je slaď, ne jen zkopíruj starý
+soubor) a navrhni ji i do `poznamky_pro_skill.md`, ať ji dostanou všichni. Vlastní skripty projektu, které skill nemá, zůstanou. Pak ve `web/`
 `npm install` a `npm run data`. Starou šablonu přihlášení `export_web.py` odmítne s výzvou k aktualizaci.
