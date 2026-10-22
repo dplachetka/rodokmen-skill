@@ -5,7 +5,7 @@ Použití: kontrola.py
 Vypíše CHYBY (rozbijí web nebo jsou věcně špatně) a UPOZORNĚNÍ (něco chybí, doplnit).
 Návratový kód 1, pokud jsou chyby.
 """
-import json, os, re, sys
+import datetime, json, os, re, sys
 for _s in (sys.stdout, sys.stderr):   # UTF-8 výstup i na Windows bez -X utf8 (cp1250 neumí třeba „→“)
     if hasattr(_s, "reconfigure"):
         _s.reconfigure(encoding="utf-8", errors="replace")
@@ -20,6 +20,43 @@ DATA = os.path.join(ROOT, "data")
 def jload(name, default):
     p = os.path.join(DATA, name)
     return json.load(open(p, encoding="utf-8")) if os.path.exists(p) else default
+
+
+STAVY = ("doc", "prob", "fam", "mh", "unk")
+ROKY_VE_JMENU = re.compile(r"\s*\(([^()]*\d{4}[^()]*)\)\s*$")   # „Josef Plachetka (* 1931)“
+
+
+def rok_narozeni(y, facts, name):
+    """Rok narození z y („* 1931“, „asi 1844–1900“), z faktu „* 30. 3. 1931 …“ nebo ze jména „Josef X (* 1931)“."""
+    m = ROKY_VE_JMENU.search(name or "")
+    for text in [y or ""] + [f.strip() for f in facts if f.strip().startswith("*")] + [m.group(1) if m else ""]:
+        if text and not text.lstrip().startswith(("†", "?")):
+            r = re.search(r"\d{4}", text)
+            if r:
+                return int(r.group(0))
+    return None
+
+
+def zemrel(y, facts, name):
+    m = ROKY_VE_JMENU.search(name or "")
+    jmeno = m.group(1) if m else ""
+    return any("†" in t for t in [y or "", jmeno] + list(facts)) \
+        or any(re.search(r"\d{4}\s*[–-]\s*\S", t) for t in (y or "", jmeno))
+
+
+def zijici(kde, y, facts, name, texts):
+    """Žijící lidé smí být na webu jen se jménem a rokem narození (reference/soukromi.md)."""
+    rok = rok_narozeni(y, facts, name)
+    if not rok or rok <= datetime.date.today().year - 100 or zemrel(y, facts, name):
+        return None
+    text = " ".join(texts)
+    letos = str(datetime.date.today().year)   # „zjištěno 22. 10. 2026“ je datum poznámky, ne údaj o člověku
+    m = next((m for m in re.finditer(r"\b\d{1,2}\.\s*\d{1,2}\.\s*(\d{4})|\bč(?:p|\.\s*p)?\.?\s*\d+", text)
+              if m.group(1) != letos), None)
+    if m:
+        return (f"ŽIJÍCÍ? ({kde}, nar. {rok}, bez úmrtí): „…{text[max(0, m.start() - 30):m.end() + 20].strip()}…“ jde na web – "
+                f"u žijících jen jméno a rok narození (reference/soukromi.md); zemřel-li, doplň † do y nebo do faktů")
+    return None
 
 
 def main():
@@ -49,8 +86,10 @@ def main():
         if k > 1 and k // 2 not in P and k not in SAME:
             warn.append(f"osoba {k} ({p.get('n')}): v rodokmenu chybí její dítě {k // 2} – je číslo správně?")
         st = p.get("st", "unk")
-        if st not in ("doc", "prob", "fam", "mh", "unk"):
+        if st not in STAVY:
             err.append(f"osoba {k}: neznámý stav '{st}'")
+        if p.get("sour") not in (None, "hotovo", "částečně"):
+            err.append(f"osoba {k}: sour='{p.get('sour')}' – povolené je „hotovo“ nebo „částečně“ (nebo nic)")
         for r in p.get("r", []):
             if r not in keys:
                 err.append(f"osoba {k} ({p.get('n')}) cituje neexistující zápis '{r}'")
@@ -62,6 +101,13 @@ def main():
         for r in s.get("r", []):
             if r not in keys:
                 err.append(f"boční příbuzný '{s.get('n')}' cituje neexistující zápis '{r}'")
+        if s.get("st") and s["st"] not in STAVY:
+            err.append(f"boční příbuzný '{s.get('n')}': neznámý stav '{s['st']}'")
+        if s.get("st") == "doc" and not s.get("r"):
+            warn.append(f"boční příbuzný '{s.get('n')}' je 'doc' (doloženo), ale necituje žádný zápis")
+        if not s.get("y") and ROKY_VE_JMENU.search(s.get("n", "")):
+            warn.append(f"boční příbuzný '{s.get('n')}': roky jsou ve jméně – přesuň je do 'y' "
+                        f"(python3 -I tools/nacti_osoby.py sourozenci)")
     for a, c in SAME.items():
         if c not in P:
             err.append(f"SAME: {a} -> {c}, ale osoba {c} neexistuje")
@@ -116,7 +162,15 @@ def main():
         text = " ".join(p.get("f", [])) + " " + p.get("note", "")
         roky = [int(y) for y in re.findall(r"\b1[5-9]\d\d|20\d\d\b", p.get("y", "") + " " + text)]
         texty.append((f"osoba {k}", text + (" 1900" if roky and min(roky) >= 1870 or k < 8 else "")))
-    texty += [(f"boční příbuzný {s.get('n')}", s.get("n", "") + " " + s.get("t", "")) for s in SIDE]
+    texty += [(f"boční příbuzný {s.get('n')}", " ".join([s.get("n", ""), s.get("t", "")] + s.get("f", []))) for s in SIDE]
+    for k, p in P.items():
+        w = zijici(f"osoba {k} {p.get('n')}", p.get("y", ""), p.get("f", []), p.get("n", ""), p.get("f", []) + [p.get("note", "")])
+        if w:
+            warn.append(w)
+    for s in SIDE:
+        w = zijici(f"boční příbuzný {s.get('n')}", s.get("y", ""), s.get("f", []), s.get("n", ""), [s.get("t", "")] + s.get("f", []))
+        if w:
+            warn.append(w)
     for f in ("zajimavosti.md", "pribeh.md"):
         if os.path.exists(os.path.join(DATA, f)):
             texty += [(f, odst) for odst in open(os.path.join(DATA, f), encoding="utf-8").read().split("\n\n")]
