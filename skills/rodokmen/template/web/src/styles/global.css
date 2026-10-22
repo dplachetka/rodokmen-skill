@@ -152,6 +152,7 @@ main.full { max-width: none; padding: 0; }
 .fan-links a.hit path, .fan-links a.hit circle { fill: rgba(255, 214, 0, 0.5); stroke: #d7302a; stroke-width: 3; vector-effect: non-scaling-stroke; }
 @media (max-width: 760px) { .fan-hint { display: none; } .fan-stage { height: calc(100vh - 150px); } }
 
+/* strom: začátek – tento blok vkládá i tools/jeden_soubor.py */
 /* full-screen tree page */
 .tree-stage { position: relative; height: calc(100vh - 110px); overflow: hidden; touch-action: none; cursor: grab; background: var(--bg); }
 .tree-stage:active { cursor: grabbing; }
@@ -179,6 +180,7 @@ main.full { max-width: none; padding: 0; }
 .tree-info p { margin: 0.4rem 0 0; }
 .tree-info-x { position: absolute; top: 0.3rem; right: 0.5rem; border: 0; background: none; font-size: 1.3rem; cursor: pointer; color: var(--muted); }
 @media (max-width: 760px) { .tree-stage { height: calc(100vh - 150px); } }
+/* strom: konec */
 
 /* home teaser */
 .teaser { display: grid; grid-template-columns: minmax(0, 3fr) minmax(0, 2fr); gap: 1.5rem; align-items: center; background: var(--paper); border: 1px solid var(--line); border-radius: 14px; padding: 1.4rem 1.5rem; margin: 0.6rem 0 1.4rem; }
