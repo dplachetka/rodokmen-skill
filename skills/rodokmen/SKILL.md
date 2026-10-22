@@ -37,20 +37,22 @@ Najdeš v ní `tools/` (nástroje), `template/` (šablona projektu a webu) a `re
 2. Projekt ještě není → **Fáze 0**.
 
 ## Fáze 0 – Příprava (jednou)
-1. Zkontroluj nástroje: `python3 --version` (≥ 3.9), `node --version` (≥ 20), `magick -version` (ImageMagick 7), `git --version`.
-   Co chybí, pomoz nainstalovat (macOS: Homebrew `brew install python node imagemagick git`; Windows: winget / instalátory
+1. Zkontroluj nástroje: `python3 --version` (≥ 3.15 – starší Python skill nepodporuje), `node --version` (≥ 20), `magick -version` (ImageMagick 7), `git --version`.
+   Co chybí, pomoz nainstalovat (macOS: Homebrew `brew install python node imagemagick git` – systémový `/usr/bin/python3`
+   od Applu je starý; hlásí-li `python3` pořád starší verzi, volej `python3.15`; Windows: winget / instalátory
    z python.org, nodejs.org, imagemagick.org). **winget na Windows vždy s plnými přepínači**, jinak spadne na otázce
    ke zdroji msstore („Error reading input in prompt“): `winget install --id <balík> --source winget
-   --accept-source-agreements --accept-package-agreements` (balíky `Python.Python.3.12` + `--scope user`,
-   `OpenJS.NodeJS.LTS`, `ImageMagick.ImageMagick`, `Git.Git`). Instalace systémových věcí nech uživatele potvrdit;
+   --accept-source-agreements --accept-package-agreements` (balíky `Python.PythonInstallManager` – správce instalací
+   Pythonu, pak `py install 3.15` –, `OpenJS.NodeJS.LTS`, `ImageMagick.ImageMagick`, `Git.Git`). Python 3.15 jako vlastní
+   balík winget zatím nemá. Instalace systémových věcí nech uživatele potvrdit;
    interaktivní příkazy mu dej s předponou `!`, ať je spustí sám.
    **Windows:** `python3` tam bývá jen nefunkční alias z Microsoft Store („Python nebyl nalezen“) – zkontroluj
-   `python --version` (případně `py -3 --version`) a ve všech příkazech tohoto skillu místo `python3 -I` používej
-   `python -I -X utf8` (funguje-li jen launcher, tak `py -3 -I -X utf8`). Zkontroluj **který** Python to je
+   `python --version` (musí být ≥ 3.15, jinak `py -V:3.15 --version`) a ve všech příkazech tohoto skillu místo `python3 -I`
+   používej `python -I -X utf8` (je-li `python` starší nebo nefunguje, tak `py -V:3.15 -I -X utf8`). Zkontroluj **který** Python to je
    (`which -a python`) – může být přibalený k jinému programu (Inkscape, GIMP…) a nemít certifikáty. Ověř https:
    `python -I -c "import urllib.request; urllib.request.urlopen('https://aron.vychodoceskearchivy.cz')"`. Když spadne
-   na `CERTIFICATE_VERIFY_FAILED`, nainstaluj běžný Python (winget výše) a volej ho plnou cestou
-   `"$LOCALAPPDATA/Programs/Python/Python312/python.exe"` (do PATH se dostane až po restartu Claude Code). `-I` ignoruje proměnnou `PYTHONUTF8`;
+   na `CERTIFICATE_VERIFY_FAILED`, nainstaluj Python správcem instalací (výše) a volej ho `py -V:3.15 -I -X utf8`
+   (`py` je v PATH až po restartu Claude Code). `-I` ignoruje proměnnou `PYTHONUTF8`;
    bez `-X utf8` je výstup do roury nebo souboru v kódování Windows (cp1250) – čeština se rozbije a některé nástroje
    spadnou na znacích jako „→“. ImageMagick: `winget install --id ImageMagick.ImageMagick --source winget --accept-source-agreements --accept-package-agreements`; do PATH se dostane až po
    restartu Claude Code (do té doby před příkazy `export PATH="/c/Program Files/ImageMagick-7…:$PATH"` s přesnou složkou

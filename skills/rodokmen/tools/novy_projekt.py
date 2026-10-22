@@ -14,6 +14,9 @@ Nástroje upravené v projektu se před přepsáním uloží do pracovni/zaloha_
 v .skill_nastroje.json); nástroje, které skill nemá (vlastní skripty projektu), zůstanou beze změny.
 """
 import filecmp, hashlib, json, os, shutil, sys, time
+if sys.version_info < (3, 15):
+    sys.exit(f"Rodokmen potřebuje Python 3.15 nebo novější, tohle je {sys.version.split()[0]}. "
+             "Nainstalujte novější (macOS: brew install python, Windows: py install 3.15) a spusťte nástroj znovu.")
 for _s in (sys.stdout, sys.stderr):   # UTF-8 výstup i na Windows bez -X utf8 (cp1250 neumí třeba „→“)
     if hasattr(_s, "reconfigure"):
         _s.reconfigure(encoding="utf-8", errors="replace")

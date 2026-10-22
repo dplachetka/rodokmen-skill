@@ -17,6 +17,10 @@ fakta z textu do f přepiš ručně (u žijících je raději vynech, viz kontro
 """
 import ast, json, os, re, shutil, sys
 
+if sys.version_info < (3, 15):   # skoro všechny nástroje skillu načítají tenhle soubor – starý Python se pozná hned
+    sys.exit(f"Rodokmen potřebuje Python 3.15 nebo novější, tohle je {sys.version.split()[0]}. "
+             "Nainstalujte novější (macOS: brew install python, Windows: py install 3.15) a spusťte nástroj znovu.")
+
 SEKCE = ("P", "LINES", "SIDE", "ISSUES", "HYPOTEZY", "SAME")
 POPIS = ("Předci podle Kekulého čísel (1 = výchozí osoba, otec osoby n = 2n, matka = 2n+1), rody LINES, boční "
          "příbuzní SIDE, otázky ISSUES, HYPOTEZY, SAME. Formát: reference/data.md ve skillu rodokmen.")
