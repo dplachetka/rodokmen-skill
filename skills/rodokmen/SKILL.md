@@ -164,22 +164,28 @@ Pravidla, která chrání kvalitu (naučená na skutečném projektu):
   s tlačítkem „stáhnout odpovědi“. Odpovědi pak zapracuj a zapiš do deníku.
 
 ### Pomocníci (subagenti) – šetrně
-Na velké kolo (např. „projdi 5 svazků a najdi všechny Nováky“) můžeš pustit 2–4 pomocníky paralelně.
-Každému dej přesné zadání (svazek, snímky, koho hledat, formát výsledku: klíč, snímek, souřadnice zápisu, přepis)
-a pravidla výše. Pomocník píše jen do `pracovni/pom_<větev>/`, **do `data/` nikdy**. Zapisuješ ty.
-Ať zmíní i zjevně související výskyty (viz krok 6 výše). Výstupy pomocníků v `pracovni/` nemaž, dokud nejsou vytěžené.
-**Jejich čtení vždy ověř sám na snímku** (`python3 -I tools/overit.py <snímek> x0,y0,x1,y1 pracovni/over`, souřadnice jako zlomky 0–1 šířky a výšky, ne pixely, rozdělí zápis
-na dvě čitelné poloviny), než ho zapíšeš jako `doc`. Uživateli to vysvětli správně: pomocníci nečtou hůř, je to stejný
-model. Jde o princip čtyř očí a pomocník nemá kontext (dvě rodiny stejného jména ve vsi, dva Janové na statku).
-Prohlížeč může mít najednou jen jeden pomocník, proto dávej přednost nástrojům bez prohlížeče.
-**Pomocníky spouštěj na levnějším modelu** (Agent s `model: "sonnet"`): hledání a první čtení zvládnou a stojí zlomek
-kreditů. Ověření na snímku a zápis do dat dělá hlavní model (ty). Uživateli to řekni, ať ví, proč kredity tolik neubývají.
-Osvědčilo se 3–4 pomocníci na různé větve a archivy současně, jedno kolo ≈ 15–25 nových předků.
-Pomocníci stojí hodně kreditů – před velkým kolem řekni uživateli, co plánuješ a proč, a nech si to schválit.
-Do zadání jim napiš technické pasti z `reference/matriky.md` (macOS: zsh; Windows: `python -I -X utf8`, `magick`).
-**V zadání chtěj u každého prošlého snímku, co na něm skutečně přečetl** (rok, první jméno), ne jen „prošel jsem
-sn. 20–40“ – pomocník jinak přehlédne, že se mu část snímků nenačetla. Na špatně čitelné knihy (kurent 1. poloviny
-19. století, vybledlé snímky) pomocníky nepouštěj, nebo jim dej přesný snímek; ARON a Porta fontium zvládají dobře.
+Na velké kolo (např. „projdi 5 svazků a najdi všechny Nováky“) můžeš pustit 2–4 pomocníky paralelně – před velkým kolem
+řekni uživateli, co plánuješ a proč, a nech si to schválit (stojí kredity). **Malé úkoly (rejstřík, ~10 snímků) dělej sám** –
+kontaktní list (`tools/nahledy.py`) zvládneš rychleji, než napíšeš zadání.
+- Projekt má vlastního pomocníka **`ctenar-matrik`** (`.claude/agents/ctenar-matrik.md`, kopíruje ho `novy_projekt.py`;
+  chybí-li, aktualizuj projekt): běží na **Sonnetu**, nečte `CLAUDE.md`, má strop 80 kroků, pracuje přes kontaktní listy,
+  plné rozlišení otevře jen u kandidáta a výsledek průběžně píše do `pracovni/pom_<větev>/vysledek.md` (prošlé snímky
+  s tím, co na nich přečetl, nálezy se souřadnicemi a přepisem, stopy). Spouštěj ho přes Agent se
+  `subagent_type: "ctenar-matrik"` a **parametr `model` nepředávej** – přebil by Sonnet. (Obecný pomocník, který otevřel
+  130 celých snímků na Opusu, spotřeboval desítky milionů tokenů; tentýž úkol přes kontaktní listy je zlomek.)
+- Nejlíp pracuje na **celém svazku staženém do `dokumenty/`** (`reference/portaly.md` → ARON, celé svazky) – navrhni
+  uživateli stáhnout ho dřív, než pomocníka pustíš. Stahovat po snímcích nástroji smí, jen když mu to v zadání dovolíš.
+- **Do zadání jen to, co je k úkolu:** složka se snímky, rozsah, koho a co hledat a vše, co o rodině víš (varianty jména,
+  čísla domů, data, rodiče, co už deník uvádí jako prošlé), název větve pro `pracovni/pom_<větev>/`, na Windows
+  `python -I -X utf8`. Postup, formát výsledku a technické pasti zná z definice.
+- Pomocník píše jen do `pracovni/pom_<větev>/`, **do `data/` nikdy**. Zapisuješ ty. Výstupy pomocníků v `pracovni/` nemaž,
+  dokud nejsou vytěžené.
+- **Jejich čtení vždy ověř sám na snímku** (`python3 -I tools/overit.py <snímek> x0,y0,x1,y1 pracovni/over`, souřadnice
+  jako zlomky 0–1) než ho zapíšeš jako `doc` – princip čtyř očí: pomocník nemá kontext (dvě rodiny stejného jména ve vsi,
+  dva Janové na statku). Uživateli to tak vysvětli; ověření a zápis do dat dělá hlavní model (ty).
+- Prohlížeč může mít najednou jen jeden pomocník – proto stažené svazky a nástroje bez prohlížeče.
+- Na špatně čitelné knihy (kurent 1. poloviny 19. století, vybledlé snímky) pomocníky nepouštěj, nebo jim dej přesný
+  snímek; ARON a Porta fontium zvládají dobře.
 
 ### Kdy přestat
 Linie končí, když matriky mlčí (nemanželské dítě bez otce, shořelé knihy, chybějící svazky) nebo když jsi
@@ -275,6 +281,7 @@ Nedělej to pořád. Postup:
 | `anno.py`, `anno_snap.py`, `kramerius.py` | noviny: ANNO (rakouské), Kramerius (české) |
 | `ged_import.py strom.ged "Jméno"` | předci z rodinného stromu (GEDCOM) + fronta zápisů |
 | `ftb_export.py strom.ftb out.ged ["Jméno" rok linie.md [Photos/]]` | záloha z MyHeritage (.ftb) → GEDCOM + přímá linie s původem údajů |
+| `nahledy.py <složka> <výstup> [--snimky A-B] [--oblast hlava\|levy\|scitani\|…]` | kontaktní listy: záhlaví, sloupce nebo čísla domů z mnoha snímků v jednom obrázku – orientace bez otvírání celých snímků |
 | `overit.py <snímek> x0,y0,x1,y1 <prefix>` | zápis na dvě čitelné poloviny – ověření čtení (souřadnice = zlomky 0–1) |
 | `napady.py` | náměty na zajímavosti z dat |
 | `vyrez.py <stránka.jpg> <klíč> x0,y0,x1,y1` | výřez do `zdroje/` a `vyrezy/` |

@@ -38,7 +38,8 @@ v archivu ani online ale ještě není. Zapiš do `archivni_dotazy.md`.
 4. **Bez indexu: listuj chronologicky.** Odhadni pozici podle let na prvních a posledních snímcích svazku (půlení intervalu).
    Rychlá orientace: **kontaktní list** – z každého snímku vyřízni záhlaví (rok, obec, číslo strany) nebo levý sloupec
    s datem a jménem a slož je do mřížky (`magick … +append`, řádky `-append`); na jeden pohled je vidět, kde je hledaný
-   rok nebo měsíc, a otevřeš jen ten snímek.
+   rok nebo měsíc, a otevřeš jen ten snímek. Hotový nástroj: `python3 -I tools/nahledy.py <složka> pracovni/listy
+   --snimky A-B [--oblast hlava|levy|scitani]` (u sčítání 1921 přední strany archů `--snimky 1-139/2`).
 5. **Přečti celý zápis**, pak se podívej i na okolí (dvojčata, další děti stejných rodičů).
 6. **Sňatek se obvykle konal ve farnosti nevěsty** (v jejím bydlišti) – hledej ho nejdřív tam, pak ve faře ženicha.
    Nedaří se? Ve křtu dítěte bývá (Praha ~1880–1890) připsané datum a místo sňatku rodičů – ověř ho v oddaných.
@@ -141,8 +142,8 @@ v archivu ani online ale ještě není. Zapiš do `archivni_dotazy.md`.
   nebo použij `vyrez.py` / `overit.py` (zlomky 0–1).
 - **Stažené složky z ARON:** název souboru obsahuje i kód fondu (např. `_00190_`), takže vzor `*_00190_*` chytí všechny
   snímky a `magick` vyrobí stovky výstupů. Vždy celý jedinečný prefix (`*<KÓD SVAZKU>_00NNN_*`).
-- **Pomocníci a cena:** u menších úkolů (rejstřík, ~10 snímků) čti sám, bez pomocníka. Do zadání: „nejdřív zvětši jen sloupec
-  jmen, celý zápis otevři až u kandidáta“ – šetří kredity; na celou knihu (desítky snímků) pomocník na Sonnetu stačí.
+- **Pomocníci a cena:** u menších úkolů (rejstřík, ~10 snímků) čti sám, bez pomocníka. Na celou knihu pomocník
+  `ctenar-matrik` (Sonnet, kontaktní listy, viz `SKILL.md`) – celé snímky jeden po druhém jsou nejdražší cesta.
   `-annotate` potřebuje písmo: `-font /System/Library/Fonts/Supplemental/Arial.ttf`.
 - Ověření čtení: `python3 -I tools/overit.py <snímek> x0,y0,x1,y1 pracovni/over [v]` (zlomky 0–1, ne pixely) – zápis rozdělený na dvě poloviny
   zmenšené na 1900 px (dvoustrana je jinak nečitelná).

@@ -12,7 +12,9 @@ Hlavní agent ti dá: složku se snímky, rozsah, koho a co hledat, co o rodině
 a složku pro výsledky `pracovni/pom_<větev>/`. Jiné úkoly nedělej.
 
 ## Pravidla
-- Piš jen do své složky `pracovni/pom_<větev>/` (založ ji). **Do `data/` ani jinam nikdy.** Nic nestahuj z internetu.
+- Piš jen do své složky `pracovni/pom_<větev>/` (založ ji). **Do `data/` ani jinam nikdy.** Prohlížeč nepoužívej.
+  Snímky stahuj jen nástroji skillu (`aron_img.py`, `trebon.py`, `portafontium.py`, `ebadatelna.py`…) do své složky,
+  a jen když to zadání dovolí – celý svazek stažený v `dokumenty/` je vždy lepší a levnější.
 - Pracuj z kořene projektu: `python3 -I tools/…` (na Windows `python -I -X utf8 tools/…` – řekne ti to zadání).
 - Shell je zsh: smyčky pouštěj přes `bash -c '…'`, cesty dávej do uvozovek a ve vzorech souborů používej celý jedinečný
   prefix svazku (`*<KÓD>_00NNN_*`) – kód fondu (`_00190_`) je v názvu každého souboru.
