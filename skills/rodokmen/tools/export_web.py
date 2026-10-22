@@ -198,17 +198,13 @@ def login_files(cfg):
     return bool(answer)
 
 
-def main():
+def build_site(cfg):
+    """Data webu (site.json) a texty z data/ – jen spočítá, nic nezapisuje. Používá export i jeden_soubor.py."""
     ns = load_people()
     P, LINES, SIDE, ISSUES = ns["P"], ns["LINES"], ns["SIDE"], ns["ISSUES"]
     if 1 not in P:
         sys.exit("V data/osoby.json chybí výchozí osoba (číslo 1).")
     SAME = ns["SAME"]                       # alias Kekulé → kanonické Kekulé (předek v rodokmenu vícekrát)
-    cfg = jload("web.json", {})
-    login = cfg.get("prihlaseni") or {}
-    if "--nasazeni" in sys.argv and not norm_answer(login.get("odpoved", "")) and not login.get("otevreny"):
-        sys.exit("CHYBA: v data/web.json není odpověď na přihlašovací otázku – web by byl otevřený komukoli.\n"
-                 "Nastavte prihlaseni.odpoved, nebo (jen když to opravdu chcete) prihlaseni.otevreny: true.")
     docs_cfg = jload("dokumenty.json", [])
     recs = {r["key"]: r for r in record_rows()}
 
@@ -355,14 +351,29 @@ def main():
                 docs=[dict(img=d["img"], caption=d["popis"], people=[slugs[k] for k in d.get("osoby", []) if k in slugs])
                       for d in docs_cfg if os.path.exists(os.path.join(VYREZY, d["img"] + ".jpg"))])
 
-    write(os.path.join(WEB, "src", "data", "site.json"), json.dumps(site, ensure_ascii=False, indent=1))
-    gen_dir = os.path.join(WEB, "src", "generated")
+    texts = {}   # markdown z data/ pro web (bez poznámek pro Clauda)
     for src, dst in (("archivni_dotazy.md", "dotazy.md"), ("research_log.md", "denik.md"), ("zajimavosti.md", "zajimavosti.md")):
         path = os.path.join(DATA, src)
         text = open(path, encoding="utf-8").read() if os.path.exists(path) else ""
-        write(os.path.join(gen_dir, dst), strip_comments(re.sub(r"^# .*\n", "", text, count=1)))
+        texts[dst] = strip_comments(re.sub(r"^# .*\n", "", text, count=1))
     story = os.path.join(DATA, "pribeh.md")
-    write(os.path.join(gen_dir, "pribeh.md"), strip_comments(open(story, encoding="utf-8").read()) if has_story else "---\ntitle: Příběh\nlead: ''\n---\n")
+    texts["pribeh.md"] = strip_comments(open(story, encoding="utf-8").read()) if has_story else "---\ntitle: Příběh\nlead: ''\n---\n"
+    return site, texts, dict(slugs=slugs, recs=recs, docs=docs_cfg, hl=hl)
+
+
+def main():
+    cfg = jload("web.json", {})
+    login = cfg.get("prihlaseni") or {}
+    if "--nasazeni" in sys.argv and not norm_answer(login.get("odpoved", "")) and not login.get("otevreny"):
+        sys.exit("CHYBA: v data/web.json není odpověď na přihlašovací otázku – web by byl otevřený komukoli.\n"
+                 "Nastavte prihlaseni.odpoved, nebo (jen když to opravdu chcete) prihlaseni.otevreny: true.")
+    site, texts, extra = build_site(cfg)
+    slugs, recs, docs_cfg, hl = extra["slugs"], extra["recs"], extra["docs"], extra["hl"]
+    people, families, records, lines, places, hypotheses = (site[k] for k in ("people", "families", "records", "lines", "places", "hypotheses"))
+    write(os.path.join(WEB, "src", "data", "site.json"), json.dumps(site, ensure_ascii=False, indent=1))
+    gen_dir = os.path.join(WEB, "src", "generated")
+    for name, text in texts.items():
+        write(os.path.join(gen_dir, name), text)
 
     hrefs = os.path.join(gen_dir, "fan_hrefs.json")
     json.dump({k: f"/osoba/{s}/" for k, s in slugs.items()}, open(hrefs, "w"))
