@@ -11,7 +11,7 @@ Použití:
 
 Popis svazků se ukládá do pracovni/.cache_aron/<apu_id>.json (ve složce projektu).
 """
-import glob, json, math, os, shutil, subprocess, sys, tempfile, time, urllib.request
+import glob, json, math, os, shutil, subprocess, sys, tempfile, time, urllib.error, urllib.request
 import concurrent.futures as cf
 import xml.etree.ElementTree as ET
 for _s in (sys.stdout, sys.stderr):   # UTF-8 výstup i na Windows bez -X utf8 (cp1250 neumí třeba „→“)
@@ -33,7 +33,31 @@ def magick():
     return m
 
 
+WEB = "https://aron.vychodoceskearchivy.cz/"
+_dostupny = False
+
+
+def dostupnost():
+    """Rychlý test (10 s), jestli ARON odpovídá – jinak by stahování viselo minuty (90 s × 4 pokusy)."""
+    global _dostupny
+    if _dostupny:
+        return
+    try:
+        urllib.request.urlopen(WEB, timeout=10).read(1)
+    except urllib.error.HTTPError as e:
+        if e.code < 500:          # server odpovídá (jen jiná stránka) – to stačí
+            _dostupny = True
+            return
+        sys.exit(f"ARON teď neodpovídá (chyba serveru {e.code}). Zkuste to za chvíli, nebo stáhněte svazek ručně "
+                 "v prohlížeči (reference/portaly.md → ARON, celé svazky).")
+    except OSError:
+        sys.exit("ARON teď neodpovídá (žádná odpověď do 10 s). Zkuste to za chvíli, nebo stáhněte svazek ručně "
+                 "v prohlížeči (reference/portaly.md → ARON, celé svazky).")
+    _dostupny = True
+
+
 def get(url, binary=False, tries=4):
+    dostupnost()
     for attempt in range(tries):
         try:
             with urllib.request.urlopen(url, timeout=90) as r:

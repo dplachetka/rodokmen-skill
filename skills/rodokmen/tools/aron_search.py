@@ -4,14 +4,38 @@ Použití: aron_search.py "<text v popisu, např. obec>" [filtr názvu fondu] [m
   Víc slov oddělených čárkou musí být v popisu všechna: "Vinice,Hořice" = Vinice ve farnosti Hořice
   (stejnojmenných obcí bývá víc – výsledky jsou proto seřazené podle farnosti / první obce v popisu).
 Vypíše: apu_id | signatura, druh a roky | popis (obce, které svazek pokrývá)."""
-import json, re, sys, urllib.request
+import json, re, sys, urllib.error, urllib.request
 for _s in (sys.stdout, sys.stderr):   # UTF-8 výstup i na Windows bez -X utf8 (cp1250 neumí třeba „→“)
     if hasattr(_s, "reconfigure"):
         _s.reconfigure(encoding="utf-8", errors="replace")
 
 API = "https://aron.vychodoceskearchivy.cz/api/aron"
 
+WEB = "https://aron.vychodoceskearchivy.cz/"
+_dostupny = False
+
+
+def dostupnost():
+    """Rychlý test (10 s), jestli ARON odpovídá – jinak by stahování viselo minuty (90 s × 4 pokusy)."""
+    global _dostupny
+    if _dostupny:
+        return
+    try:
+        urllib.request.urlopen(WEB, timeout=10).read(1)
+    except urllib.error.HTTPError as e:
+        if e.code < 500:          # server odpovídá (jen jiná stránka) – to stačí
+            _dostupny = True
+            return
+        sys.exit(f"ARON teď neodpovídá (chyba serveru {e.code}). Zkuste to za chvíli, nebo stáhněte svazek ručně "
+                 "v prohlížeči (reference/portaly.md → ARON, celé svazky).")
+    except OSError:
+        sys.exit("ARON teď neodpovídá (žádná odpověď do 10 s). Zkuste to za chvíli, nebo stáhněte svazek ručně "
+                 "v prohlížeči (reference/portaly.md → ARON, celé svazky).")
+    _dostupny = True
+
+
 def post(path, body):
+    dostupnost()
     req = urllib.request.Request(API + path, data=json.dumps(body).encode(),
                                  headers={"Content-Type": "application/json"})
     with urllib.request.urlopen(req, timeout=90) as r:
