@@ -26,6 +26,11 @@ Adresy u nevyzkoušených portálů ověř při prvním použití (portály se m
   Jen část stránky v plném rozlišení: `… <snímek> 0 pracovni/detail.jpg 0.0,0.4,1.0,0.7`.
 - **Odkaz na snímek** (pole `odkaz` v `zaznamy.json`): `python3 -I tools/aron_img.py <apu_id> link <snímek>`.
 - **Svazek do dat:** `python3 -I tools/aron_img.py <apu_id> svazek` (klíč = prvních 8 znaků apu_id → pole `svazek` v zápisu).
+- **Celé svazky ručně** (když ARON vypadává, nebo se bude číst hodně snímků): uživatel stáhne svazek tlačítkem v prohlížeči
+  → složka `CZ_<archiv>_<fond>_<kód>_sign-<signatura>/` se soubory `…_00001_…jpg` = snímek 1 (u sčítání lidu `…_00010_…`
+  = snímek 1, tedy číslo souboru / 10). Ať ji uloží do `dokumenty/` (`.gitignore` ji vynechá) a čti z disku – spolehlivější
+  a rychlejší než stahování po snímcích; `vyrez.py` bere soubor přímo. Odkaz (`link`) a `svazek` doplň, až ARON odpovídá.
+  Co má uživatel stáhnout, veď v `data/STAV.md` jako seznam „Ke stažení“ s odkazy na svazky.
 - V ARON jsou i další fondy (sčítání lidu, některé gruntovní knihy, kroniky) – `aron_search.py "Obec" "název fondu"`.
 - Stejnojmenných obcí bývá víc (Vinice u Hořic × Vinice u Velké Jesenice). Výsledky jsou seřazené podle farnosti;
   zúžit jde víc slovy oddělenými čárkou, která musí být v popisu všechna: `aron_search.py "Vinice,Hořice"`
@@ -84,6 +89,12 @@ Adresy u nevyzkoušených portálů ověř při prvním použití (portály se m
   `magick x.jpg -colorspace Gray -contrast-stretch 2%x30% x_k.jpg` (výřez pak dělej z kontrastní verze a poznamenej to v přepisu).
 - Portál dává vždy celý snímek (nedlaždicuje); náhled a výřez dělá nástroj po stažení přes ImageMagick (`magick`).
   Denní údržba kolem 4:44 (asi 2 minuty).
+- **Celé svazky stáhnout nejde** (na rozdíl od ARONu) – jen `snimek` po jednom: nejdřív `nahled` na odhad roku, plné
+  rozlišení jen u čtených snímků.
+- Velmi vybledlé snímky (některé fary): pomohlo `magick x.jpg -colorspace Gray -level 45%,85% x_k.jpg` – barevné `-level`
+  dává zelenooranžové barvy, proto do šedi.
+- **Sčítání lidu** jsou v sekci Archiválie (typ „Sčítací operáty“), ne u matrik, a jen pro část okresů. Formulář hledání je
+  Wicket: hodnoty nastavené JavaScriptem se neuloží – vyplň je přes formulářové pole a klikni na „Hledat“. Pak `a-info` / `a-snimek` s id.
 
 ## AHMP Praha – `tools/ahmp_search.sh`, `tools/ahmp_scan.py`
 - `bash tools/ahmp_search.sh "Smíchov"` → svazky Sbírky matrik: popis | farnost | (XID, id, počet snímků).
@@ -99,6 +110,21 @@ Adresy u nevyzkoušených portálů ověř při prvním použití (portály se m
   Obrázkový server neomezuje a cookies nepotřebuje.
 - **POZOR: po zhruba 100 rychlých požadavcích na stránky aplikace (prohlížení snímků, detail výsledku) archiv zablokuje
   přístup na 30 minut.** V prohlížeči proto jen najdi knihu a cestu k obrázkům, pak už jen nástroj. Pomocníkům to napiš do zadání.
+- **Seznam matrik obce a období:** do hledání obec, typ „Matriky“, ve „Specifickém filtru“ Datum od–do, počet na stránku 99.
+  Záznam bez „digi. sada“ není digitalizovaný.
+- **Část knih má obrázky jinde** (`…/CZ-214000010/NAD-<číslo>/dao/images/…` místo `…/matriky/…`) – pak dej nástroji
+  **celou adresu** obrázku. Adresu snímku vrátí i dotaz `fetch('/digitalnibadatelna/showZoomifySeparate?imageNumberSeparate=<n>&myEntityUuid=<id záznamu>')`
+  (id záznamu je v odkazu `vysledekDetail/<id>` v seznamu výsledků); rok najdi půlením (2–3 snímky), pak čti jen potřebný úsek.
+- **Kroniky** (ne matriky) jsou pod `…/ximage/kroniky/zoomify/…/CZ-<kód SOkA>/kroniky/dao/images/…`; naskenovaná je jen
+  menšina (v seznamu výsledků je poznáš podle odkazu na obrázky).
+- **Sčítací operáty** jsou pod `…/ximage/operaty/…`. Tempo 1 dotaz za 6–10 s blokaci nevyvolalo (stovky dotazů za 2 h).
+  Názvy snímků jsou časová UUID a sousední snímky mívají první hex pole o 2 vyšší – sondou na `…/TileGroup0/0-0-0.jpg`
+  (načtením obrázku v prohlížeči, ne `fetch` – CORS) se dají najít bez dotazu na aplikaci. Dlouhé smyčky pouštěj
+  v prohlížeči na pozadí; ve skrytém panelu `setTimeout` zpomalí – čekání přes Web Worker.
+- **Adresáře ke stažení** (seznam na images.soalitomerice.cz/vademecum-proarchiv-resources/html/cs/seznam.html): okresní
+  adresáře 1900–1940 jako ZIP (stovky MB) – dobré pro pohraničí, kde matriky po 1920 nejsou online. Většina je jen
+  živnostenská; **seznam všech majitelů domů po obcích** mají jen „Adressbuch für den politischen Bezirk …“ – podívej se
+  na název, než stáhneš stovky MB.
 
 ## ZA Opava (severní Morava, Slezsko, Olomoucko, Litovelsko) – `tools/soal_zoomify.py`
 - Pozor na hranici: obce na Litovelsku a Olomoucku patří pod **ZA Opava**, ne pod MZA Brno.
@@ -168,11 +194,30 @@ A když osoba „chybí“ v očekávaných matrikách (stěhovala se se službo
   – jména **německy** („Johann Nowak“, „Wenzel Dworschak“). Výřez místa: `tools/anno_snap.py <docId> "<dotaz>" pracovni/x.jpg`.
   ALEX a annoshow jsou za Cloudflare – neobcházet.
 - Kramerius NK ČR (české noviny, ročenky, adresáře): `python3 -I tools/kramerius.py 'text_ocr:"Jan Novák" AND datum_begin:[1900 TO 1910]'`.
+  - **Veřejné stránky – celý text:** `https://kramerius5.nkp.cz/search/api/v5.0/item/<uuid stránky>/streams/TEXT_OCR`
+    (ztrátové seznamy z 1. světové války v novinách, Chytilův adresář 1914 – fara, pošta, živnostníci v obci).
+  - **Chráněné stránky (DNNT/private):** text nejde stáhnout (403), ale hledání funguje: `PID:"<uuid stránky>" AND
+    text_ocr:"Příjmení Jméno slovo"~s` vrátí 0/1 – pro s = 0…4 zjistíš, jestli a jak blízko jména je dané slovo (místo,
+    útvar), fráze „jméno + nalezené slovo“ pak vrátí v úryvku pár sousedních slov. V seznamech (ročenky, schematismy)
+    patří slovo těsně *před* jménem obvykle předchozí osobě. Úryvky jsou u chráněných stránek oříznuté na pár slov.
+  - **Regionální Kramerie** mají regionální noviny, místní dějiny a adresáře, které národní Kramerius nemá (seznamy
+    vlastníků domů, spolky): Liberecký kraj kvkli.cz (API v5 jako NK, text `/item/<uuid>/streams/TEXT_OCR` u veřejných),
+    Královéhradecký svkhk.cz (API v7: `/search/api/client/v7.0/search`, filtr na stránku `fq=pid:"…"`, zvýraznění až
+    ~300 znaků kolem slova i u chráněných), další krajské knihovny a MZK. `kramerius.py` zatím umí jen NK.
 - Vojenské schematismy: fulltext na archive.org (např. `militrschematis13kriegoog` = 1850).
 - **Rizika:** jména se opakují a fulltext šumí („Winter“ = i zima, „Novák“ = nový obyvatel). Ztotožni jen při shodě víc údajů (bydliště,
   funkce navazující na matriku, časová posloupnost). Zdroj je „J“ (jiný pramen) – vodítko a příběh, ne náhrada matriky.
 - Výstřižky jsou skvělé na web: ulož do `dokumenty/noviny/`, přes `vyrez.py` a do `dokumenty.json`.
 - Pořadí: nejdřív matriky; noviny, když chybí stopa kvůli stěhování, nebo když jde o úředníka/vojáka a chceme příběh.
+
+## Vojáci a legionáři
+- **Vojáci z povolání 1918–1950:** sňatky a narození dětí bývají jen ve **vojenských matrikách** (VÚA–VHA Praha, na žádost);
+  v civilních a farních knihách místa bydliště pak chybí. Online (vuapraha.cz/vojenske-matriky, kramerius.army.cz) jsou
+  jen vojenské matriky zemřelých z 1. světové války.
+- **Legionáři – databáze ČsOL** (`csol.cz/legionar/<id>/`): jedna osoba mívá dva záznamy s různým id (jiný den narození);
+  druhý bývá úplnější – povolání, **místní jednota ČsOL = kde legionář po válce žil**, fotky (`/wp-content/legionari-obrazky/<id>/…jpg`,
+  na legitimaci razítko jednoty). Vyhledávání `?q=` přes stažení stránky nefunguje; sousední id jsou abecedně sousední jména.
+  Jednota může rozhodnout mezi dvěma kandidáty stejného jména.
 
 ## Ostatní portály – obecný postup
 Nástroje pro ně hotové nejsou. Postupuj takto a výsledek zapiš do `STAV.md`, ať to příště víš:
