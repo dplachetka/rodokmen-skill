@@ -97,6 +97,21 @@ Cíl: znát co nejvíc o 3–4 generacích nazpět, než sáhneš do matrik.
   bývají to nejcennější rodinné doklady.
 - Strom, který si rodina vede sama, má stav `fam`. Cizí stromy z internetu (stromy jiných lidí na MyHeritage, Geni,
   FamilySearch) jsou **jen vodítko**, stav `mh`, nikdy `doc`.
+- **Rodinné „pocházíme z X“** se často týká 20. století (příbuzní, za kterými se jezdilo), ne předků. Než začneš hledat ve
+  staré matrice X, zeptej se: kdo tam jezdil, kdy, za kým, mluvilo se česky, nebo německy?
+
+### Převzetí dřívějšího výzkumu (jiný chat, jiný program, genealog)
+Uživatel už něco dohledal mimo skill? Převezmi **všechno**, ale nic jako `doc`, dokud to sám nepřečteš na snímku:
+1. Ať podklady dá do `dokumenty/predchozi_vyzkum/`: export (zápisy s archivem, svazkem, číslem snímku a odkazem, osoby,
+   neúspěšná hledání, rozpory), soubor stromu (GEDCOM / `.ftb` – načti jako výše), obrázky rozrodu, poznámky. Z jiného
+   chatu ať si nechá napsat úplný export do jednoho souboru (bez vymýšlení čísel svazků a snímků, které nebyly).
+2. Stavy: zápis s přesným svazkem a snímkem → `prob` s poznámkou „převzato, ověřit na snímku“ (po přečtení a výřezu
+   `doc`); údaj čtený dřív bez čísla snímku (ze screenshotu) → `prob` „ověřit“; rodinný strom → `fam`; cizí stromy → `mh`;
+   dohady → `prob` s důvodem. Rozpory → `ISSUES`, sourozenci a lidé kolem rodiny → `SIDE` (s `v`).
+3. Svazky do `data/svazky.json` (ARON: `aron_img.py <apu> svazek`, jinak ručně archiv, svazek, odkaz), dřívější hledání do
+   `research_log.md` jako řádky „převzato z dřívějšího výzkumu“ i s rozsahem – i neúspěšná, ať se neopakují.
+4. Do `data/STAV.md` → „Rozpracováno“ jako první bod: ověřit převzaté zápisy na snímcích (od nejmladších, s přesným
+   snímkem je to rychlé). Podklady v `dokumenty/predchozi_vyzkum/` nemaž.
 
 ## Fáze 2 – Matriky, generace po generaci
 Podrobný postup čtení: `reference/matriky.md`. Portály archivů: `reference/portaly.md`. Metodika: `reference/playbook.md` (EN).
