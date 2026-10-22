@@ -15,7 +15,7 @@ for _s in (sys.stdout, sys.stderr):   # UTF-8 výstup i na Windows bez -X utf8 (
 
 TOOLS = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, TOOLS)   # python3 -I složku skriptu do sys.path nepřidá
-from nacti_osoby import nacti_osoby
+from nacti_osoby import NEPRIBUZNI, nacti_osoby
 ROOT = os.path.dirname(TOOLS)
 DATA = os.path.join(ROOT, "data")
 WEB = os.path.join(ROOT, "web")
@@ -26,10 +26,7 @@ LINE_COLORS = {8: "#EFB45F", 9: "#F09A78", 10: "#E58AA6", 11: "#B99AE0",
                12: "#86B8E8", 13: "#6FCBB9", 14: "#9CD17A", 15: "#D3D46A"}
 STATUS = {"doc": "doloženo matrikou", "prob": "pravděpodobné", "fam": "údaj od rodiny",
           "mh": "jen z cizího rodokmenu", "unk": "neznámé"}
-SIDE_KIND = {"bratr": "sib", "sestra": "sib", "manžel": "spouse", "manželka": "spouse", "syn": "child", "dcera": "child"}
-# role lidí, kteří nejsou příbuzní (učeň v domě, kmotr, svědek…) – na webu „Lidé kolem rodiny“, ne mezi dětmi
-NEPRIBUZNI = ("učeň", "tovaryš", "čeledín", "čeledínka", "služebná", "služka", "děvečka", "podruh", "podruhyně",
-              "nájemník", "nájemnice", "soused", "sousedka", "kmotr", "kmotra", "svědek", "svědkyně", "poručník", "pěstoun")
+SIDE_KIND = {"bratr": "sib", "sestra": "sib", "sourozenci": "sib", "bratři": "sib", "sestry": "sib", "manžel": "spouse", "manželka": "spouse", "syn": "child", "dcera": "child"}
 
 
 def side_kind(v):

@@ -11,7 +11,8 @@ a přijmou se jen přiřazení hodnot.
 
 Boční příbuzní ve starém tvaru (roky ve jméně, vztah jen v textu):
   python3 -I tools/nacti_osoby.py sourozenci [--nanecisto]
-„Josef Plachetka (* 1931)“ → n „Josef Plachetka“, y „* 1931“; text „Bratr Zdeňka, …“ → v „bratr“. Nic jiného nemění,
+„Josef Plachetka (* 1931)“ → n „Josef Plachetka“, y „* 1931“; text „Bratr Zdeňka, …“ → v „bratr“, „Učeň …“ → v „učeň“,
+text s „Nepříbuzný“ → v „nepříbuzný“. Text zůstává celý, nic jiného se nemění,
 fakta z textu do f přepiš ručně (u žijících je raději vynech, viz kontrola.py). --nanecisto jen vypíše, co by změnil.
 """
 import ast, json, os, re, shutil, sys
@@ -139,7 +140,11 @@ def prevod(root):
     return True
 
 
-VZTAHY = ("bratr", "sestra", "manžel", "manželka", "syn", "dcera")
+VZTAHY = ("bratr", "sestra", "sourozenci", "bratři", "sestry", "manžel", "manželka", "syn", "dcera", "strýc", "teta",
+          "bratranec", "sestřenice", "švagr", "švagrová", "synovec", "neteř")
+# role lidí, kteří nejsou příbuzní (na webu „Lidé kolem rodiny“, ne mezi dětmi); používá i export_web.py
+NEPRIBUZNI = ("učeň", "tovaryš", "čeledín", "čeledínka", "služebná", "služka", "děvečka", "podruh", "podruhyně",
+              "nájemník", "nájemnice", "soused", "sousedka", "kmotr", "kmotra", "svědek", "svědkyně", "poručník", "pěstoun")
 
 
 def roky_ve_jmene(name):
@@ -162,9 +167,13 @@ def sourozenci(data_dir, ulozit=True):
         m = roky_ve_jmene(s.get("n", ""))
         if m and not s.get("y"):
             s["n"], s["y"] = m
-        w = re.match(r"\s*(\w+)", s.get("t", ""))
-        if not s.get("v") and w and w.group(1).lower() in VZTAHY:
-            s["v"] = w.group(1).lower()
+        # vztah z prvního slova textu (nebo jména u „Sourozenci Jana …“); kmotr a svědek ne – bývají i příbuzní
+        role = [w.group(1).lower() for w in (re.match(r"\s*(\w+)", s.get(f, "")) for f in ("t", "n")) if w]
+        role = next((r for r in role if r in VZTAHY or (r in NEPRIBUZNI and not r.startswith(("kmotr", "svěd")))), None)
+        if not s.get("v") and role:
+            s["v"] = role
+        elif not s.get("v") and re.search(r"\bnepříbuzn", s.get("t", ""), re.I):
+            s["v"] = "nepříbuzný"
         if s != old:
             order = ["k", "n", "v", "y"]     # nová pole hned za jméno, ať jde řádek dobře číst
             s_new = {k: s[k] for k in order if k in s} | {k: v for k, v in s.items() if k not in order}

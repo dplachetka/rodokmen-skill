@@ -107,6 +107,10 @@ def main():
         if not s.get("y") and roky_ve_jmene(s.get("n", "")):
             warn.append(f"boční příbuzný '{s.get('n')}': roky jsou ve jméně – přesuň je do 'y' "
                         f"(python3 -I tools/nacti_osoby.py sourozenci)")
+    bez_vztahu = [s.get("n", "?") for s in SIDE if not s.get("v")]
+    if bez_vztahu:
+        warn.append(f"{len(bez_vztahu)} bočních záznamů nemá vztah 'v' (např. {', '.join(bez_vztahu[:3])}) – na webu jsou ve skupině "
+                    f"„Vztah zatím neuveden“; doplň v (bratr, sestra, manželka, strýc…, nebo u nepříbuzných učeň, kmotr, soused…)")
     for a, c in SAME.items():
         if c not in P:
             err.append(f"SAME: {a} -> {c}, ale osoba {c} neexistuje")
