@@ -32,7 +32,8 @@ Najdeš v ní `tools/` (nástroje), `template/` (šablona projektu a webu) a `re
    (data zůstanou, změněné soubory webu se zazálohují do `pracovni/`), pak ve `web/` `npm install`. Po souhlasu ji udělej
    a podle výpisu převezmi ze záloh v `pracovni/` úpravy vzhledu i nástrojů upravených v projektu (viz `reference/web.md`). Odmítne-li, připomeň to až příště.
    Má projekt ještě starý `data/osoby.py` místo `data/osoby.json`? Aktualizace ho převede (bez ní nástroje nepoběží) –
-   pak v `data/STAV.md` oprav název souboru a ulož do gitu.
+   pak v `data/STAV.md` oprav název souboru a ulož do gitu. Hlásí-li pak `kontrola.py` „roky jsou ve jméně“, převeď boční
+   příbuzné: `python3 -I tools/nacti_osoby.py sourozenci`, fakta z jejich textů přepiš do `f` a ulož do gitu.
 2. Projekt ještě není → **Fáze 0**.
 
 ## Fáze 0 – Příprava (jednou)
@@ -118,7 +119,8 @@ Základní smyčka pro každou osobu:
    3. výřez: `python3 -I tools/vyrez.py pracovni/<stránka>.jpg <klíč> x0,y0,x1,y1` (velkoryse – celý zápis s hlavičkou sloupců a okrajovými poznámkami),
    4. rámeček čteného místa: `python3 -I tools/ramecek.py <klíč> x0,y0,x1,y1` a **prohlédni si** `pracovni/ramecek_<klíč>.jpg`,
    5. přepis originálu a český překlad do `data/prepisy.json` (nejistá místa „(?)“, nečitelná „[…]“),
-   6. osobu/osoby do `data/osoby.json` (`f` fakta, `r` klíč zápisu, `"st": "doc"`), sourozence a kmotry-příbuzné do `SIDE`.
+   6. osobu/osoby do `data/osoby.json` (`f` fakta, `r` klíč zápisu, `"st": "doc"`), sourozence a kmotry-příbuzné do `SIDE`
+      se stejnými poli (`y`, `st`, `f`, `r`) a vztahem `v`; když už máš všechny sourozence předka, dej mu `"sour": "hotovo"`.
 6. **Zapiš hledání do deníku** `data/research_log.md` – i neúspěšné, s rozsahem (které roky / snímky jsi prošel).
    Narazíš-li po cestě na **zjevně související výskyt** (vzácné příjmení rodu, stejný dům, jméno z rodinného
    vyprávění), zapiš ho do výsledku v deníku se snímkem – je to jen stopa, ne doklad. Když se hledání zasekne,
@@ -256,4 +258,4 @@ Nedělej to pořád. Postup:
 | `kontrola.py` | kontrola dat; hlásí i citlivé údaje na webu a kdy psát příběh |
 | `export_web.py` | data → web (volá ho `npm run data`) |
 | `fan_chart.py vystupy/` | vějíř předků jako plakát k tisku |
-| `nacti_osoby.py prevod` | starý `data/osoby.py` → `data/osoby.json` (jinak jen knihovna pro ostatní nástroje) |
+| `nacti_osoby.py prevod` / `sourozenci [--nanecisto]` | starý `data/osoby.py` → `data/osoby.json`; boční příbuzní ze starého tvaru (roky ve jméně) na nový |

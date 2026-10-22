@@ -1,8 +1,11 @@
 # Soukromí, etika a cizí služby
 
 ## Žijící lidé
-- Na webu jen jméno a rok narození (`note="Žijící – údaje jen základní."`). Žádné adresy, telefony, rodná čísla,
+- Na webu jen jméno a rok narození (`"note": "Žijící – údaje jen základní."`). Žádné adresy, telefony, rodná čísla,
   zdravotní údaje, rozvody, nemanželské děti u žijících či nedávno zemřelých bez souhlasu rodiny.
+- Platí i pro boční příbuzné (sourozence předků z 20. století). `kontrola.py` hlásí `ŽIJÍCÍ?` u každého, kdo se narodil
+  před méně než 100 lety, nemá zapsané úmrtí a v jeho textu nebo faktech je přesné datum či číslo domu. Zeptej se
+  uživatele: zemřel-li, doplň † (do `y` nebo faktů); žije-li, nech jen jméno a rok narození.
 - Citlivé věci z nedávné minulosti (sebevraždy, věznění, nemoci) – zeptej se uživatele, jestli a jak je zmínit.
 - Matriční údaje starší než lhůty jsou veřejné, ale ohleduplnost platí i pro ně (zbytečně nezesměšňovat).
 

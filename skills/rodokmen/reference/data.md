@@ -28,7 +28,7 @@ Soubor má sekce `P`, `LINES`, `SIDE`, `ISSUES`, `HYPOTEZY`, `SAME` a jeden řá
   "8": ["Novákové", "Kováři z Holic…"]
  },
  "SIDE": [
-  {"k": 16, "n": "Josef Novák", "v": "bratr", "y": "1865–1920", "t": "Bratr Jana. Kovář v …", "r": ["klic_zapisu"]}
+  {"k": 16, "n": "Josef Novák", "v": "bratr", "y": "1865–1920", "st": "doc", "f": ["* 3. 2. 1865 Holice čp. 112", "kovář", "† 1920 Holice"], "t": "Převzal kovárnu po otci.", "r": ["klic_zapisu"]}
  ],
  "ISSUES": [
   ["Kdy se narodil Jan Novák?", "Otevřené: rodina říká 1850, v Holicích 1848–1852 nenalezen."]
@@ -52,9 +52,15 @@ Soubor má sekce `P`, `LINES`, `SIDE`, `ISSUES`, `HYPOTEZY`, `SAME` a jeden řá
 - `sour` (volitelné) stav hledání sourozenců předka: `"hotovo"` = všichni dohledáni, `"částečně"`; chybí = zatím nehledáno –
   stromový graf (`/strom/`) u ostatních ukazuje „sourozenci nehledáni“ jako připomínku, co dohledat.
 - `LINES` – jen čísla 8–15: `[název rodu, jedna věta o rodu]`; název rodu = příjmení v množném čísle.
-- `SIDE` – sourozenci a další příbuzní: `k` = číslo předka, ke kterému patří, `n` jméno (bez let), `t` text, `r` klíče zápisů;
-  volitelně `v` vztah k předkovi (`bratr`, `sestra`, `manžel`, `manželka`, `syn`, `dcera`, jinak volně, např. `učeň`)
-  a `y` roky jako u předků (`"* 1931"`, `"1893–1960"`). Stromový graf podle nich kreslí kartičky příbuzných vedle předka.
+- `SIDE` – sourozenci a další příbuzní: `k` = číslo předka, ke kterému patří, `n` jméno (bez let), `r` klíče zápisů a
+  stejná pole jako u předků: `y` roky (`"* 1931"`, `"1893–1960"`), `st` stav doložení, `f` fakta (`*` `×` `†` s datem
+  a místem, povolání), `t` volný text. Dále `v` vztah k předkovi (`bratr`, `sestra`, `manžel`, `manželka`, `syn`,
+  `dcera`, jinak volně, např. `učeň`, `kmotr`). Všechno kromě `k` a `n` je volitelné. Web ukazuje kartu s roky, vztahem,
+  stavem, fakty a zápisy; stromový graf kreslí příbuzné vedle předka. Údaje ze zápisu patří do `f`, ne do textu.
+  Žijící (narození před méně než 100 lety, žádné †): jen jméno a rok narození – `kontrola.py` hlásí `ŽIJÍCÍ?`.
+- Starší tvar (roky ve jméně „Josef Novák (1865–1920)“, vztah jen v textu) převede
+  `python3 -I tools/nacti_osoby.py sourozenci` (`--nanecisto` jen ukáže změny): roky do `y`, „Bratr …“ do `v`, nic jiného.
+  Fakta z textu pak přepiš do `f` ručně.
 - `ISSUES` – dvojice `[otázka, odpověď]`, odpověď začíná „Vyřešeno: …“ (na webu se skryje), „Hypotéza: …“ nebo
   „Otevřené: …“ → stránka „Co hledáme“. Jde na web – nepiš sem citlivé věci (příčiny úmrtí, rodinné spory) bez souhlasu.
 - `HYPOTEZY` – hypotézy o původu rodu nad rámec doložené linie → stránka rodu (`rod` = číslo 8–15).
