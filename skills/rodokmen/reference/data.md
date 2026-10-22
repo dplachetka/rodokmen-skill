@@ -52,14 +52,23 @@ Soubor má sekce `P`, `LINES`, `SIDE`, `ISSUES`, `HYPOTEZY`, `SAME` a jeden řá
 - `sour` (volitelné) stav hledání sourozenců předka: `"hotovo"` = všichni dohledáni, `"částečně"`; chybí = zatím nehledáno –
   stromový graf (`/strom/`) u ostatních ukazuje „sourozenci nehledáni“ jako připomínku, co dohledat.
 - `LINES` – jen čísla 8–15: `[název rodu, jedna věta o rodu]`; název rodu = příjmení v množném čísle.
-- `SIDE` – sourozenci a další příbuzní: `k` = číslo předka, ke kterému patří, `n` jméno (bez let), `r` klíče zápisů a
-  stejná pole jako u předků: `y` roky (`"* 1931"`, `"1893–1960"`), `st` stav doložení, `f` fakta (`*` `×` `†` s datem
-  a místem, povolání), `t` volný text. Dále `v` vztah k předkovi (`bratr`, `sestra`, `manžel`, `manželka`, `syn`,
-  `dcera`, jinak volně, např. `učeň`, `kmotr`). Všechno kromě `k` a `n` je volitelné. Web ukazuje kartu s roky, vztahem,
-  stavem, fakty a zápisy; stromový graf kreslí příbuzné vedle předka. Údaje ze zápisu patří do `f`, ne do textu.
+- `SIDE` – sourozenci, další příbuzní i nepříbuzní lidé kolem rodiny: `k` = číslo předka, ke kterému patří, `n` jméno
+  (bez let), `r` klíče zápisů a stejná pole jako u předků: `y` roky (`"* 1931"`, `"1893–1960"`), `st` stav doložení,
+  `f` fakta (`*` `×` `†` s datem a místem, povolání), `t` volný text. Všechno kromě `k` a `n` je volitelné.
+- `v` vztah k předkovi rozhoduje, kde je člověk na webu (stránka rodiny, osoby i strom):
+  | `v` | skupina na webu |
+  |---|---|
+  | `bratr`, `sestra` (u záznamu za víc lidí `sourozenci`, `bratři`, `sestry`) | Sourozenci (na stránce rodiny pod „Děti“) |
+  | `manžel`, `manželka`, `syn`, `dcera`, `strýc`, `bratranec`… (cokoli jiného) | Další příbuzní |
+  | `učeň`, `tovaryš`, `čeledín`, `služebná`, `podruh`, `nájemník`, `soused`, `kmotr`, `svědek`… nebo `nepříbuzný` | Lidé kolem rodiny |
+  | chybí | Vztah zatím neuveden (`kontrola.py` to hlásí) |
+  Kmotr nebo svědek může být i příbuzný – pak patří vztah (`strýc`), role do textu. Web ukazuje kartu s roky,
+  vztahem, stavem, fakty a zápisy; stromový graf kreslí lidi vedle předka. Údaje ze zápisu patří do `f`, ne do textu.
   Žijící (narození před méně než 100 lety, žádné †): jen jméno a rok narození – `kontrola.py` hlásí `ŽIJÍCÍ?`.
 - Starší tvar (roky ve jméně „Josef Novák (1865–1920)“, vztah jen v textu) převede
-  `python3 -I tools/nacti_osoby.py sourozenci` (`--nanecisto` jen ukáže změny): roky do `y`, „Bratr …“ do `v`, nic jiného.
+  `python3 -I tools/nacti_osoby.py sourozenci` (`--nanecisto` jen ukáže změny): roky do `y`, vztah z prvního slova
+  textu do `v` („Bratr …“, „Učeň …“, „Sourozenci Jana …“; text s „Nepříbuzný“ → `nepříbuzný`), text zůstává celý.
+  Kmotra a svědka nedoplní – rozhodni s uživatelem.
   Fakta z textu pak přepiš do `f` ručně.
 - `ISSUES` – dvojice `[otázka, odpověď]`, odpověď začíná „Vyřešeno: …“ (na webu se skryje), „Hypotéza: …“ nebo
   „Otevřené: …“ → stránka „Co hledáme“. Jde na web – nepiš sem citlivé věci (příčiny úmrtí, rodinné spory) bez souhlasu.

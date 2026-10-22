@@ -120,7 +120,8 @@ Základní smyčka pro každou osobu:
    4. rámeček čteného místa: `python3 -I tools/ramecek.py <klíč> x0,y0,x1,y1` a **prohlédni si** `pracovni/ramecek_<klíč>.jpg`,
    5. přepis originálu a český překlad do `data/prepisy.json` (nejistá místa „(?)“, nečitelná „[…]“),
    6. osobu/osoby do `data/osoby.json` (`f` fakta, `r` klíč zápisu, `"st": "doc"`), sourozence a kmotry-příbuzné do `SIDE`
-      se stejnými poli (`y`, `st`, `f`, `r`) a vztahem `v`; když už máš všechny sourozence předka, dej mu `"sour": "hotovo"`.
+      se stejnými poli (`y`, `st`, `f`, `r`) a vztahem `v` – i nepříbuzné z domácnosti (`učeň`, `čeledín`, `nepříbuzný`),
+      jinak by na webu nevěděl, kam je zařadit; když už máš všechny sourozence předka, dej mu `"sour": "hotovo"`.
 6. **Zapiš hledání do deníku** `data/research_log.md` – i neúspěšné, s rozsahem (které roky / snímky jsi prošel).
    Narazíš-li po cestě na **zjevně související výskyt** (vzácné příjmení rodu, stejný dům, jméno z rodinného
    vyprávění), zapiš ho do výsledku v deníku se snímkem – je to jen stopa, ne doklad. Když se hledání zasekne,
