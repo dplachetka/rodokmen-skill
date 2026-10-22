@@ -1,5 +1,7 @@
 # pracovní soubory a stažené stránky (nejdou na web ani do historie)
 pracovni/
+# celé svazky stažené z archivů (složky CZ_… v dokumenty/) – stovky MB, zůstávají jen na disku, do gitu jdou výřezy
+dokumenty/CZ_*/
 # vytvořené výstupy (vějíř k tisku, rodokmen v jednom souboru – velké, dají se kdykoli vytvořit znovu)
 vystupy/
 __pycache__/

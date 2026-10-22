@@ -55,6 +55,20 @@ def copy_tree(src, dst, backup=None):
     return changed
 
 
+def doplnit_gitignore(dst):
+    """Do .gitignore staršího projektu doplní vzory, které má nová šablona a projekt ne (vlastní řádky nechá)."""
+    path = os.path.join(dst, ".gitignore")
+    if not os.path.exists(path):
+        return []
+    mine = {l.strip() for l in open(path, encoding="utf-8").read().splitlines()}
+    new = [l.strip() for l in open(os.path.join(SKILL, "template", ".gitignore"), encoding="utf-8").read().splitlines()
+           if l.strip() and not l.startswith("#") and l.strip() not in mine]
+    if new:
+        with open(path, "a", encoding="utf-8") as f:
+            f.write("\n# doplněno při aktualizaci skillu\n" + "\n".join(new) + "\n")
+    return new
+
+
 def main():
     if len(sys.argv) < 2:
         sys.exit(__doc__)
@@ -106,6 +120,7 @@ def main():
     for d in ("vyrezy", "zdroje", "dokumenty", "pracovni"):
         os.makedirs(os.path.join(dst, d), exist_ok=True)
     os.makedirs(os.path.join(dst, ".claude"), exist_ok=True)
+    gitignore = doplnit_gitignore(dst)
     for name in ("CLAUDE.md", ".gitignore", ".gitattributes", "poznamky_pro_skill.md", os.path.join(".claude", "launch.json")):
         out = os.path.join(dst, name)
         if not os.path.lexists(out):
@@ -113,6 +128,8 @@ def main():
     with open(os.path.join(dst, ".skill_verze"), "w", encoding="utf-8") as f:   # SKILL.md podle něj nabídne aktualizaci
         f.write(open(os.path.join(SKILL, "VERZE"), encoding="utf-8").read())
     print("Projekt připraven:", dst)
+    if gitignore:
+        print(".gitignore doplněn o: " + ", ".join(gitignore) + " (už uložené soubory z nich vyndá `git rm -r --cached <cesta>` + commit)")
     if changed:
         print(f"Web aktualizován na novou šablonu ({len(changed)} souborů). Původní verze jsou v {backup}:")
         for f in changed:

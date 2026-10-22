@@ -222,7 +222,12 @@ Nedělej to pořád. Postup:
   automatické procházení stovek záznamů vede k **zablokování účtu**. Čti jen to, co uživatel otevře, nebo co potřebuješ jednotlivě.
 - Nezadávej za uživatele hesla, platební údaje, neřeš CAPTCHA, nekupuj předplatné.
 - Nedávej na web podrobnosti o žijících lidech bez jejich souhlasu.
-- Nepřepisuj data bez zálohy v gitu; po větším kroku navrhni uložení (`git add -A && git commit -m "…"`).
+- Nepřepisuj data bez zálohy v gitu; po větším kroku navrhni uložení – **ne `git add -A`** (uložilo by i svazek, který
+  uživatel právě stahuje do `dokumenty/`), ale jen datové složky: `git add data vyrezy zdroje tools web .gitignore CLAUDE.md
+  poznamky_pro_skill.md` (a `dokumenty/` s rodinnými dokumenty, stažené svazky `dokumenty/CZ_*/` ignoruje `.gitignore`),
+  předtím `git status --short` a nic velkého neukládej. Omylem uloženou složku vyndej `git rm -r --cached <složka>` + commit
+  (na disku zůstane). **Nikdy `git filter-branch` ani `git gc --prune`** bez souhlasu a zálohy – přepsání historie umí smazat
+  složku i z disku.
 
 ## Mapa souborů projektu
 | Cesta | K čemu |
