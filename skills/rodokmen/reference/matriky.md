@@ -143,7 +143,7 @@ v archivu ani online ale ještě není. Zapiš do `archivni_dotazy.md`.
 - **Stažené složky z ARON:** název souboru obsahuje i kód fondu (např. `_00190_`), takže vzor `*_00190_*` chytí všechny
   snímky a `magick` vyrobí stovky výstupů. Vždy celý jedinečný prefix (`*<KÓD SVAZKU>_00NNN_*`).
 - **Pomocníci a cena:** u menších úkolů (rejstřík, ~10 snímků) čti sám, bez pomocníka. Na celou knihu pomocník
-  `ctenar-matrik` (Sonnet, kontaktní listy, viz `SKILL.md`) – celé snímky jeden po druhém jsou nejdražší cesta.
+  `ctenar-matrik` (Sonnet, u těžkých knih Opus; kontaktní listy, viz `SKILL.md`) – celé snímky jeden po druhém jsou nejdražší cesta.
   `-annotate` potřebuje písmo: `-font /System/Library/Fonts/Supplemental/Arial.ttf`.
 - Ověření čtení: `python3 -I tools/overit.py <snímek> x0,y0,x1,y1 pracovni/over [v]` (zlomky 0–1, ne pixely) – zápis rozdělený na dvě poloviny
   zmenšené na 1900 px (dvoustrana je jinak nečitelná).

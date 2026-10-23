@@ -168,24 +168,31 @@ Na velké kolo (např. „projdi 5 svazků a najdi všechny Nováky“) můžeš
 řekni uživateli, co plánuješ a proč, a nech si to schválit (stojí kredity). **Malé úkoly (rejstřík, ~10 snímků) dělej sám** –
 kontaktní list (`tools/nahledy.py`) zvládneš rychleji, než napíšeš zadání.
 - Projekt má vlastního pomocníka **`ctenar-matrik`** (`.claude/agents/ctenar-matrik.md`, kopíruje ho `novy_projekt.py`;
-  chybí-li, aktualizuj projekt): běží na **Sonnetu**, nečte `CLAUDE.md`, má strop 80 kroků, pracuje přes kontaktní listy,
-  plné rozlišení otevře jen u kandidáta a výsledek průběžně píše do `pracovni/pom_<větev>/vysledek.md` (prošlé snímky
-  s tím, co na nich přečetl, nálezy se souřadnicemi a přepisem, stopy). Spouštěj ho přes Agent se
-  `subagent_type: "ctenar-matrik"` a **parametr `model` nepředávej** – přebil by Sonnet. (Obecný pomocník, který otevřel
-  130 celých snímků na Opusu, spotřeboval desítky milionů tokenů; tentýž úkol přes kontaktní listy je zlomek.)
-- Nejlíp pracuje na **celém svazku staženém do `dokumenty/`** (`reference/portaly.md` → ARON, celé svazky) – navrhni
-  uživateli stáhnout ho dřív, než pomocníka pustíš. Stahovat po snímcích nástroji smí, jen když mu to v zadání dovolíš.
-- **Do zadání jen to, co je k úkolu:** složka se snímky, rozsah, koho a co hledat a vše, co o rodině víš (varianty jména,
-  čísla domů, data, rodiče, co už deník uvádí jako prošlé), název větve pro `pracovni/pom_<větev>/`, na Windows
-  `python -I -X utf8`. Postup, formát výsledku a technické pasti zná z definice.
+  chybí-li, aktualizuj projekt): nečte `CLAUDE.md` ani skill, ale na začátku přečte `.claude/cteni_matrik.md` (kopie
+  `reference/matriky.md`) a jen pro čtení si vygrepuje příjmení a obec z `data/research_log.md` a `data/osoby.json`.
+  Má strop 80 kroků, pracuje přes kontaktní listy, plné rozlišení otevře jen u kandidáta a výsledek průběžně píše do
+  `pracovni/pom_<větev>/vysledek.md` (prošlé snímky s tím, co na nich přečetl, nálezy se souřadnicemi a přepisem, stopy).
+  Spouštěj ho přes Agent se `subagent_type: "ctenar-matrik"`. (Obecný pomocník, který otevřel 130 celých snímků na Opusu,
+  spotřeboval desítky milionů tokenů; tentýž úkol přes kontaktní listy je zlomek.)
+- **Model:** výchozí je **Sonnet** – parametr `model` nepředávej. Jen u **těžké knihy** (kurent 1. poloviny 19. století
+  a starší, vybledlé nebo tmavé snímky, latinské zkratky) předej `model: "opus"` – čte líp, ale stojí víc; řekni to
+  uživateli při schvalování kola.
+- Nejlíp pracuje na **celém svazku staženém do `dokumenty/`** (`reference/portaly.md` → ARON, celé svazky) – u většího
+  rozsahu navrhni uživateli stáhnout ho dřív, než pomocníka pustíš. Když svazek stažený není, stahuje si snímky a výřezy
+  sám nástroji skillu (ARON, Porta fontium, eBadatelna, Třeboň) – do zadání dej portál a id svazku. **SOA Litoměřice
+  a ZA Opava nestahuje** (blokují přístup po desítkách požadavků) – tam jen se staženým svazkem.
+- **Do zadání jen to, co je k úkolu:** složka se snímky (nebo portál a id svazku), rozsah, koho a co hledat a vše, co
+  o rodině víš (varianty jména, čísla domů, data, rodiče), název větve pro `pracovni/pom_<větev>/`, na Windows
+  `python -I -X utf8`. Postup, čtení, formát výsledku a technické pasti zná z definice a návodu; prošlé svazky si najde
+  v deníku sám.
 - Pomocník píše jen do `pracovni/pom_<větev>/`, **do `data/` nikdy**. Zapisuješ ty. Výstupy pomocníků v `pracovni/` nemaž,
   dokud nejsou vytěžené.
 - **Jejich čtení vždy ověř sám na snímku** (`python3 -I tools/overit.py <snímek> x0,y0,x1,y1 pracovni/over`, souřadnice
   jako zlomky 0–1) než ho zapíšeš jako `doc` – princip čtyř očí: pomocník nemá kontext (dvě rodiny stejného jména ve vsi,
   dva Janové na statku). Uživateli to tak vysvětli; ověření a zápis do dat dělá hlavní model (ty).
 - Prohlížeč může mít najednou jen jeden pomocník – proto stažené svazky a nástroje bez prohlížeče.
-- Na špatně čitelné knihy (kurent 1. poloviny 19. století, vybledlé snímky) pomocníky nepouštěj, nebo jim dej přesný
-  snímek; ARON a Porta fontium zvládají dobře.
+- Na špatně čitelné knihy pusť pomocníka s `model: "opus"` a užším rozsahem (přesné snímky z rejstříku), nebo je čti
+  sám; ARON a Porta fontium zvládá Sonnet dobře.
 
 ### Kdy přestat
 Linie končí, když matriky mlčí (nemanželské dítě bez otce, shořelé knihy, chybějící svazky) nebo když jsi
