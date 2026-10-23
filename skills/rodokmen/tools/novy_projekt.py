@@ -6,7 +6,8 @@ Použití: python3 <skill>/tools/novy_projekt.py <cílová složka> [--ukazka]
 
 Vytvoří: data/ (prázdné kostry nebo ukázka), web/ (Astro web), tools/ (kopie nástrojů),
 vyrezy/, zdroje/, dokumenty/, pracovni/, CLAUDE.md, .gitignore, .gitattributes (konce řádků LF i na Windows),
-.claude/launch.json (náhled v Claude desktop) a .claude/agents/ (pomocník ctenar-matrik).
+.claude/launch.json (náhled v Claude desktop), .claude/agents/ (pomocník ctenar-matrik) a .claude/cteni_matrik.md
+(jeho návod ke čtení – kopie reference/matriky.md, při každé aktualizaci nová).
 Existující data nepřepisuje.
 Aktualizace staršího projektu (znovu spustit na stejnou složku): tools/ se přepíše vždy a soubory webu,
 které se liší od nové šablony, taky – jejich staré verze se nejdřív uloží do pracovni/zaloha_web_<datum>/.
@@ -125,6 +126,19 @@ def main():
     agents_backup = os.path.join(dst, "pracovni", "zaloha_pomocnici_" + stamp)
     changed_agents = copy_tree(os.path.join(SKILL, "template", ".claude", "agents"), agents,
                                agents_backup if os.path.isdir(agents) else None)
+    # návod ke čtení matrik pro pomocníka (skill sám nenačítá): kopie reference/matriky.md, při aktualizaci vždy nová
+    guide = os.path.join(dst, ".claude", "cteni_matrik.md")
+    text = ("<!-- Kopie reference/matriky.md ze skillu rodokmen – při aktualizaci projektu se přepíše, neupravuj ji."
+            " Odkazy na portaly.md, playbook.md, data.md a SKILL.md míří do skillu. -->\n\n"
+            + open(os.path.join(SKILL, "reference", "matriky.md"), encoding="utf-8").read())
+    if os.path.lexists(guide):
+        if os.path.islink(guide):
+            os.remove(guide)
+        elif open(guide, encoding="utf-8").read() != text:
+            os.makedirs(agents_backup, exist_ok=True)
+            shutil.copy2(guide, os.path.join(agents_backup, "cteni_matrik.md"))
+    with open(guide, "w", encoding="utf-8", newline="\n") as f:
+        f.write(text)
     gitignore = doplnit_gitignore(dst)
     for name in ("CLAUDE.md", ".gitignore", ".gitattributes", "poznamky_pro_skill.md", os.path.join(".claude", "launch.json")):
         out = os.path.join(dst, name)
