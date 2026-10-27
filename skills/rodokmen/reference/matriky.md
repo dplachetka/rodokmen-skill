@@ -56,6 +56,8 @@ v archivu ani online ale ještě není. Zapiš do `archivni_dotazy.md`.
 5. **Přečti celý zápis**, pak se podívej i na okolí (dvojčata, další děti stejných rodičů).
 6. **Sňatek se obvykle konal ve farnosti nevěsty** (v jejím bydlišti) – hledej ho nejdřív tam, pak ve faře ženicha.
    Nedaří se? Ve křtu dítěte bývá (Praha ~1880–1890) připsané datum a místo sňatku rodičů – ověř ho v oddaných.
+   Jinde (Českodubsko 1890s) je u rodičů poznámka „cop. 18 7/2 91“ = oddáni 7. 2. 1891, často i s daty narození rodičů
+   (ta bývají chybná) – užitečné, když oddací kniha online není.
    Naopak **oddací zápisy po ~1860** často odkazují na křest snoubenců („křestní kniha … tom. XXVIII pag. 201“) – podle
    toho najdeš křest hned.
 7. **Rodina v katolické matrice chybí? Zkus evangelickou nebo židovskou.** Po toleranci (1781) vedly vlastní matriky
@@ -91,6 +93,11 @@ přehlédne (skutečná chyba: prošel se oddíl jiné vsi).
   (i díly mimo známé číslo domu – čísla domů se měnila).
 - **Sloupec „od kdy bydlí v obci“** u přivdaných žen a přiženěných mužů dává pravděpodobné datum sňatku (kde hledat oddací zápis).
 - **Data narození ve sčítání 1921 bývají chybná** (jiný den nebo měsíc) – neúspěch v matrice podle nich nic nedokazuje.
+  Rok bývá vedle i o deset let (1892 zapsán jako 1882) – při neúspěchu zkus ±10 let, ne jen ±1.
+- **Svislé sloupce dat ve sčítání 1921** (den, měsíc, rok narození; „od kdy bydlí“) jsou psané nastojato a přes ně jdou
+  tužkové škrty statistiků – z celého archu se rok snadno přečte špatně (1891 místo 1897, 1860 místo 1866). Čti je
+  z výřezu sloupce otočeného o 90°: `magick arch.jpg -crop <š>x<v>+<x>+<y> +repage -rotate 90 -resize 400% sloupec.jpg`
+  (posun v pixelech, viz technické pasti níže).
   Tužkou dopsané číslice sčítacího komisaře (poslední dvojčíslí roku narození) pomáhají u přepsaných let.
 - **Jak číst celé sčítání obce:** přečti záhlaví listů (číslo domu, majitel) na odhadnutých snímcích (často dům n ≈ snímek
   2n−1, zadní strana listu prázdná) a dolaď půlením; vložený lístek (hostinec, nájemník) posune číslování o snímek.
@@ -107,10 +114,17 @@ přehlédne (skutečná chyba: prošel se oddíl jiné vsi).
   Maria = Marie, Anna, Katharina = Kateřina, Barbara = Barbora, Magdalena = Majdalena/Magdaléna, Theresia = Terezie,
   Ludmilla = Lidmila, Dorothea = Dorota, Apollonia = Apolena, Georg/Georgius = Jiří, Matthias = Matěj, Adalbert = Vojtěch.
 - Příjmení se píše foneticky a mění se (Šaršon/Scharschon/Šaršoun, Kroupa/Kraupa). Hledej všechny varianty.
+  Jedna rodina se za 20 let psala Czegnar → Čejnar → Čyrnař → Cžerne → Černý (podle faráře) a rejstřík ji rozdělí pod různá
+  písmena – při nenálezu projdi i podobně znějící tvary a ověř je přes známý pár (stejní rodiče a dům v různých letech).
+  Staré pravopisné tvary: au = ou (Hlaupý = Hloupý), w = v, g = j. Příjmení, které dnes neexistuje, ještě není chybné
+  čtení – ověř ho na 3–4 zápisech od různých písařů.
 - Ženská příjmení v němčině bez „-ová“ (Maria Novak = Marie Nováková).
 - Názvy obcí mívají staré tvary, třeba s předsunutým „V“ („Volešnice“ = Olešnice); při hledání obce zkus i ty.
 - Kurent: dlouhé „ſ“ vypadá jako „f“, „e“ jako „n“, „h“ s kličkou dolů. Při nejistotě porovnej se stejným písmenem
   jinde na stránce stejné ruky – i u „divného“ příjmení (koncové „k“ psané skoro jako „r“: „-ek“ vypadá jako „-er“).
+  Velké S a D (a R a K) se u některých písařů skoro neliší – porovnej s jistým slovem téhož písaře („Samek“ ve známé vsi,
+  „Dorota“). Tak se opravilo „Kohlena“ → Rohlena, „Kathauský“ → Rathouský, „Kutka“ → Rutka. Místní příjmení zná často
+  rodina – zeptej se.
   Slovo rozdělené přes konec řádku („Urlau-“ / „ber“) dočti na začátku dalšího řádku.
 - Daty bývají svátky (*Dominica*, *festum S. Joannis*) – v nejasných případech dopočítej.
 
@@ -165,6 +179,7 @@ přehlédne (skutečná chyba: prošel se oddíl jiné vsi).
 ## Technické pasti (macOS, zsh) – napiš je i pomocníkům do zadání
 - Shell je zsh: `for a in "x y z"; do set -- $a` slova nerozdělí (v zsh `${=a}`); `ls F*` bez shody = chyba
   „no matches found“; `echo ====` je chyba (`=` na začátku slova). Složitější smyčky pouštěj přes `bash -c '…'`.
+- macOS nemá příkaz `timeout` – dlouhé příkazy pouštěj na pozadí, ne přes `timeout`.
 - ImageMagick: seznam souborů předávej jako jednotlivé argumenty, ne jednou proměnnou s mezerami.
   `files=$(ls …); for f in $files` v zsh nedělí na řádky – použij `for f in $D/*.jpg`.
   `-annotate` potřebuje písmo: `-font /System/Library/Fonts/Supplemental/Arial.ttf` (bez něj spadne na „unable to read
