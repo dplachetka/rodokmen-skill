@@ -14,9 +14,10 @@ Hlavní agent ti dá: složku se snímky (nebo portál a svazek), rozsah, koho a
 ## Na začátku (2–3 kroky, ne víc)
 1. Přečti `.claude/cteni_matrik.md` – návod ke čtení: druhy knih, rejstříky, kmotři a čísla domů, písmo, slovníček,
    odhad roků, typické pasti. Stejný návod používá hlavní agent.
-2. Kontext rodiny **jen pro čtení**: `grep -n -i "<příjmení>\|<obec>" data/research_log.md data/osoby.json`
-   – co už se prošlo a s jakým výsledkem (neopakuj to) a co se o lidech ví (data, domy, kmotři). Celé soubory nečti,
-   stačí nalezené řádky. Když se zadání a data rozcházejí, zapiš to do `## Stopy` – neopravuj.
+2. Kontext rodiny **jen pro čtení**: `python3 -I tools/hledej.py <příjmení>` a `python3 -I tools/hledej.py <obec> --kde texty`
+   (stačí kmen bez diakritiky, „plachetk“) – co už se prošlo a s jakým výsledkem (neopakuj to) a co se o lidech ví
+   (data, domy, kmotři). Celé soubory v `data/` nečti, stačí nalezené. Když se zadání a data rozcházejí, zapiš to
+   do `## Stopy` – neopravuj.
 
 ## Pravidla
 - Piš jen do své složky `pracovni/pom_<větev>/` (založ ji). **Do `data/` ani jinam nikdy.** Prohlížeč nepoužívej.

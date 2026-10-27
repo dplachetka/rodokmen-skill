@@ -3,7 +3,8 @@
 Všechna data jsou v `data/`. Web se z nich generuje (`npm run data`), nikdy needituj `web/src/data/site.json` ručně.
 Po změnách spusť `python3 -I tools/kontrola.py`. Ukázku vyplněných dat má `SKILL_DIR/template/ukazka/`.
 Položky do `zaznamy`, `svazky`, `prepisy`, `zvyrazneni`, `mista` a `dokumenty` přidávej a měň přes `python3 -I tools/zapis.py`
-(zachová formát souboru, viz SKILL.md); `osoby.json` nástrojem pro úpravu souborů.
+(zachová formát souboru, viz SKILL.md); `osoby.json` nástrojem pro úpravu souborů. Hledat v datech:
+`python3 -I tools/hledej.py <text>` (osobu vypíše celou, nevadí diakritika).
 
 ## `osoby.json` – předci
 Kekulého čísla: 1 = výchozí osoba, otec osoby n = 2n, matka = 2n+1.

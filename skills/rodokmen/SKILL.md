@@ -151,8 +151,8 @@ Základní smyčka pro každou osobu:
 7. Spusť `python3 -I tools/kontrola.py` a oprav chyby.
 
 Pravidla, která chrání kvalitu (naučená na skutečném projektu):
-- **Než něco ohlásíš jako nové, prohledej** `data/osoby.json`, `data/zaznamy.json` a `data/research_log.md`
-  (jméno, místo, rok). Snadno „objevíš“ něco, co už v datech je.
+- **Než něco ohlásíš jako nové, prohledej data:** `python3 -I tools/hledej.py <příjmení> [obec]` (osoby, zápisy, přepisy,
+  deník výzkumu; bez diakritiky, stačí kmen „plachetk“). Snadno „objevíš“ něco, co už v datech je.
 - **Zápis do dat:** `zaznamy`, `svazky`, `prepisy`, `dokumenty` přes `python3 -I tools/zapis.py <soubor> <klíč> pracovni/x.json`
   (objekt napiš do `pracovni/x.json`, nástroj změní jen tu položku); `osoby.json` a markdown nástrojem pro úpravu souborů.
   Nikdy `sed -i` ani skript, který soubor přepíše celý – rozbije formát a v historii je pak změněný celý soubor.
@@ -177,7 +177,7 @@ Na velké kolo (např. „projdi 5 svazků a najdi všechny Nováky“) můžeš
 kontaktní list (`tools/nahledy.py`) zvládneš rychleji, než napíšeš zadání.
 - Projekt má vlastního pomocníka **`ctenar-matrik`** (`.claude/agents/ctenar-matrik.md`, kopíruje ho `novy_projekt.py`;
   chybí-li, aktualizuj projekt): nečte `CLAUDE.md` ani skill, ale na začátku přečte `.claude/cteni_matrik.md` (kopie
-  `reference/matriky.md`) a jen pro čtení si vygrepuje příjmení a obec z `data/research_log.md` a `data/osoby.json`.
+  `reference/matriky.md`) a jen pro čtení si přes `tools/hledej.py` najde, co se o příjmení a obci už ví.
   Má strop 80 kroků, pracuje přes kontaktní listy, plné rozlišení otevře jen u kandidáta a výsledek průběžně píše do
   `pracovni/pom_<větev>/vysledek.md` (prošlé snímky s tím, co na nich přečetl, nálezy se souřadnicemi a přepisem, stopy).
   Spouštěj ho přes Agent se `subagent_type: "ctenar-matrik"`. (Obecný pomocník, který otevřel 130 celých snímků na Opusu,
@@ -304,6 +304,7 @@ Nedělej to pořád. Postup:
 | `vyrez.py <stránka.jpg> <klíč> x0,y0,x1,y1` | výřez do `zdroje/` a `vyrezy/` |
 | `ramecek.py <klíč> x0,y0,x1,y1` | rámeček čteného místa + kontrolní obrázek |
 | `mista.py pridej "Obec"` / `mista.py` | místa pro mapu (souřadnice z OpenStreetMap) |
+| `hledej.py <text> [další…] [--kde osoby\|zapisy\|texty…]` | hledání v datech: celé osoby, zápisy, přepisy, deník (bez diakritiky) |
 | `zapis.py <soubor> <klíč> <vstup.json> [--sloucit]` | přidá / změní položku v `zaznamy`, `svazky`, `prepisy`… beze změny formátu |
 | `kontrola.py` | kontrola dat; hlásí i citlivé údaje na webu a kdy psát příběh |
 | `export_web.py` | data → web (volá ho `npm run data`) |
