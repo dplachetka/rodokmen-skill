@@ -53,7 +53,7 @@ def main():
     args = [a for a in sys.argv[1:] if a != "--sloucit"]
     sloucit = "--sloucit" in sys.argv
     if args[:1] == ["osoby"]:
-        sys.exit("data/osoby.json uprav nástrojem pro úpravu souborů – jeden řádek = jedna osoba (reference/data.md).")
+        sys.exit("data/osoby.json uprav nástrojem pro úpravu souborů (reference/data.md) – zapis.py umí jen soubory bez sekcí.")
     if len(args) != 3 or args[0] not in {*SEZNAMY, *SLOVNIKY}:
         sys.exit(__doc__)
     nazev, klic, vstup = args

@@ -173,8 +173,7 @@ v archivu ani online ale ještě není. Zapiš do `archivni_dotazy.md`.
 - Limit délky příkazové řádky je 32 767 znaků – stovky souborů (dlaždic) v jednom příkazu `magick` neprojdou
   (WinError 206); skládej po řádcích.
 - Skripty `.sh` přes Git Bash (`bash tools/…`). Markdown a JSON nikdy neupravuj `sed -i` (escapy v Git Bash rozbijí
-  soubor) – data zapisuj podle pravidla „Zápis do dat“ v SKILL.md (`osoby.json` má jeden řádek na osobu – viz
-  `reference/data.md`).
+  soubor) – data zapisuj podle pravidla „Zápis do dat“ v SKILL.md.
 - Windows nerozlišuje velikost písmen v názvech (`o_29.jpg` = `O_29.jpg`) – náhled a plné rozlišení odliš předponou
   (`nahled_`, `plne_`), jinak se přepíšou.
 - Datové soubory zapisuj v UTF-8 **bez BOM** (Windows PowerShell 5.1 s `-Encoding UTF8` přidá BOM a soubory `.json` pak nejdou načíst).

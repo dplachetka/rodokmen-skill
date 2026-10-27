@@ -3,7 +3,7 @@
 Všechna data jsou v `data/`. Web se z nich generuje (`npm run data`), nikdy needituj `web/src/data/site.json` ručně.
 Po změnách spusť `python3 -I tools/kontrola.py`. Ukázku vyplněných dat má `SKILL_DIR/template/ukazka/`.
 Položky do `zaznamy`, `svazky`, `prepisy`, `zvyrazneni`, `mista` a `dokumenty` přidávej a měň přes `python3 -I tools/zapis.py`
-(zachová formát souboru, viz SKILL.md); `osoby.json` nástrojem pro úpravu souborů – po jednom řádku.
+(zachová formát souboru, viz SKILL.md); `osoby.json` nástrojem pro úpravu souborů.
 
 ## `osoby.json` – předci
 Kekulého čísla: 1 = výchozí osoba, otec osoby n = 2n, matka = 2n+1.
@@ -17,28 +17,96 @@ Kekulého čísla: 1 = výchozí osoba, otec osoby n = 2n, matka = 2n+1.
 
 Otec předka 22 je 44, matka 45; dítě předka 45 je 22 (45 // 2). Muži mají sudá čísla.
 
-Soubor má sekce `P`, `LINES`, `SIDE`, `ISSUES`, `HYPOTEZY`, `SAME` a jeden řádek na osobu (rod, příbuzného, otázku):
+Soubor má sekce `P`, `LINES`, `SIDE`, `ISSUES`, `HYPOTEZY`, `SAME`; je to běžný JSON odsazený po jedné mezeře
+jako ostatní datové soubory:
 ```json
 {
  "_popis": "…",
  "P": {
-  "8": {"n": "Jan Novák", "y": "1890–1944", "st": "doc", "f": ["* 14. 2. 1890 Holice čp. 112", "kovář", "× 20. 6. 1919 Holice Josefa Pokorná", "† 1944 Holice"], "r": ["holice_krest_jan_novak_1890", "holice_snatek_jan_novak_josefa_pokorna_1919"], "note": "Proč nejistota / rozpor / odkud údaj", "sour": "částečně"},
-  "9": {"n": "Josefa Pokorná", "y": "* 1895", "st": "doc", "f": ["…"], "r": ["…"]},
-  "33": {"n": "otec neuveden", "st": "unk", "f": [], "note": "Nemanželský syn; otec v matrice není."}
+  "8": {
+   "n": "Jan Novák",
+   "y": "1890–1944",
+   "st": "doc",
+   "f": [
+    "* 14. 2. 1890 Holice čp. 112",
+    "kovář",
+    "× 20. 6. 1919 Holice Josefa Pokorná",
+    "† 1944 Holice"
+   ],
+   "r": [
+    "holice_krest_jan_novak_1890",
+    "holice_snatek_jan_novak_josefa_pokorna_1919"
+   ],
+   "note": "Proč nejistota / rozpor / odkud údaj",
+   "sour": "částečně"
+  },
+  "9": {
+   "n": "Josefa Pokorná",
+   "y": "* 1895",
+   "st": "doc",
+   "f": [
+    "…"
+   ],
+   "r": [
+    "…"
+   ]
+  },
+  "33": {
+   "n": "otec neuveden",
+   "st": "unk",
+   "f": [],
+   "note": "Nemanželský syn; otec v matrice není."
+  }
  },
  "LINES": {
-  "8": ["Novákové", "Kováři z Holic…"]
+  "8": [
+   "Novákové",
+   "Kováři z Holic…"
+  ]
  },
  "SIDE": [
-  {"k": 16, "n": "Josef Novák", "v": "bratr", "y": "1865–1920", "st": "doc", "f": ["* 3. 2. 1865 Holice čp. 112", "kovář", "† 1920 Holice"], "t": "Převzal kovárnu po otci.", "r": ["klic_zapisu"]}
+  {
+   "k": 16,
+   "n": "Josef Novák",
+   "v": "bratr",
+   "y": "1865–1920",
+   "st": "doc",
+   "f": [
+    "* 3. 2. 1865 Holice čp. 112",
+    "kovář",
+    "† 1920 Holice"
+   ],
+   "t": "Převzal kovárnu po otci.",
+   "r": [
+    "klic_zapisu"
+   ]
+  }
  ],
  "ISSUES": [
-  ["Kdy se narodil Jan Novák?", "Otevřené: rodina říká 1850, v Holicích 1848–1852 nenalezen."]
+  [
+   "Kdy se narodil Jan Novák?",
+   "Otevřené: rodina říká 1850, v Holicích 1848–1852 nenalezen."
+  ]
  ],
  "HYPOTEZY": [
-  {"rod": 8, "nadpis": "Hypotéza: Novákové z Lhoty", "text": "…", "polozky": [["Jan Novák", "kmotr 1681…"]], "zaznamy": ["klic"]}
+  {
+   "rod": 8,
+   "nadpis": "Hypotéza: Novákové z Lhoty",
+   "text": "…",
+   "polozky": [
+    [
+     "Jan Novák",
+     "kmotr 1681…"
+    ]
+   ],
+   "zaznamy": [
+    "klic"
+   ]
+  }
  ],
- "SAME": {"350": 140}
+ "SAME": {
+  "350": 140
+ }
 }
 ```
 - Je to JSON: texty v dvojitých uvozovkách (uvozovka v textu `\"`, raději ale „české“), čárka mezi položkami, za

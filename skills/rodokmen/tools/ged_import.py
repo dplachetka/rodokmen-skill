@@ -21,7 +21,7 @@ for _s in (sys.stdout, sys.stderr):   # UTF-8 výstup i na Windows bez -X utf8 (
         _s.reconfigure(encoding="utf-8", errors="replace")
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))   # python3 -I složku skriptu do sys.path nepřidá
-from nacti_osoby import format_osoby
+from nacti_osoby import format_osoby, kostra
 
 EVENTS = {"BIRT": "*", "CHR": "* (křest)", "DEAT": "†", "BURI": "† (pohřeb)", "MARR": "×"}
 MONTHS = {m: i for i, m in enumerate("JAN FEB MAR APR MAY JUN JUL AUG SEP OCT NOV DEC".split(), 1)}
@@ -205,7 +205,7 @@ def main():
                 queue.append((k, name(ind), {"DEAT": "úmrtí", "BURI": "úmrtí", "MARR": "sňatek"}.get(t, "narození"), d, p))
                 break
     if as_json:
-        print(format_osoby({"P": P}), end="")
+        print(format_osoby(kostra({"P": P})), end="")
         return
     print("\nFRONTA ZÁPISŮ (nejmladší známá událost s místem; lhůty pro archiv: narození 100, sňatky 75, úmrtí 75 let\n"
           "od POSLEDNÍHO zápisu ve svazku – „asi online“ znamená, že je dost starý zápis, ne celý svazek):")

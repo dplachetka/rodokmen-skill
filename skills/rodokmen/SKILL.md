@@ -154,8 +154,7 @@ Pravidla, která chrání kvalitu (naučená na skutečném projektu):
 - **Než něco ohlásíš jako nové, prohledej** `data/osoby.json`, `data/zaznamy.json` a `data/research_log.md`
   (jméno, místo, rok). Snadno „objevíš“ něco, co už v datech je.
 - **Zápis do dat:** `zaznamy`, `svazky`, `prepisy`, `dokumenty` přes `python3 -I tools/zapis.py <soubor> <klíč> pracovni/x.json`
-  (objekt napiš do `pracovni/x.json`, nástroj změní jen tu položku); `osoby.json` (jeden řádek = jedna osoba, viz
-  `reference/data.md`) a markdown nástrojem pro úpravu souborů.
+  (objekt napiš do `pracovni/x.json`, nástroj změní jen tu položku); `osoby.json` a markdown nástrojem pro úpravu souborů.
   Nikdy `sed -i` ani skript, který soubor přepíše celý – rozbije formát a v historii je pak změněný celý soubor.
 - **`doc` jen to, co jsi četl přímo na snímku.** Shoda jména a doby bez přímého dokladu = `prob` + poznámka proč.
 - **Nic nedomýšlej.** Nejisté čtení „(?)“, rozpory zapiš do `ISSUES`. Písaři se pletli (jména sourozenců, věk, Anna/Františka).

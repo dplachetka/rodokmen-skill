@@ -56,23 +56,20 @@ def nacti_osoby(data_dir):
     return data
 
 
-def format_osoby(data):
-    """Text osoby.json: co osoba (rod, příbuzný, otázka), to jeden řádek – dobře se v tom hledá i upravuje."""
-    one = lambda v: json.dumps(v, ensure_ascii=False)
-    parts = [f' "_popis": {one(data.get("_popis", POPIS))}']
+def kostra(data):
+    """Celý obsah nového osoby.json: _popis, sekce v obvyklém pořadí (chybějící prázdné), osoby a rody podle čísla."""
+    out = {"_popis": data.get("_popis", POPIS)}
     extra = sorted(k for k in data if k not in SEKCE and not k.startswith("_"))   # neznámé sekce – nahlásí kontrola.py
     own = sorted(k for k in data if k.startswith("_") and k != "_popis")       # vlastní poznámky projektu (_odlozeno…)
     for name in SEKCE + tuple(extra) + tuple(own):
         v = data.get(name, [] if name in ("SIDE", "ISSUES", "HYPOTEZY") else {})
-        if not isinstance(v, (dict, list)):
-            parts.append(f" {one(name)}: {one(v)}")
-        elif isinstance(v, dict):
-            rows = [f"  {one(str(k))}: {one(x)}" for k, x in sorted(v.items(), key=lambda kv: _poradi(kv[0]))]
-            parts.append(f' "{name}": {{' + ("\n" + ",\n".join(rows) + "\n }" if rows else "}"))
-        else:
-            rows = [f"  {one(x)}" for x in v]
-            parts.append(f' "{name}": [' + ("\n" + ",\n".join(rows) + "\n ]" if rows else "]"))
-    return "{\n" + ",\n".join(parts) + "\n}\n"
+        out[name] = {str(k): x for k, x in sorted(v.items(), key=lambda kv: _poradi(kv[0]))} if isinstance(v, dict) else v
+    return out
+
+
+def format_osoby(data):
+    """Text osoby.json: běžný JSON odsazený po jedné mezeře jako ostatní data; pořadí sekcí a osob nemění."""
+    return json.dumps(data, ensure_ascii=False, indent=1) + "\n"
 
 
 def uloz_osoby(data_dir, data):
@@ -138,7 +135,7 @@ def prevod(root):
     old, new = os.path.join(data_dir, "osoby.py"), os.path.join(data_dir, "osoby.json")
     if not os.path.exists(old) or os.path.exists(new):
         return False
-    uloz_osoby(data_dir, nacti_stare_osoby(old))   # neznámé proměnné zůstanou jako sekce navíc, nahlásí je kontrola.py
+    uloz_osoby(data_dir, kostra(nacti_stare_osoby(old)))   # neznámé proměnné zůstanou jako sekce navíc, nahlásí je kontrola.py
     os.makedirs(os.path.join(root, "pracovni"), exist_ok=True)
     shutil.move(old, os.path.join(root, "pracovni", "osoby_puvodni.py"))
     return True
@@ -210,7 +207,7 @@ def sourozenci(data_dir, ulozit=True):
         elif not s.get("v") and re.search(r"\bnepříbuzn", s.get("t", ""), re.I):
             s["v"] = "nepříbuzný"
         if s != old:
-            order = ["k", "n", "v", "y"]     # nová pole hned za jméno, ať jde řádek dobře číst
+            order = ["k", "n", "v", "y"]     # nová pole hned za jméno, ať se příbuzný dobře čte
             s_new = {k: s[k] for k in order if k in s} | {k: v for k, v in s.items() if k not in order}
             s.clear(); s.update(s_new)
             zmeny.append(f"  {old.get('n')}  →  n={s['n']!r}" + (f", y={s['y']!r}" if s.get("y") != old.get("y") else "")
