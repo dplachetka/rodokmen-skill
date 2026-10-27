@@ -136,6 +136,11 @@ jako ostatní datové soubory:
   Kmotr nebo svědek může být i příbuzný – pak patří vztah (`strýc`), role do textu. Web ukazuje kartu s roky,
   vztahem, stavem, fakty a zápisy; stromový graf kreslí lidi vedle předka. Údaje ze zápisu patří do `f`, ne do textu.
   Žijící (narození před méně než 100 lety, žádné †): jen jméno a rok narození – `kontrola.py` hlásí `ŽIJÍCÍ?`.
+- **Příbuzné zapisuj tak, aby šli později převést na osoby s rodiči** (číslo předka `k` a vztah dají rodiče):
+  - sourozenec vždy `bratr` nebo `sestra`, ne `sourozenec`; jeden záznam na člověka (`sourozenci` jen, když víš jen počet),
+  - nejistý vztah s „(?)“: `"bratr (?)"`, důvod do `t`,
+  - nevlastní sourozenec se společným rodičem: `"nevlastní bratr (stejná matka)"`, `"nevlastní sestra (stejný otec)"`,
+  - partner a děti sourozence jako fakta v `f`: `"× 12. 5. 1890 Ostřetín Karel Hrubý"`, `"syn Jaroslav Hrubý * 1920 Ostřetín"`.
 - Starší tvar (roky ve jméně „Josef Novák (1865–1920)“, vztah jen v textu) převede
   `python3 -I tools/nacti_osoby.py sourozenci` (`--nanecisto` jen ukáže změny): roky do `y`, vztah z prvního slova
   textu do `v` („Bratr …“, „Učeň …“, „Sourozenci Jana …“; text s „Nepříbuzný“ → `nepříbuzný`), text zůstává celý.
