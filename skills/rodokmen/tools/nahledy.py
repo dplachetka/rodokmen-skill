@@ -33,7 +33,8 @@ PISMA = ["/System/Library/Fonts/Supplemental/Arial.ttf", "/Library/Fonts/Arial.t
 
 
 def magick():
-    m = shutil.which("magick") or next(iter(sorted(glob.glob(r"C:\Program Files\ImageMagick*\magick.exe"))), None)
+    m = (shutil.which("magick") or next(iter(sorted(glob.glob(r"C:\Program Files\ImageMagick*\magick.exe"))), None)
+         or (os.name != "nt" and shutil.which("convert")))   # ImageMagick 6 bez magick; na Windows je convert.exe jiný program
     if not m:
         sys.exit("Chybí ImageMagick (příkaz magick). Nainstaluj ho (macOS: brew install imagemagick, "
                  "Windows: winget install ImageMagick.ImageMagick a restart Claude Code) a spusť nástroj znovu.")
@@ -114,7 +115,7 @@ def main():
     try:
         with cf.ThreadPoolExecutor(4) as ex:
             dilky = dict(zip(cisla, ex.map(dilek, cisla)))
-        vyska = max(int(subprocess.run([M, "identify", "-format", "%h", f], capture_output=True, text=True).stdout)
+        vyska = max(int(subprocess.run([M, "-ping", f, "-format", "%h", "info:"], capture_output=True, text=True).stdout)
                     for f in list(dilky.values())[:5])
         radku = max(1, MAX // vyska)
         na_list = sloupcu * radku

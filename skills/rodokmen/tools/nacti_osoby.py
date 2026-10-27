@@ -78,7 +78,7 @@ def format_osoby(data):
 def uloz_osoby(data_dir, data):
     path = os.path.join(data_dir, "osoby.json")
     tmp = path + ".tmp"
-    with open(tmp, "w", encoding="utf-8") as f:
+    with open(tmp, "w", encoding="utf-8", newline="\n") as f:
         f.write(format_osoby(data))
     os.replace(tmp, path)
 
@@ -227,7 +227,7 @@ def sourozenci(data_dir, ulozit=True):
                     for a, b in zip(puvodni.get("SIDE", []), nove.get("SIDE", []))), \
             "převod by změnil i jiné údaje – nic jsem neuložil, nahlas to prosím (poznamky_pro_skill.md)"
         tmp = path + ".tmp"
-        with open(tmp, "w", encoding="utf-8") as f:
+        with open(tmp, "w", encoding="utf-8", newline="\n") as f:
             f.write(text)
         os.replace(tmp, path)
     return zmeny

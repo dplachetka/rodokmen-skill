@@ -116,7 +116,7 @@ def main():
                 if b"\r\n" in data:
                     open(out, "wb").write(data.replace(b"\r\n", b"\n"))
             prints[f] = fingerprint(out)
-    with open(record, "w", encoding="utf-8") as fh:
+    with open(record, "w", encoding="utf-8", newline="\n") as fh:
         json.dump(prints, fh, indent=1, sort_keys=True)
     for d in ("vyrezy", "zdroje", "dokumenty", "pracovni"):
         os.makedirs(os.path.join(dst, d), exist_ok=True)

@@ -63,7 +63,8 @@ def upozorneni():
 
 
 # ---------- obrázky: zmenšené a vložené jako data: URI ----------
-MAGICK = shutil.which("magick") or next(iter(sorted(glob.glob(r"C:\Program Files\ImageMagick*\magick.exe"))), None)
+MAGICK = (shutil.which("magick") or next(iter(sorted(glob.glob(r"C:\Program Files\ImageMagick*\magick.exe"))), None)
+          or (os.name != "nt" and shutil.which("convert")) or None)   # ImageMagick 6 bez magick; na Windows je convert.exe jiný program
 TMP = tempfile.mkdtemp(prefix="jeden-")
 _obr = {}
 
@@ -417,7 +418,7 @@ def stranka(js):
 
     # vějíř z fan_chart.py: odkazy na panely, kvůli starším prohlížečům i xlink:href
     hrefs = os.path.join(TMP, "hrefs.json")
-    json.dump({str(k): "#" + A["o"](s) for k, s in slug_k.items()}, open(hrefs, "w"))
+    json.dump({str(k): "#" + A["o"](s) for k, s in slug_k.items()}, open(hrefs, "w", encoding="utf-8", newline="\n"))
     fan = os.path.join(TMP, "fan.svg")
     subprocess.run([sys.executable, "-I", "-X", "utf8", os.path.join(TOOLS, "fan_chart.py"), fan, "--web", hrefs],
                    check=True, stdout=subprocess.DEVNULL)
@@ -804,7 +805,7 @@ def main():
                 + ('<script>document.documentElement.className = "js";</script>' if js else "")
                 + f"</head><body>\n{body}\n" + (skript(N) if js else "") + "</body></html>")
         path = os.path.join(OUT, "rodokmen.html" if js else "rodokmen-bez-js.html")
-        with open(path, "w", encoding="utf-8") as f:
+        with open(path, "w", encoding="utf-8", newline="\n") as f:
             f.write(page)
         hotovo.append(f"{path} ({os.path.getsize(path) / 1e6:.1f} MB)")
     shutil.rmtree(TMP, ignore_errors=True)
