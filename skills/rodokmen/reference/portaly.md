@@ -25,6 +25,8 @@ Adresy u nevyzkoušených portálů ověř při prvním použití (portály se m
   (úroveň 1 = poloviční rozlišení – stačí na orientaci; 0 = plné rozlišení – na čtení a výřez).
   Jen část stránky v plném rozlišení: `… <snímek> 0 pracovni/detail.jpg 0.0,0.4,1.0,0.7`.
 - **Odkaz na snímek** (pole `odkaz` v `zaznamy.json`): `python3 -I tools/aron_img.py <apu_id> link <snímek>`.
+  Odkazy z dřívějších verzí (id souboru PUBLISHED) otevřou knihu na prvním snímku – najde je
+  `aron_img.py odkazy`, opraví `aron_img.py odkazy --opravit` (v `data/`, pak znovu `npm run data`).
 - **Svazek do dat:** `python3 -I tools/aron_img.py <apu_id> svazek` (klíč = prvních 8 znaků apu_id → pole `svazek` v zápisu).
 - **Celé svazky ručně** (když ARON vypadává, nebo se bude číst hodně snímků): uživatel stáhne svazek tlačítkem v prohlížeči
   → složka `CZ_<archiv>_<fond>_<kód>_sign-<signatura>/` se soubory `…_00001_…jpg` = snímek 1 (u sčítání lidu `…_00010_…`
