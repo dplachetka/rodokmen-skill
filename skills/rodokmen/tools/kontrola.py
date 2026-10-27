@@ -239,7 +239,10 @@ def main():
     # co uživatel výslovně schválil ke zveřejnění, web.json → "citlive_schvaleno", dvojí tvar:
     # místo a slovo ("osoba 26: nemanželsk", "*: dluh", jen místo "osoba 26" = všechna slova v něm),
     # nebo úryvek textu se slovem ("oběsil se ve stodole") – platí jen pro to místo v textu; po změně textu se hlásí znovu
-    schvaleno = [s.strip() for s in (cfg.get("citlive_schvaleno") if isinstance(cfg.get("citlive_schvaleno"), list) else [])
+    schvaleno = cfg.get("citlive_schvaleno") or []
+    if isinstance(schvaleno, str):   # jediná položka zapsaná bez hranatých závorek
+        schvaleno = [schvaleno]
+    schvaleno = [s.strip() for s in (schvaleno if isinstance(schvaleno, list) else [])
                  if isinstance(s, str) and len(s.strip()) >= 3]
     schvaleno_mala = {s.lower() for s in schvaleno}
 
@@ -260,8 +263,8 @@ def main():
         m = next((m for m in citlive.finditer(text) if not schvalene(kde, text, m)), None)
         if m:
             warn.append(f"CITLIVÉ ({kde}): „…{text[max(0, m.start() - 40):m.end() + 40].strip()}…“ – jde na web; zeptej se uživatele, "
-                        f"jestli to tam smí být (reference/soukromi.md). Schválí-li to, přidej do data/web.json "
-                        f"\"citlive_schvaleno\": \"{kde}: {m.group(0).lower()}\" (nebo úryvek textu s tím slovem)")
+                        f"jestli to tam smí být (reference/soukromi.md). Schválí-li to, přidej do seznamu v data/web.json "
+                        f"\"citlive_schvaleno\": [\"{kde}: {m.group(0).lower()}\"] (nebo úryvek textu s tím slovem)")
 
     if not os.path.exists(os.path.join(DATA, "pribeh.md")) and LINES:
         hlavni = min(LINES)
