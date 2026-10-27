@@ -9,7 +9,8 @@ Použití (z kořene projektu):
                               [--sloupcu N] [--sirka PX]
     složka    stažený svazek (ARON: soubory …_<KÓD>_00NNN_…; u sčítání lidu …_00010_… = snímek 1),
               nebo libovolná složka se snímky .jpg (číslo = poslední číslo v názvu: f067.jpg = snímek 67;
-              když ho nemají všechny soubory nebo se opakuje, pořadí podle názvu)
+              když ho nemají všechny soubory nebo se opakuje, pořadí podle názvu; zmenšeniny …_s.jpg vedle
+              plného snímku z matricula_batch.sh vynechá)
     výstup    začátek názvu listů: pracovni/pom_x/hlava → pracovni/pom_x/hlava_01.jpg, hlava_02.jpg…
     --snimky  rozsah čísel snímků („20-60“, „5,7,9-12“, každý druhý „1-139/2“), výchozí všechny
     --oblast  co vyříznout z každého snímku (zlomky šířky a výšky 0–1):
@@ -47,6 +48,8 @@ def snimky(slozka):
     Jinak poslední číslo v názvu (f067.jpg, snimek_12.jpg), když ho mají všechny soubory a žádné se neopakuje;
     jinak pořadí podle názvu."""
     soubory = sorted(f for f in glob.glob(os.path.join(slozka, "*")) if f.lower().endswith((".jpg", ".jpeg")))
+    nazvy = set(soubory)   # zmenšeniny z matricula_batch.sh (X_12_s.jpg vedle X_12.jpg) vynechat
+    soubory = [f for f in soubory if not (m := re.fullmatch(r"(.+)_s(\.jpe?g)", f, re.I)) or m[1] + m[2] not in nazvy]
     if not soubory:
         sys.exit(f"Ve složce {slozka} nejsou žádné snímky .jpg.")
     cisla = [re.search(r"_[A-Z0-9]{8}_(\d{5})_", os.path.basename(f)) for f in soubory]
