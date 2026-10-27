@@ -209,6 +209,9 @@ def build_site(cfg):
     if 1 not in P:
         sys.exit("V data/osoby.json chybí výchozí osoba (číslo 1).")
     SAME = ns["SAME"]                       # alias Kekulé → kanonické Kekulé (předek v rodokmenu vícekrát)
+    # web.json "puvodni_jmena": true → jméno osoby v původních tvarech ze zápisů (pole zap v osoby.json, „Nowakin / Nováková“);
+    # jinak dnešní podoba n. Adresa stránky (slug) je vždy podle n.
+    puvodni = lambda p: " / ".join(p["zap"]) if cfg.get("puvodni_jmena") and p.get("zap") else p["n"]
     docs_cfg = jload("dokumenty.json", [])
     recs = {r["key"]: r for r in record_rows()}
 
@@ -243,8 +246,8 @@ def build_site(cfg):
             path.append(slugs.get(c))
             c //= 2
         people[slugs[k]] = dict(
-            k=k, slug=slugs[k], name=p["n"], y=p.get("y", ""), years=years(p.get("y")), born=born(p.get("y"), p.get("f", [])),
-            st=p.get("st", "unk"),
+            k=k, slug=slugs[k], name=puvodni(p), modern=p["n"], zap=p.get("zap", []), y=p.get("y", ""), years=years(p.get("y")),
+            born=born(p.get("y"), p.get("f", [])), st=p.get("st", "unk"),
             status=STATUS.get(p.get("st"), ""), gen=gen(k), sex="M" if k == 1 and p.get("sex", "M") == "M" or k > 1 and k % 2 == 0 else "F",
             rel=relation(k), line=line_of(k), facts=p.get("f", []), note=p.get("note", ""), records=[r for r in p.get("r", []) if r in recs],
             father=slugs.get(2 * k), mother=slugs.get(2 * k + 1),
@@ -419,6 +422,12 @@ def main():
               for m in re.finditer(r"/(osoba|zdroj|rod|rodina)/([^/\s)\"'#?<>\]]+)", t) if m.group(2) not in targets[m.group(1)]]
     for f, link in dict.fromkeys(broken):
         print(f"POZOR: nefunkční odkaz {link}/ v {f} – oprav ho (adresy stránek jsou ve web/src/data/site.json)")
+
+    # stránky Statistiky a Domy se počítají z hotového site.json
+    sys.path.insert(0, TOOLS)
+    import statistiky, domy_export
+    statistiky.main()
+    domy_export.main()
 
 
 if __name__ == "__main__":
