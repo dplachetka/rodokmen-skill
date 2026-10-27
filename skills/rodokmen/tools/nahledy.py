@@ -8,7 +8,8 @@ Použití (z kořene projektu):
   python3 -I tools/nahledy.py <složka> <výstup> [--snimky 20-60] [--oblast hlava|levy|pravy|cely|scitani|x0,y0,x1,y1]
                               [--sloupcu N] [--sirka PX]
     složka    stažený svazek (ARON: soubory …_<KÓD>_00NNN_…; u sčítání lidu …_00010_… = snímek 1),
-              nebo libovolná složka se snímky .jpg (číslo = pořadí podle názvu)
+              nebo libovolná složka se snímky .jpg (číslo = poslední číslo v názvu: f067.jpg = snímek 67;
+              když ho nemají všechny soubory nebo se opakuje, pořadí podle názvu)
     výstup    začátek názvu listů: pracovni/pom_x/hlava → pracovni/pom_x/hlava_01.jpg, hlava_02.jpg…
     --snimky  rozsah čísel snímků („20-60“, „5,7,9-12“, každý druhý „1-139/2“), výchozí všechny
     --oblast  co vyříznout z každého snímku (zlomky šířky a výšky 0–1):
@@ -42,7 +43,9 @@ def magick():
 
 
 def snimky(slozka):
-    """{číslo snímku: soubor}. ARON: pole …_<KÓD>_00NNN_…; když jsou všechna čísla násobky 10 (sčítání), děleno 10."""
+    """{číslo snímku: soubor}. ARON: pole …_<KÓD>_00NNN_…; když jsou všechna čísla násobky 10 (sčítání), děleno 10.
+    Jinak poslední číslo v názvu (f067.jpg, snimek_12.jpg), když ho mají všechny soubory a žádné se neopakuje;
+    jinak pořadí podle názvu."""
     soubory = sorted(f for f in glob.glob(os.path.join(slozka, "*")) if f.lower().endswith((".jpg", ".jpeg")))
     if not soubory:
         sys.exit(f"Ve složce {slozka} nejsou žádné snímky .jpg.")
@@ -53,6 +56,12 @@ def snimky(slozka):
             n = [x // 10 for x in n]
         if len(set(n)) == len(n):
             return dict(zip(n, soubory))
+    cisla = [re.findall(r"\d+", os.path.splitext(os.path.basename(f))[0]) for f in soubory]
+    if all(cisla):
+        n = [int(c[-1]) for c in cisla]
+        if len(set(n)) == len(n):
+            return dict(zip(n, soubory))
+    print("(čísla snímků = pořadí podle názvu – názvy souborů nemají každý vlastní číslo)")
     return {i: f for i, f in enumerate(soubory, 1)}
 
 
