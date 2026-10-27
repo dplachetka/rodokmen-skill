@@ -312,16 +312,36 @@ A když osoba „chybí“ v očekávaných matrikách (stěhovala se se službo
     vlastníků domů, spolky): Liberecký kraj kvkli.cz (API v5 jako NK, text `/item/<uuid>/streams/TEXT_OCR` u veřejných),
     Královéhradecký svkhk.cz (API v7: `/search/api/client/v7.0/search`, filtr na stránku `fq=pid:"…"`, zvýraznění až
     ~300 znaků kolem slova i u chráněných), další krajské knihovny a MZK. `kramerius.py` zatím umí jen NK.
-- Vojenské schematismy: fulltext na archive.org (např. `militrschematis13kriegoog` = 1850).
+  - **Výroční zprávy středních škol** (Kramerius NK) – seznamy žáků po třídách („Jméno Příjmení, rodiště (bydliště)“),
+    výborné pro děti narozené zhruba 1900–1930: třída dá rok narození, bydliště ukáže stěhování rodiny (vojáci, úředníci)
+    a odhalí sourozence. Bývají chráněné, ale hledání na stránce funguje: `PID:"<uuid stránky>" AND
+    text_ocr:("Příjmení Rodiště"~N)` s `hl.snippets=5` vrací útržky; třídu zjistíš dotazem `"Příjmení Třída"~40`.
+- **Rakouští důstojníci:** povýšení a vyznamenání v ANNO (Grazer Volksblatt, Fremden-Blatt, Neues Wiener Tagblatt);
+  zkratky útvarů rozepiš („bh. IR 2“ = bosensko-hercegovinský pěší pluk č. 2). Veřejný „Schematismus für das k.u.k. Heer“
+  1911–1914 je v Krameriovi NK celým textem (TEXT_OCR), starší vojenské schematismy na archive.org
+  (např. `militrschematis13kriegoog` = 1850).
 - **Rizika:** jména se opakují a fulltext šumí („Winter“ = i zima, „Novák“ = nový obyvatel). Ztotožni jen při shodě víc údajů (bydliště,
   funkce navazující na matriku, časová posloupnost). Zdroj je „J“ (jiný pramen) – vodítko a příběh, ne náhrada matriky.
 - Výstřižky jsou skvělé na web: ulož do `dokumenty/noviny/`, přes `vyrez.py` a do `dokumenty.json`.
+- **Dějiny obce na jejím webu** (oddíl „Historie“: dějiny mlýnů, statků a domů s majiteli a roky prodeje) dávají
+  pro 19.–20. století jména, čísla popisná a vztahy (kdo si koho vzal, kdo komu prodal). Vždy jen stopa (`prob`) –
+  číslo domu a rok tě pak dovedou do matriky.
 - Pořadí: nejdřív matriky; noviny, když chybí stopa kvůli stěhování, nebo když jde o úředníka/vojáka a chceme příběh.
 
 ## Vojáci a legionáři
-- **Vojáci z povolání 1918–1950:** sňatky a narození dětí bývají jen ve **vojenských matrikách** (VÚA–VHA Praha, na žádost);
-  v civilních a farních knihách místa bydliště pak chybí. Online (vuapraha.cz/vojenske-matriky, kramerius.army.cz) jsou
-  jen vojenské matriky zemřelých z 1. světové války.
+- **Vojáci z povolání 1918–1950:** sňatky a narození dětí bývají jen ve **vojenských matrikách** (VÚA–VHA Praha);
+  v civilních a farních knihách místa bydliště pak chybí. Na vuapraha.cz/vojenske-matriky jsou online jen matriky
+  zemřelých z 1. světové války, ale **Vojenská digitální knihovna kramerius.army.cz** (VHU) má víc:
+  - **„Matriky <útvaru> a předchůdců“** – vojenské matriky čs. pluků zhruba 1918–1932, i s narozením dětí důstojníků.
+    Stránky jsou většinou neveřejné, ale fulltext najde jméno, rok, rodiče i rodné příjmení matky; přesná stránka
+    (svazek, strana) pak stačí do žádosti VÚA–VHA o výpis.
+  - **Osobní věstník MNO** 1919–1949 – veřejný plný text: převzetí důstojníků do čs. armády 1919 s rokem narození
+    a domovskou obcí, povýšení, přeložení (útvar = posádka, tedy kde rodina žila). Tabulky jsou v OCR po sloupcích –
+    řádek srovnej podle pořadí.
+  - API je stejné jako u Krameria NK (v5), ale Python tam padá na certifikátu (server neposílá mezilehlý certifikát) –
+    volej ho přes `curl`. `kramerius.py` zatím umí jen NK.
+  - **Osobní spis důstojníka** (kvalifikační listiny, často s fotografií) je ve VHA, řazený podle ročníku narození –
+    žádost zapiš do `archivni_dotazy.md`.
 - **Legionáři – databáze ČsOL** (`csol.cz/legionar/<id>/`): jedna osoba mívá dva záznamy s různým id (jiný den narození);
   druhý bývá úplnější – povolání, **místní jednota ČsOL = kde legionář po válce žil**, fotky (`/wp-content/legionari-obrazky/<id>/…jpg`,
   na legitimaci razítko jednoty). Vyhledávání `?q=` přes stažení stránky nefunguje; sousední id jsou abecedně sousední jména.
