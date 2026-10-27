@@ -1,7 +1,7 @@
 # Stav rodokmenu a pravidla práce
 
 Tento soubor je vstupní bod. Po každém restartu (nová konverzace, zkrácený kontext) ho Claude čte jako první,
-pak konec `research_log.md` a sekci „Rozpracováno“.
+pak posledních ~5 řádků `research_log.md` (`tail -5 data/research_log.md | cut -c1-400`) a sekci „Rozpracováno“.
 
 ## Pro koho
 - Výchozí osoba: (doplnit – jméno, rok a místo narození)

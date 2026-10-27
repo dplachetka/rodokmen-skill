@@ -25,8 +25,8 @@ Najdeš v ní `tools/` (nástroje), `template/` (šablona projektu a webu) a `re
 - Dnešní datum (do deníku, STAV.md) ber z příkazu `date`, ne z hlavy.
 
 ## Na začátku každé konverzace
-1. Jsi ve složce projektu? (`data/STAV.md` existuje.) → Přečti `data/STAV.md`, konec `data/research_log.md`
-   a pokračuj podle sekce „Rozpracováno“. Krátce uživateli shrň, kde jste skončili.
+1. Jsi ve složce projektu? (`data/STAV.md` existuje.) → Přečti `data/STAV.md`, z deníku jen posledních pár řádků
+   zkrácených (`tail -5 data/research_log.md | cut -c1-400` – řádky deníku bývají dlouhé) a pokračuj podle sekce „Rozpracováno“. Krátce uživateli shrň, kde jste skončili.
    **Verze:** porovnej soubor `.skill_verze` v projektu se `SKILL_DIR/VERZE`. Chybí-li, nebo se liší, řekni jednou větou,
    že je nová verze skillu, a nabídni aktualizaci projektu: `python3 -I SKILL_DIR/tools/novy_projekt.py <složka projektu>`
    (data zůstanou, změněné soubory webu se zazálohují do `pracovni/`), pak ve `web/` `npm install`. Po souhlasu ji udělej
@@ -221,6 +221,24 @@ kontaktní list (`tools/nahledy.py`) zvládneš rychleji, než napíšeš zadán
 - Prohlížeč může mít najednou jen jeden pomocník – proto stažené svazky a nástroje bez prohlížeče.
 - Na špatně čitelné knihy pusť pomocníka s `model: "opus"` a užším rozsahem (přesné snímky z rejstříku), nebo je čti
   sám; ARON a Porta fontium zvládá Sonnet dobře.
+
+### Šetření tokenů (velký projekt)
+Každý přečtený obrázek stojí asi 1 500 tokenů a zůstává v kontextu – každý další krok dlouhého sezení je pak dražší.
+Od zhruba stovky osob (datové soubory mají stovky kB) se drž tohoto a řekni to uživateli:
+1. **Krátká sezení:** jedno sezení = jeden úkol (jedna větev nebo 1–3 knihy). Pak shrň stav do „Rozpracováno“
+   v `data/STAV.md`, ulož a navrhni nové sezení.
+2. **Velké soubory nečti celé** (`osoby.json`, `zaznamy.json`, `prepisy.json`, deník – jedno přečtení stojí desítky tisíc
+   tokenů): hledej přes `hledej.py` (nebo `grep -n`), přečti jen potřebné řádky a zapisuj podle pravidla „Zápis do dat“.
+3. **Čti po sloupcích, ne po dvoustranách:** rejstřík, je-li; pak mapa knihy z kontaktního listu záhlaví
+   (`nahledy.py --oblast hlava`: který snímek je který rok a obec) – **zapiš ji do deníku**, ať se příště nehledá; pak
+   úzké pruhy sloupce s datem, číslem domu a jménem (`--oblast levy` nebo vlastní zlomky) a plné rozlišení jen u řádku
+   kandidáta. Celé dvoustrany jen výjimečně.
+4. **Drahé hledání ohlas předem:** nad ~30 snímků bez rejstříku (hlavně latinské knihy) řekni uživateli odhad a přínos
+   a nech ho rozhodnout. Ukazuje-li aplikace využití limitu, změř cenu na prvních pár snímcích a přepočítej na celek.
+5. **Krátké výstupy příkazů:** `| tail` / `| head`, chyby nevypisuj celé; na výřezy a kontaktní listy hotové nástroje,
+   ne nové skripty.
+6. **Model hlavního sezení volí uživatel** (v aplikaci): české tabulkové matriky 19. století zvládne levnější model,
+   silnější se vyplatí na latinu a kurent 18. století. Řekni mu to, když se mění druh knih.
 
 ### Kdy přestat
 Linie končí, když matriky mlčí (nemanželské dítě bez otce, shořelé knihy, chybějící svazky) nebo když jsi
