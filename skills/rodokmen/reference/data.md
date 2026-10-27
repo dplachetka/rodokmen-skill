@@ -115,6 +115,9 @@ jako ostatní datové soubory:
   `kontrola.py` ukáže případnou chybu i s řádkem. Klíče začínající `_` nástroje přeskakují.
 - `n` jméno (ženy rodným příjmením, u nejistého čtení „(?)“), `y` roky pro přehledy (`"* 1895"`, `"1890–1944"`,
   `"asi 1720–1785"`, `"1680 – před 1740"`, `"† 1940"` když známe jen úmrtí; nic nevíme → `""`).
+- `zap` (volitelné) – tvary jména, jak stojí v zápisech: `"zap": ["Catharina Nowakin", "Kateřina Nováková"]`.
+  Na stránce osoby se ukážou jako „V zápisech zapsána jako …“; s `"puvodni_jmena": true` ve `web.json` se jimi osoba
+  i jmenuje (web, vějíř, mapa domů, statistiky). Adresa stránky zůstává podle `n`.
 - `f` fakta: začínají `*` (narození), `×` (sňatek), `†` (úmrtí) nebo jsou volný text (řemeslo, bydliště).
   Názvy obcí ve faktech používá mapa (`mista.json` → `re`).
   **Dům vždy jako „Obec čp. N“** (`* 14. 2. 1890 Holice čp. 112`, i skloňované „v Holicích čp. 112“), ne „č. 112“ –
@@ -187,12 +190,26 @@ Zapisuje `ramecek.py`. Rámeček má obepnout celý čtený zápis (ne jen jmén
 `{"Holice": {"re": "Holic", "dotaz": "Holice, Česko", "lat": 50.066, "lon": 15.986}}` – `re` je regulární výraz hledaný
 ve faktech osob (kmen slova, aby sedělo skloňování: „Holic“ najde Holice i v Holicích). Spravuje `mista.py`.
 Pozor na kolize (Hradec Králové × Nový Hradec Králové – použij `(?<!Nový )Hradec`; krátká jména jako `\bBuku?\b`).
-Hypotéza: `"hypoteza": true, "rod": 8`. Když OpenStreetMap obec nenajde („Žár“, malé osady), zkus třetí parametr – dotaz: `mista.py pridej "Žár" "Žár" "Žár, Zdíkov, okres Prachatice"`
+Hypotéza: `"hypoteza": true, "rod": 8`. Zkratky obce, které se objevují ve faktech nebo souhrnech zápisů
+(„HL čp. 12“), přidej jako `"zkratky": ["HL"]` – použije je stránka Domy. Stránka Domy bere vzory `re` z `mista.json`
+přednostně, i k rozhodnutí, co je táž obec (vzor „Řetov“ spojí Řetovou i Velkou Řetovou) – u stejnojmenných
+obcí (Lhota × Dolní Lhota) proto vzor zúži, jinak se domy obou obcí slijí. Když OpenStreetMap obec nenajde („Žár“, malé osady), zkus třetí parametr – dotaz: `mista.py pridej "Žár" "Žár" "Žár, Zdíkov, okres Prachatice"`
 nebo dotaz s větší obcí či okresem. U **víceznačných názvů** (Podolí, Dub, Lhota) vezme OpenStreetMap kteroukoli ves
 („Podolí, Česko“ = Podolí u Brna) – v posledním sloupci výpisu zkontroluj okres a dej dotaz se sousední obcí
 (`mista.py pridej "Podolí" "Podol" "Podolí, Odlochovice"`). Místopis nejlíp zná rodina – když si nejsi jistý, zeptej se.
 Špatnou obec oprav stejným příkazem s novým dotazem – jiný dotaz zahodí staré souřadnice a hledá znovu, prázdný výraz `""`
 nechá uložený: `mista.py pridej "Voděrady" "" "Voděrady, okres Rychnov nad Kněžnou"` (bez dotazu se uložená obec nehledá znovu).
+
+## `domy/` – domy předků na mapě (volitelné)
+Složka skillu **stare-adresy** (polohy domů „obec čp.“ podle stabilního katastru): `data/domy/adresy.json` – adresy
+a co bylo přečteno na skicách (výzkum, patří do gitu; založí ho `z_rodokmenu.py . data/domy/adresy.json`),
+`data/domy/vyrezy/` – výřezy skic a `data/domy/domy.geojson` – poloha domů pro web, vytvoří ho
+`mapa.py data/domy data/domy/adresy.json`. Podklady mapy (`podklady/`, `cache/` – desítky MB), `index.html`,
+`files.json` a `chybi.txt` git ignoruje, dají se kdykoli vytvořit znovu.
+Export z `domy.geojson` udělá stránku `/domy/` a propojí domy s osobami podle zmínek „Obec čp. N“ ve faktech `f`
+předků a bočních příbuzných (poznámky se nečtou – bývá v nich i dům sourozence nebo kmotra) a se zápisy podle jejich
+shrnutí. Adresy, které na mapě chybí, zapíše do `data/domy/chybi.txt` – podklad pro další kolo geokódování.
+Bez `domy.geojson` se stránka v menu neukáže.
 
 ## `dokumenty.json` – rodinné fotky a dokumenty na webu
 `[{"img": "foto_svatba_1919", "popis": "Svatba Jana a Josefy, Holice 1919.", "osoby": [8, 9]}]`

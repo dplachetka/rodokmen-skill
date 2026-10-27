@@ -50,7 +50,7 @@ def tvar(ns):
         if not isinstance(p, dict) or not isinstance(p.get("n"), str):
             chyby.append(f"P {k}: osoba musí být objekt aspoň se jménem n, je {str(p)[:60]!r}")
             continue
-        for pole in ("f", "r"):
+        for pole in ("f", "r", "zap"):
             if pole in p and not seznam_textu(p[pole]):
                 chyby.append(f"P {k} ({p['n']}): {pole} musí být seznam textů")
         if not isinstance(p.get("y", ""), str):

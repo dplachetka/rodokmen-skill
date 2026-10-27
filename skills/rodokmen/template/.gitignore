@@ -4,6 +4,12 @@ pracovni/
 dokumenty/CZ_*/
 # vytvořené výstupy (vějíř k tisku, rodokmen v jednom souboru – velké, dají se kdykoli vytvořit znovu)
 vystupy/
+# mapa domů ze skillu stare-adresy (mapa.py data/domy …) – do gitu jde adresy.json, domy.geojson a vyrezy/
+data/domy/podklady/
+data/domy/cache/
+data/domy/index.html
+data/domy/files.json
+data/domy/chybi.txt
 __pycache__/
 .DS_Store
 Thumbs.db

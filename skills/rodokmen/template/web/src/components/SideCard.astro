@@ -1,10 +1,10 @@
 ---
 // Card of a relative outside the direct line (SIDE in data/osoby.json): name, years, status, facts, text, records.
 import { records, href, statusClass } from '../lib/data.js';
-const { s } = Astro.props;
+const { s, id } = Astro.props;
 const recs = s.records.filter((r) => records[r]);
 ---
-<div class="card">
+<div class="card" id={id}>
   <h3>{s.name}{s.years && ` (${s.years})`}</h3>
   {(s.rel || s.status) && (
     <div class="chips">{s.rel && <span class="chip">{s.rel}</span>}{s.status && <span class={`chip ${statusClass(s.st)}`}>{s.status}</span>}</div>
