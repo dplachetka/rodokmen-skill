@@ -190,17 +190,70 @@ Adresy u nevyzkoušených portálů ověř při prvním použití (portály se m
 - Skeny některých polských far jsou i na Matricule (výše) nebo FamilySearch (níže).
 
 ## FamilySearch (přes uživatelův přihlášený prohlížeč)
-- Přihlášení je potřeba i na hledání v indexech. České matriky tam skoro zindexované nejsou (Slovensko ano, hlavně křty).
-- Jen když ho má uživatel otevřený a sám nabídne. Z kontextu stránky lze volat JSON API
+- Přihlášení je potřeba na katalog, snímky i hledání – curl a WebFetch vidí jen přihlašovací stránku. Pracuj jen
+  v prohlížeči, kde je uživatel přihlášený a kde to sám nabídne (vestavěný prohlížeč aplikace Claude, Claude in Chrome).
+  Neměň mu otevřené karty (po hledání vrať původní adresu). Stránky za Cloudflare neobcházej.
+- **Jen běžné prohlížení:** čti stránky a obrázky, které prohlížeč FamilySearch sám načítá. Nevytahuj token ze session
+  do vlastních dotazů na interní API (`/platform/…`, `filmdatainfo`) – Claude Code to zablokuje jako obcházení přístupu.
+- **Indexy** (české matriky skoro zindexované nejsou, Slovensko ano, hlavně křty): hledání ze stránky lze volat
   `https://www.familysearch.org/service/search/hr/v2/personas?q.surname=…&q.givenName=…&q.fatherGivenName=…&count=20`
-  (`fetch(…, {credentials:'include'})`); výsledky v `entries[].content.gedcomx`.
-- Užitečné na indexy matrik a hroby (BillionGraves, Find a Grave). Výsledek je vodítko – ověř v matrice.
-- Neměň uživateli otevřené karty (po hledání vrať původní adresu). Stránky za Cloudflare neobcházej – ať je uživatel
-  otevře sám a pošle snímek obrazovky.
-- Snímky filmu (DGS): seznam přes `POST /search/filmdatainfo/image-data` s `{"type":"film-data","args":{"dgsNum":"00…","state":{"i":"0"},"locale":"cs"}}`
-  (`images[]` = ARK). Snímek: `https://www.familysearch.org/service/records/storage/deepzoomcloud/dz/v1/<ARK 3:1:…>/$dist`
-  (plné rozlišení), malé náhledy `…/image_files/8/0_0.jpg`. **Po ~1000 rychlých požadavcích přijde HTTP 429** a blokace
-  na desítky minut – stahuj jen konkrétní snímky, nanejvýš pár za sekundu, hromadné procházení knih nedělej.
+  (`fetch(…, {credentials:'include'})`); výsledky v `entries[].content.gedcomx`. Užitečné i na hroby (BillionGraves,
+  Find a Grave). Výsledek je vodítko – ověř v matrice.
+
+### Co tam je pro české země (snímky bez indexu)
+- **Matriky SOA Litoměřice** – sady „Czech Republic, <okres>, <obec>, <fara>, church records“, v názvu skupiny snímků
+  německy („Oschitz, Böhmisch Leipa, Bohemia“). Náhrada, když badatelna SOA Litoměřice nejde. Čísla snímků i stran
+  se od badatelny liší (táž kniha: pag. 135 v SOA = pag. 168 na FamilySearch) – v zápisu uveď portál, ze kterého čteš.
+- **Sčítání lidu 1869–1910 ze SOA Litoměřice** jsou v katalogu jako **„land records“** („…, <obec>, <ves>, land records,
+  1890–1910“, skupiny „… Grundbuchblätter <rok>“) – hledání „census“ najde jen sčítání 1921. Hledej podle místa.
+  Na dům připadá pevný počet snímků (1869 a 1910 tři, 1880 a 1900 dva) – snímek domu spočítáš a ověříš na obálce archu.
+- **Urbáře panství SOA Zámrsk 1574–1773** (záznamy katalogu `olib:2857880` až `olib:2857980`, „<okres>, <obec>, land
+  records“, poznámka „Land registers Urbarios Zamrsk, <č.>, <rok>“) – most přes 17. století. Karta archivu na prvním
+  snímku často uvádí folia jednotlivých vsí.
+- Sbírka „Czech Republic land records 1750–1889“ (1918632) jsou hlavně pozemkové knihy z Opavska, Litoměřicka a Brněnska.
+
+### Katalog
+- Hledání podle místa: `https://www.familysearch.org/search/catalog/results?q.place=Czech Republic, <okres>, <obec>`
+  (nebo `+place:"<obec>"`); skupiny předmětů se rozbalují kliknutím.
+- **Seznam svazků je stránkovaný po 10** („Page 1 of 2“ pod tabulkou) – přepni na 100 na stránku nebo projdi všechny
+  stránky. (Skutečná chyba: oddací knihy fary byly až na druhé stránce a hledání hlásilo, že online nejsou.)
+- **Farnost a archiv malé vsi:** wiki „Czechia Town and Parish Finder“ (`https://www.familysearch.org/en/wiki/Czech_Gazetteer_<písmeno>`,
+  tabulka obec | německy | farnost | soudní okres | archiv). V prohlížeči stáhni `fetch()` jedno písmeno (~2,7 MB; víc
+  najednou nestihne limit nástroje) a filtruj regexem. Tvary jmen se liší (Domaslavice je tam „Domaslovice“).
+- **Knihy vedené po vsích:** katalogové roky („Baptisms 1799–1854“) na oddíly malých vsí nesedí – oddíl pokračuje
+  na volných listech jiného oddílu nebo v jiném svazku („Continuatio in Tomo XI“). Než napíšeš „na FamilySearch není“,
+  přečti titulní list se seznamem vsí a poznámky na konci oddílu vsi. Rejstříky oddaných bývají řazené podle ženicha.
+
+### Čtení snímků bez stahování
+- **Seznam snímků skupiny:** `https://www.familysearch.org/search/catalog/film?dgs=<DGS>&i=0` (mřížka; v prohlížeči
+  záznamu `view=explore&grid=on`). Miniatury jsou `…/deepzoomcloud/dz/v1/<id>/thumb_p200.jpg`, kde `<id>` je `3:1:<ark>`
+  (dřív `apid:TH-…`). Mřížka je virtualizovaná a líná: **pořadí `img` neodpovídá číslu snímku** – číslo ber z předka
+  `[aria-label]` („Image N of M“, česky „Snímek“, německy „Aufnahme“) nebo z tlačítka nad miniaturou. Posouvej
+  kontejnerem mřížky a id sbírej do `sessionStorage`. Ve skrytém panelu prohlížeče se miniatury nenačtou a snímky
+  obrazovky bývají prázdné – ať uživatel panel zobrazí, snímek obrazovky zopakuj.
+- **Obrázek snímku:** `https://sg30p0.familysearch.org/service/records/storage/deepzoomcloud/dz/v1/<id>/dist.jpg`
+  se načte v `<img>` (`fetch` z jiné adresy ne – CORS); dlaždice 256 px `…/<id>/image_files/<úroveň>/<x>_<y>.jpg`,
+  rozměry a nejvyšší úroveň (u každého snímku jiná, 12 nebo 13) v `…/<id>/image.xml`. Na hledání jmen stačí úroveň
+  s ~2000 px šířky, na přepis plná.
+- **Kontaktní list:** do stránky vlož vlastní vrstvu přes celé okno s mřížkou výřezů z více snímků (`<img>` s
+  `max-width:none` posunutý v rámečku s `overflow:hidden`), počkej ~1,5 s na vykreslení a udělej snímek obrazovky.
+  Osvědčilo se: pruh jmen (bez číselných sloupců) po polovinách stran, 4 výřezy na snímek obrazovky, víc snímků
+  v jedné dávce akcí prohlížeče. Přiblížení (`zoom`) nástroje pro snímek obrazovky rozlišení nepřidá – větší měřítko
+  nastav ve vrstvě. Orientačně 11 dvoustran ≈ 1 % pětihodinového limitu.
+- Delší skripty pouštěj bez `await` (nástroj pro JavaScript má limit ~45 s) a výsledek ukládej do `window`
+  nebo `sessionStorage`. `window.name` přežije přechod mezi `www.familysearch.org` a `sg30p0.familysearch.org` –
+  tak předáš seznam id mezi kartami bez vypisování do chatu.
+- **Čti sám:** uživatel při ručním procházení přehlédl zápis na sousední dvoustraně.
+- **Po ~1000 rychlých požadavcích přijde HTTP 429** a blokace na desítky minut – načítej jen snímky, které čteš,
+  nanejvýš pár za sekundu; celé knihy hromadně neprocházej.
+
+### Výřez a citace
+- Soubor snímku na disk nástrojem nedostaneš (curl bez přihlášení neprojde, prohlížeč nepošle data na localhost).
+  Výřez pro web: ať uživatel snímek uloží do `pracovni/` (stažení v prohlížeči FamilySearch), nebo vezmi snímek
+  obrazovky přiblíženého zápisu z výsledku nástroje → `vyrez.py`.
+- Citace do zápisu: název sady, **DGS** („číslo skupiny snímků“) a snímek N z M; trvalý odkaz dá
+  `https://www.familysearch.org/search/catalog/film?dgs=<DGS>&i=<N−1>` (přesměruje na `ark:/61903/3:1:…`).
+  Do `svazky.json` dej DGS, název sady a archiv, ze kterého snímky jsou.
 
 ## Hroby a hřbitovy
 - Kde jsou předci pohřbeni, víš z rozhovoru s rodinou (Fáze 1). Fotky náhrobků (jména, data, rodná příjmení) jsou
