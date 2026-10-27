@@ -244,9 +244,9 @@ Adresy u nevyzkoušených portálů ověř při prvním použití (portály se m
 - **Farnost a archiv malé vsi:** wiki „Czechia Town and Parish Finder“ (`https://www.familysearch.org/en/wiki/Czech_Gazetteer_<písmeno>`,
   tabulka obec | německy | farnost | soudní okres | archiv). V prohlížeči stáhni `fetch()` jedno písmeno (~2,7 MB; víc
   najednou nestihne limit nástroje) a filtruj regexem. Tvary jmen se liší (Domaslavice je tam „Domaslovice“).
-- **Knihy vedené po vsích:** katalogové roky („Baptisms 1799–1854“) na oddíly malých vsí nesedí – oddíl pokračuje
-  na volných listech jiného oddílu nebo v jiném svazku („Continuatio in Tomo XI“). Než napíšeš „na FamilySearch není“,
-  přečti titulní list se seznamem vsí a poznámky na konci oddílu vsi. Rejstříky oddaných bývají řazené podle ženicha.
+- **Knihy vedené po vsích:** katalogové roky („Baptisms 1799–1854“) na oddíly malých vsí nesedí – než napíšeš
+  „na FamilySearch není“, přečti titulní list a poznámky na konci oddílu (`matriky.md` → „Knihy vedené po vsích“).
+  Rejstříky oddaných bývají řazené podle ženicha.
 
 ### Čtení snímků bez stahování
 - **Seznam snímků skupiny:** `https://www.familysearch.org/search/catalog/film?dgs=<DGS>&i=0` (mřížka; v prohlížeči

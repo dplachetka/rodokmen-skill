@@ -28,10 +28,14 @@ v archivu ani online ale ještě není. Zapiš do `archivni_dotazy.md`.
    hodí se, když originál chybí, je nečitelný nebo velký.
 3. **Index, pak kniha.** Index řazený po písmenech a letech dá stránku/folio; snímek odhadni (snímek ≈ folio × 1 až 2) a dolaď.
    Starší rejstříky (18. stol.) občas ukazují o 1–4 strany vedle – když zápis na udané straně není, listuj kolem.
+   Rejstřík proto nejdřív ověř na jednom známém zápisu: může mít i úplně jiné stránkování než kniha (rejstřík „str. 96“,
+   zápis na str. 87, na straně 96 jiné děti). Nesedí-li, procházej knihu po rocích přes okraje (obec v levém sloupci).
+   **Písmeno v záhlaví rejstříku** bývá kurentem – S vypadá jako P, R jako K; spolehlivější je přečíst první příjmení na stránce.
    Posun „snímek – strana“ se v knize mění (vložené listy, chybějící strany) – přečti číslo strany na náhledu a dopočítej.
    U starých far se vyplatí nejdřív najít **souhrnný index** přes víc desetiletí (např. N/O/Z 1636–1746) – dovede
    rychle až do 17. století. Rejstříky bývají podle **německého pravopisu**: česká jména na O a V hledej i pod W
-   (Otava = Wotawa, Vávra = Wawra). Knihy pro více obcí bývají řazené po obcích, rejstřík na konci.
+   (Otava = Wotawa, Vávra = Wawra). Knihy pro více obcí bývají řazené po obcích, rejstřík na konci (viz „Knihy vedené
+   po vsích“ níže). **Knihy B, C** v rejstříku fary jsou knihy filiálních obcí (A = farní obec, B a C další vsi).
    Velké fary mají rejstříky i jako **samostatné svazky** (např. rejstřík oddaných přes 300 let) – hledej je nejdřív.
    **Když matrika chybí** (není online nebo se nedochovala), zkus rejstřík – bývá vedený zvlášť a přežil i tam, kde kniha
    ne. Zápis v rejstříku dokládá datum, místo a otce; zapiš ho jako `prob` (opis, ne originál) a matriku zkus později.
@@ -64,6 +68,22 @@ v archivu ani online ale ještě není. Zapiš do `archivni_dotazy.md`.
 9. **Rodina přes čísla domů:** rejstřík narozených po ~1878 (uvádí číslo domu a rodiče) + celé sčítání 1921 obce
    (přehled „číslo domu – majitel – příjmení“) ukážou, které domácnosti se jménem ve vsi vůbec jsou a který dům je rodový.
    Když chybí matriky, je to nejlepší nepřímý důkaz (zapisuj jako `prob` s odůvodněním).
+
+### Knihy vedené po vsích
+Velké fary (hojně na Litoměřicku, ale i jinde) psaly každou ves do vlastního oddílu knihy. Hledání podle data pak zápis
+přehlédne (skutečná chyba: prošel se oddíl jiné vsi).
+- **Nejdřív titulní list:** na začátku knihy bývá seznam vsí s foliem, kde jejich oddíl začíná („Smržov fol. 139“).
+  Přečti ho a skoč rovnou na oddíl vsi. Obec ze sčítání bývá zkrácená („Hr. Lesnov“ = Hrubý Lesnov) a může být jiná
+  než rodiště v pozdějším sčítání.
+- **Roky z katalogu na oddíly nesedí:** oddíl malé vsi pokračuje na volných listech jiného oddílu („Continuatio sequitur
+  in hocce tomo pag. 51“) nebo v jiném svazku („Continuatio in Tomo XI“). Než napíšeš „kniha není“, přečti poznámky
+  na konci oddílu. Poznámka „patřila k panství X“ neznamená jinou faru.
+- **Sňatek bývá v oddílu obce ženicha**, ne nevěsty – „sňatek ve farnosti nevěsty“ platí pro faru, ne pro oddíl.
+- **Jmenný rejstřík na konci knihy** po písmenech (příjmení – jméno – obec – strana – rok) najdeš kontaktním listem
+  záhlaví (písmeno nahoře) rychleji než čtením oddílů.
+- **Strana → snímek:** pag. ≈ 2 × snímek + konstanta (u foliace snímek ≈ folio + 1 až 2), ověř na dvou snímcích. Posun
+  se uvnitř knihy mění (prázdné listy, vlepky „Blank Page“) – po každém zásahu přepočítej podle hlavičky stránky.
+- **Odkazy v oddacích zápisech** („Mt. Bpt. Tom. II fol. 161“) jsou folia knihy křtů – vedou přímo ke křtu snoubence.
 
 ## Sčítání lidu (1869, 1880, 1890–1910, 1921)
 - **Sčítání 1921 je nejlepší most pro 20. století:** domácnost s daty narození, rodištěm, náboženstvím a povoláním.
