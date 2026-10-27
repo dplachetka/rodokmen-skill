@@ -32,6 +32,16 @@ pak posledních ~5 řádků `research_log.md` (`tail -5 data/research_log.md | c
 4. Nejistá čtení označím (?) – nic nedomýšlím.
 5. Ke každému novému zápisu: výřez (`tools/vyrez.py`), rámeček (`tools/ramecek.py`) a přepis s překladem.
 6. Po změně dat spustím `python3 -I tools/kontrola.py`.
+7. Sourozenci a úmrtí: (doplnit odpověď uživatele – otázka na začátku Fáze 2 ve skillu)
+
+## Ke stažení
+Svazky, které má uživatel stáhnout celé do `dokumenty/` (název, signatura, počet snímků, odkaz, koho v nich hledat).
+Než sem něco přidám, podívám se do `dokumenty/`. Stažené přesunu do další sekce.
+- (zatím nic)
+
+## Na disku, ale nepřečteno (nebo jen zčásti)
+| Svazek | Co v něm hledat |
+|---|---|
 
 ## Rozpracováno (aktualizovat průběžně)
 - (zatím nic)

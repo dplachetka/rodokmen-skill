@@ -30,7 +30,8 @@ Adresy u nevyzkoušených portálů ověř při prvním použití (portály se m
   → složka `CZ_<archiv>_<fond>_<kód>_sign-<signatura>/` se soubory `…_00001_…jpg` = snímek 1 (u sčítání lidu `…_00010_…`
   = snímek 1, tedy číslo souboru / 10). Ať ji uloží do `dokumenty/` (`.gitignore` ji vynechá) a čti z disku – spolehlivější
   a rychlejší než stahování po snímcích; `vyrez.py` bere soubor přímo. Odkaz (`link`) a `svazek` doplň, až ARON odpovídá.
-  Co má uživatel stáhnout, veď v `data/STAV.md` jako seznam „Ke stažení“ s odkazy na svazky.
+  Co má uživatel stáhnout, veď v `data/STAV.md` jako seznam „Ke stažení“ s odkazy na svazky; stažené a ještě nepřečtené
+  svazky v tabulce „Na disku, ale nepřečteno“ (co v nich hledat) – ať se na ně po pár sezeních nezapomene.
 - V ARON jsou i další fondy (sčítání lidu, některé gruntovní knihy, kroniky) – `aron_search.py "Obec" "název fondu"`.
 - Stejnojmenných obcí bývá víc (Vinice u Hořic × Vinice u Velké Jesenice). Výsledky jsou seřazené podle farnosti;
   zúžit jde víc slovy oddělenými čárkou, která musí být v popisu všechna: `aron_search.py "Vinice,Hořice"`
