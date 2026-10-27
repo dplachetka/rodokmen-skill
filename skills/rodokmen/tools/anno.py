@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 """ANNO (Rakouská národní knihovna) – fulltext v novinách 1700–1950. Jen REST API, bez prohlížeče.
-Volitelně ANNO_TITLE=<zkratka listu> omezí hledání na jeden list.
+Volitelně ANNO_TITLE=<zkratka listu> omezí hledání na jeden list (zkratka je v docId: ANNO_vll19150203 → vll).
 Usage: anno.py "TEXT QUERY" [yearFrom] [yearTo] [maxpages] [--snip]
-API: GET https://anno.onb.ac.at/anno-suche/rest/search/complex?text=..&dateFrom=YYYY&dateTo=YYYY&from=1&facets=true
+API: GET https://anno.onb.ac.at/anno-suche/rest/search/complex?text=..&dateFrom=YYYY&dateTo=YYYY&from=1&facets=true[&selectedFilters=title:vll]
      GET https://anno.onb.ac.at/anno-suche/rest/search/snippet?documentId=<docId>&query=<textQuery>
 """
 import html, os, re, sys, json, time, urllib.parse, urllib.request
@@ -21,7 +21,7 @@ for p in range(maxp):
     prm={'text':q,'from':1+p*10,'facets':'false'}
     if yf: prm['dateFrom']=yf
     if yt: prm['dateTo']=yt
-    if os.environ.get('ANNO_TITLE'): prm['title']=os.environ['ANNO_TITLE']
+    if os.environ.get('ANNO_TITLE'): prm['selectedFilters']='title:'+os.environ['ANNO_TITLE']   # title= vrací vždy 0
     d=get('complex',prm)
     if p==0: print('TOTAL',d.get('totalHits'),'|',d.get('textQuery'))
     for doc in d.get('documents',[]):

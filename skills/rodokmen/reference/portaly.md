@@ -300,6 +300,10 @@ sňatků a parte (zhruba od 1860). Z toho plyne, **kde člověk kdy žil** → k
 A když osoba „chybí“ v očekávaných matrikách (stěhovala se se službou). **Spíš ne:** sedláci a řemeslníci na vsi.
 - ANNO (rakouské noviny 1700–1950, i Prager Zeitung, Wiener Zeitung): `python3 -I tools/anno.py '"Johann Nowak"' 1860 1915 [stran] [--snip]`
   – jména **německy** („Johann Nowak“, „Wenzel Dworschak“). Výřez místa: `tools/anno_snap.py <docId> "<dotaz>" pracovni/x.jpg`.
+  Jen jeden list: `ANNO_TITLE=vll python3 -I tools/anno.py …` – zkratka listu je v docId (`ANNO_vll19150203` → `vll`).
+  Ztrátové listiny 1914–1919: `vll` Verlustliste, `vlv` Verlustliste – abecední seznam, `nvv` Nachrichten über Verwundete
+  und Verletzte; jiné listy např. `wrz` Wiener Zeitung, `ptb` Prager Tagblatt. Najednou jde jen jeden list – další = další spuštění.
+  Ve ztrátových listinách je **příjmení první** („Nowak Johann, Inft., IR. Nr. 13 …“) – hledej `'"Nowak Johann"'`.
   ALEX a annoshow jsou za Cloudflare – neobcházet.
 - Kramerius NK ČR (české noviny, ročenky, adresáře): `python3 -I tools/kramerius.py 'text_ocr:"Jan Novák" AND datum_begin:[1900 TO 1910]'`.
   - **Veřejné stránky – celý text:** `https://kramerius5.nkp.cz/search/api/v5.0/item/<uuid stránky>/streams/TEXT_OCR`
