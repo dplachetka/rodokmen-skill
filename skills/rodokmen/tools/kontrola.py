@@ -275,7 +275,13 @@ def main():
                         f"(data/pribeh.md, reference/pribehy.md); koncept nejdřív ukaž uživateli v chatu")
 
     log = os.path.join(DATA, "research_log.md")
-    rows = sum(1 for l in open(log, encoding="utf-8") if re.match(r"^\| \d+ \|", l)) if os.path.exists(log) else 0
+    cisla = [int(m.group(1)) for l in open(log, encoding="utf-8") if (m := re.match(r"^\| (\d+) \|", l))] if os.path.exists(log) else []
+    rows = len(cisla)
+    dvakrat = sorted({c for c in cisla if cisla.count(c) > 1})
+    if dvakrat:   # dvě sezení najednou si vzala stejné číslo řádku – odkazy „deník 174“ by byly nejednoznačné
+        warn.append(f"research_log.md: {'číslo řádku' if len(dvakrat) == 1 else 'čísla řádků'} {', '.join(map(str, dvakrat))} "
+                    f"{'je' if len(dvakrat) == 1 else 'jsou'} v deníku víckrát – přečísluj pozdější řádek "
+                    f"(číslo ber těsně před zápisem: tail -1 data/research_log.md) a oprav odkazy na něj")
     print(f"{len(P)} osob, {len(zaz)} zápisů, {len(svazky)} svazků, {rows} řádků deníku")
     for e in err:
         print("CHYBA:", e)
