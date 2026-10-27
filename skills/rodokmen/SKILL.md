@@ -118,6 +118,12 @@ Uživatel už něco dohledal mimo skill? Převezmi **všechno**, ale nic jako `d
 ## Fáze 2 – Matriky, generace po generaci
 Podrobný postup čtení: `reference/matriky.md`. Portály archivů: `reference/portaly.md`. Metodika: `reference/playbook.md` (EN).
 
+**Sourozenci a úmrtí – zeptej se jednou, na začátku Fáze 2:** „Chcete u předků i jejich sourozence a úmrtí?“ Odpověď
+zapiš do pravidel v `data/STAV.md`. Doporuč tohle (rozhoduje o ceně): **sourozence ber rovnou** z knihy, kterou kvůli
+předkovi stejně čteš (stejní rodiče nebo dům) – později by se tytéž knihy četly podruhé. **Úmrtí rovnou jen ve společných
+knihách N/O/Z**; samostatné knihy zemřelých (jiný svazek, o desítky let později) sesbírej na konci generace do seznamu
+a projdi je najednou po farnostech.
+
 Základní smyčka pro každou osobu:
 1. **Vyber cíl a začni od nejmladšího zápisu.** Vezmi nejmladšího předka bez dokladu a hledej jeho **nejmladší
    známou událost**: úmrtí (online po 75 letech; ve 20. století uvádí datum a místo narození i rodiče), pak sňatek
@@ -133,8 +139,12 @@ Základní smyčka pro každou osobu:
    `tools/trebon.py`, SOA Plzeň: `tools/portafontium.py`, SOA Praha (střední Čechy): `tools/ebadatelna.py`,
    Praha: `tools/ahmp_search.sh`; ostatní a Rakousko viz `reference/portaly.md`. Sňatek hledej nejdřív ve farnosti nevěsty.
    Je-li ke svazku index (rejstřík), začni jím. Starší matriky (před ~1784) bývají ve faře sousedního města.
+   U **stejnojmenných obcí** ověř faru a okres svazku, než ho doporučíš ke stažení – katalog je často neuvádí
+   (skutečná chyba: svazek „Voděrady“ byl z Voděrad u Litomyšle, ne u Opočna).
 4. **Stáhni snímek** do `pracovni/<svazek>/` a nech ho tam – před dalším stažením se podívej, jestli ho už nemáš
    (šetří čas, archiv i CAPTCHY). Najdi zápis, **přečti ho sám ze snímku** (přiblíž si výřez v plném rozlišení).
+   **Nový svazek nejdřív ověř jedním snímkem:** záhlaví (fara, obec, roky) a jeden zápis, který už znáš (sourozenec,
+   soused z téhož domu) – teprve pak ho procházej celý.
 5. **Zapiš nález** (vždy všech 6 kroků, i když to zdržuje):
    1. svazek do `data/svazky.json` (ARON: `python3 -I tools/aron_img.py <apu> svazek`),
    2. zápis do `data/zaznamy.json` (klíč = popisný název, např. `holice_krest_jan_novak_1890`; odkaz na snímek) přes `tools/zapis.py`,
@@ -159,6 +169,14 @@ Pravidla, která chrání kvalitu (naučená na skutečném projektu):
   (objekt napiš do `pracovni/x.json`, nástroj změní jen tu položku); `osoby.json` a markdown nástrojem pro úpravu souborů.
   Nikdy `sed -i` ani skript, který soubor přepíše celý – rozbije formát a v historii je pak změněný celý soubor.
 - **`doc` jen to, co jsi četl přímo na snímku.** Shoda jména a doby bez přímého dokladu = `prob` + poznámka proč.
+- **Ztotožnění s jediným kandidátem je `prob`:** vazba na rodiče, která stojí jen na tom, že v rejstříku nebo knize je
+  jediný vhodný kandidát (křest 1786 ↔ ženich 1811, jehož sňatek rodiče neuvádí), zůstává `prob`, dokud ji nespojí přímý
+  zápis. Stejně odvozené vztahy (pořadí manželství z úmrtí první ženy) – `doc` až po přečtení sňatku. Jmenuje-li rodiče
+  přímo zápis (sňatek) a ztotožněn je jen křest, zůstává osoba `doc` a fakt o narození dostane „– jen ztotožnění (prob)“.
+- **Jména předků ověř druhým zápisem**, nejčastěji křtem sourozence v téže knize (sedí rodiče, prarodiče, dům?).
+  Hlavně u předků, kteří stojí na jediném zápisu (`doc` s jedním klíčem v `r`), a u jmen s „(?)“. Ne jako samostatné
+  velké kolo, ale průběžně, když v knize jsi. Opravu zapiš do přepisu, zápisu, osoby i deníku. (Skutečná oprava:
+  nejasné „Fröhlichová“ bylo ve druhém zápisu čitelně „Bičíková“.)
 - **Nic nedomýšlej.** Nejisté čtení „(?)“, rozpory zapiš do `ISSUES`. Písaři se pletli (jména sourozenců, věk, Anna/Františka).
 - **Čti celý zápis včetně okrajů** – pozdější poznámky o úmrtí, sňatku, legitimaci bývají nejcennější.
 - **Rodina přes čísla domů**: stejné číslo popisné a řemeslo přes generace je silná stopa; v knize hledej celé domácnosti.

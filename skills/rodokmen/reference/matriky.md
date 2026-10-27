@@ -128,7 +128,7 @@ v archivu ani online ale ještě není. Zapiš do `archivni_dotazy.md`.
 | stav | kdy |
 |---|---|
 | `doc` | přečteno přímo na snímku zápisu, který osobu jednoznačně identifikuje |
-| `prob` | silná shoda (jméno, doba, místo, dům, řemeslo), ale bez přímého zápisu; vždy `note` proč |
+| `prob` | silná shoda (jméno, doba, místo, dům, řemeslo), ale bez přímého zápisu; vždy `note` proč. Patří sem i ztotožnění s jediným kandidátem v rejstříku a odvozené vztahy (pořadí manželství) – viz `SKILL.md`, „Pravidla, která chrání kvalitu“ |
 | `fam` | od rodiny / z rodinného dokumentu |
 | `mh` | jen z cizího stromu na internetu |
 | `unk` | známe jen místo v rodokmenu |
