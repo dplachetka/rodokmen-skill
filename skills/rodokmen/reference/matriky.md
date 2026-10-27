@@ -49,6 +49,10 @@ v archivu ani online ale ještě není. Zapiš do `archivni_dotazy.md`.
    s datem a jménem a slož je do mřížky (`magick … +append`, řádky `-append`); na jeden pohled je vidět, kde je hledaný
    rok nebo měsíc, a otevřeš jen ten snímek. Hotový nástroj: `python3 -I tools/nahledy.py <složka> pracovni/listy
    --snimky A-B [--oblast hlava|levy|scitani]` (u sčítání 1921 přední strany archů `--snimky 1-139/2`).
+   U dvoustran (ARON) je čitelnější `python3 -I tools/sloupce.py listy <složka> pracovni/listy --snimky A-B
+   [--x 0.04,0.42] [--puleni]`: z každé strany zvlášť vyřízne sloupec s datem, číslem domu a jménem (zlomky šířky
+   *strany*) a pruhy označí „258L/258P“. Kandidáta pak přibliž jen jeho řádek:
+   `sloupce.py zoom <složka> <snímek> L|P y0,y1 pracovni/radek.jpg` (plné rozlišení).
    Staré knihy svázané z **ročních výtahů** (Extractus, Consignatio, 18. stol.) nemusí jít po sobě a ročníky chybí;
    rok bývá jen v nadpisu výtahu. Než napíšeš „zápis tam není“, ověř hlavičky ročníků.
    **Nejisté datum** (číslice z pozdější poznámky): nejdřív projdi všechny možné roky v domovské farnosti, teprve pak

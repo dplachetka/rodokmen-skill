@@ -47,7 +47,9 @@ možná cesta – **celé snímky nikdy nečti jeden po druhém**.
    (záhlaví: rok, obec, strana – 10 snímků na list). Sčítání 1921: `--oblast scitani --snimky 1-139/2` (číslo domu
    a majitel z předních stran archů). Půli interval: nejdřív list ze začátku, středu a konce, pak jen potřebný úsek.
 3. **Hledání v úzkém rozsahu:** `--oblast levy` (datum, dům, jméno – 3 snímky na list), u jiného rozložení vlastní
-   oblast `--oblast x0,y0,x1,y1` (zlomky 0–1, ne pixely).
+   oblast `--oblast x0,y0,x1,y1` (zlomky 0–1, ne pixely). U dvoustran čitelněji
+   `python3 -I tools/sloupce.py listy "<složka>" pracovni/pom_<větev>/sloupec --snimky A-B` (sloupec z každé strany,
+   4 dvoustrany na list, `--puleni` pro větší písmo) a řádek kandidáta `sloupce.py zoom "<složka>" <snímek> L|P y0,y1 <out.jpg>`.
 4. **Plné rozlišení jen u kandidáta:** `python3 -I tools/overit.py "<snímek>" x0,y0,x1,y1 pracovni/pom_<větev>/over`
    (zápis na dvě čitelné poloviny), nebo `nahledy.py … --snimky N --oblast cely --sirka 1500`; u nestaženého svazku
    výřez nástrojem portálu (viz výše).

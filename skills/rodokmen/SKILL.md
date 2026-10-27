@@ -235,8 +235,8 @@ Od zhruba stovky osob (datové soubory mají stovky kB) se drž tohoto a řekni 
    tokenů): hledej přes `hledej.py` (nebo `grep -n`), přečti jen potřebné řádky a zapisuj podle pravidla „Zápis do dat“.
 3. **Čti po sloupcích, ne po dvoustranách:** rejstřík, je-li; pak mapa knihy z kontaktního listu záhlaví
    (`nahledy.py --oblast hlava`: který snímek je který rok a obec) – **zapiš ji do deníku**, ať se příště nehledá; pak
-   úzké pruhy sloupce s datem, číslem domu a jménem (`--oblast levy` nebo vlastní zlomky) a plné rozlišení jen u řádku
-   kandidáta. Celé dvoustrany jen výjimečně.
+   úzké pruhy sloupce s datem, číslem domu a jménem z každé strany dvoustrany (`sloupce.py listy`, 4 dvoustrany na list)
+   a plné rozlišení jen u řádku kandidáta (`sloupce.py zoom`). Celé dvoustrany jen výjimečně.
 4. **Drahé hledání ohlas předem:** nad ~30 snímků bez rejstříku (hlavně latinské knihy) řekni uživateli odhad a přínos
    a nech ho rozhodnout. Ukazuje-li aplikace využití limitu, změř cenu na prvních pár snímcích a přepočítej na celek.
 5. **Krátké výstupy příkazů:** `| tail` / `| head`, chyby nevypisuj celé; na výřezy a kontaktní listy hotové nástroje,
@@ -341,6 +341,7 @@ Nedělej to pořád. Postup:
 | `ged_import.py strom.ged "Jméno"` | předci z rodinného stromu (GEDCOM) + fronta zápisů |
 | `ftb_export.py strom.ftb out.ged ["Jméno" rok linie.md [Photos/]]` | záloha z MyHeritage (.ftb) → GEDCOM + přímá linie s původem údajů |
 | `nahledy.py <složka> <výstup> [--snimky A-B] [--oblast hlava\|levy\|scitani\|…]` | kontaktní listy: záhlaví, sloupce nebo čísla domů z mnoha snímků v jednom obrázku – orientace bez otvírání celých snímků |
+| `sloupce.py listy <složka> <výstup> --snimky A-B [--x 0.04,0.42] [--strany LP\|C] [--puleni] [--kontrast]`, `sloupce.py zoom <složka> <snímek> L\|P\|C y0,y1 <out.jpg>` | pruhy jednoho sloupce (datum, číslo domu, jméno) z každé strany dvoustrany vedle sebe; `zoom` = jen řádek kandidáta v plném rozlišení |
 | `overit.py <snímek> x0,y0,x1,y1 <prefix>` | zápis na dvě čitelné poloviny – ověření čtení (souřadnice = zlomky 0–1) |
 | `napady.py` | náměty na zajímavosti z dat |
 | `vyrez.py <stránka.jpg> <klíč> x0,y0,x1,y1` | výřez do `zdroje/` a `vyrezy/` |
