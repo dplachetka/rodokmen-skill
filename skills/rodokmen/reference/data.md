@@ -121,7 +121,7 @@ jako ostatní datové soubory:
   podle faktů nástroje spojují osobu s domem (mapa domů, skill stare-adresy). Ve faktu jen dům této osoby, jeden dům
   na fakt; jiné nebo sporné číslo (rodinný strom, dům sourozence či kmotra) patří do `note`. I v `note`, `t` a ve shrnutí
   zápisů piš „čp.“. **Citace „…“ a přepisy (`prepisy.json`) zůstávají doslova** („No 112“, „N° 112“, „č. 112“).
-  `kontrola.py` hlásí fakta s „Obec č. N“ (všechna: `kontrola.py --cp`).
+  `kontrola.py` hlásí fakta s „Obec č. N“; opraví je `python3 -I tools/nacti_osoby.py cp` (postup v SKILL.md, krok 1).
 - `r` klíče zápisů ze `zaznamy.json`. `st` viz `matriky.md`: `doc` přečteno v matrice, `prob` pravděpodobné,
   `fam` od rodiny (i strom, který si rodina vede sama, např. GEDCOM z jejího MyHeritage), `mh` cizí strom z internetu, `unk`.
 - `note` proč je údaj nejistý, rozpory, odkud se vzal. Žijící lidé: jen jméno a rok narození, `"note": "Žijící – údaje jen základní."`

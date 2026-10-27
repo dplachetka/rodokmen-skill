@@ -36,6 +36,11 @@ Najdeš v ní `tools/` (nástroje), `template/` (šablona projektu a webu) a `re
    příbuzné: `python3 -I tools/nacti_osoby.py sourozenci`, fakta z jejich textů přepiš do `f` a ulož do gitu.
    Po aktualizaci spusť `python3 -I tools/aron_img.py odkazy`: odkazy na ARON z dřívějších verzí otevírají knihu na prvním
    snímku – opraví je `… odkazy --opravit`.
+   Hlásí-li `kontrola.py` „fakta s domem Obec č. N“, sjednoť je na „Obec čp. N“ (`reference/data.md`): nejdřív ulož
+   rozpracované změny do gitu, pak `python3 -I tools/nacti_osoby.py cp --nanecisto` a ukaž uživateli pár řádků výpisu.
+   Po souhlasu totéž bez `--nanecisto`, `kontrola.py` a samostatný commit („Fakta: dům jako Obec čp. N“). Mění jen fakta
+   `f` a jen mimo citace „…“; poznámky, texty, shrnutí zápisů a přepisy nechává. „č. N“ bez obce („chalupník z č. 12“)
+   nástroj nepozná – obec dopiš, až budeš na té osobě pracovat, nehádej ji.
 2. Projekt ještě není → **Fáze 0**.
 
 ## Fáze 0 – Příprava (jednou)

@@ -14,6 +14,11 @@ Boční příbuzní ve starém tvaru (roky ve jméně, vztah jen v textu):
 „Josef Plachetka (* 1931)“ → n „Josef Plachetka“, y „* 1931“; text „Bratr Zdeňka, …“ → v „bratr“, „Učeň …“ → v „učeň“,
 text s „Nepříbuzný“ → v „nepříbuzný“. Text zůstává celý, nic jiného se nemění,
 fakta z textu do f přepiš ručně (u žijících je raději vynech, viz kontrola.py). --nanecisto jen vypíše, co by změnil.
+
+Dům ve faktech jako „Obec čp. N“ (kontrola.py hlásí „Obec č. N“):
+  python3 -I tools/nacti_osoby.py cp [--nanecisto]
+„Houdkovice č. 33“, „v Holicích č. p. 5“ → „… čp. 33“, „… čp. 5“ ve faktech f předků i bočních příbuzných. Citace „…“
+zůstávají doslova, poznámky, texty a přepisy se nemění. --nanecisto jen vypíše, co by změnil.
 """
 import ast, json, os, re, shutil, sys
 
@@ -22,6 +27,11 @@ if sys.version_info < (3, 15):   # skoro všechny nástroje skillu načítají t
              "Nainstalujte novější (macOS: brew install python, Windows: py install 3.15) a spusťte nástroj znovu.")
 
 SEKCE = ("P", "LINES", "SIDE", "ISSUES", "HYPOTEZY", "SAME")
+UP, LO = "A-ZÁČĎÉĚÍŇÓŘŠŤÚŮÝŽ", "a-záčďéěíňóřšťúůýž"
+# dům jinak než „Obec čp. N“: „Houdkovice č. 33“, „v Holicích č. p. 5“, „Kostelec n. O. č. 12“ (ne „č.ev.“, ne „čp.“);
+# skupina 2 je to, co se přepíše na „čp.“ – hlásí kontrola.py, opraví cp()
+CP_JINAK = re.compile(rf"([{UP}][{LO}]*\.?(?:\s\([^)]*\))?\s+)(č\.(?:\s?p\.)?)(\s?\d+)")
+CITACE = re.compile(r"„[^“”\"]*(?:[“”\"]|$)|\"[^\"]*(?:\"|$)")
 POPIS = ("Předci podle Kekulého čísel (1 = výchozí osoba, otec osoby n = 2n, matka = 2n+1), rody LINES, boční "
          "příbuzní SIDE, otázky ISSUES, HYPOTEZY, SAME. Formát: reference/data.md ve skillu rodokmen.")
 
@@ -29,6 +39,20 @@ POPIS = ("Předci podle Kekulého čísel (1 = výchozí osoba, otec osoby n = 2
 def _cislo(k):
     """Kekulého číslo z klíče JSON („8“ → 8); co není číslo, nechá být (kontrola.py to nahlásí)."""
     return int(k) if isinstance(k, str) and k.isdigit() else k
+
+
+def mimo_citace(text):
+    """Text s citacemi („…“) nahrazenými mezerami – citace zůstávají doslova; neuzavřená sahá do konce textu."""
+    return CITACE.sub(lambda m: " " * len(m.group(0)), text)
+
+
+def cp_opravit(text):
+    """„Obec č. N“ → „Obec čp. N“ mimo citace."""
+    out, i = [], 0
+    for m in CP_JINAK.finditer(mimo_citace(text)):
+        out += [text[i:m.start(2)], "čp."]
+        i = m.end(2)
+    return "".join(out) + text[i:]
 
 
 def _poradi(k):
@@ -230,6 +254,43 @@ def sourozenci(data_dir, ulozit=True):
     return zmeny
 
 
+def cp(data_dir, ulozit=True):
+    """„Obec č. N“ → „Obec čp. N“ ve faktech f (P i SIDE), citace beze změny. Vrací seznam změn (jako text)."""
+    path = os.path.join(data_dir, "osoby.json")
+    with open(path, encoding="utf-8-sig") as f:
+        data = json.load(f)                      # syrově, ať zůstane _popis i pořadí
+    zmeny = []
+    kdo = [(f"osoba {k} ({p.get('n')})", p) for k, p in (data.get("P") or {}).items() if isinstance(p, dict)]
+    kdo += [(f"boční příbuzný {s.get('n')} (u P {s.get('k')})", s) for s in data.get("SIDE", []) if isinstance(s, dict)]
+    for kde, z in kdo:
+        if not isinstance(z.get("f"), list):
+            continue
+        nove = [cp_opravit(t) if isinstance(t, str) else t for t in z["f"]]
+        zmeny += [f"  {kde}: {a}  →  {b}" for a, b in zip(z["f"], nove) if a != b]
+        z["f"] = nove
+    if zmeny and ulozit:
+        text = format_osoby(data)
+        with open(path, encoding="utf-8-sig") as f:
+            puvodni = json.load(f)
+        # pojistka: jinak než zkratkou čísla domu se nesmí změnit nic, citace „…“ vůbec – jinak neukládat
+        zkratka = lambda v: re.sub(r"č(?:p\.|\.(?:\s?p\.)?)", "#", v) if isinstance(v, str) else v
+        stejne = lambda a, b: json.dumps(a, ensure_ascii=False) == json.dumps(b, ensure_ascii=False)
+        fakta = lambda d: [t for z in list((d.get("P") or {}).values()) + d.get("SIDE", []) if isinstance(z, dict)
+                           for t in z.get("f") or []]
+        bez_f = lambda d: {**d, "P": {k: {**z, "f": None} if isinstance(z, dict) else z for k, z in (d.get("P") or {}).items()},
+                           "SIDE": [{**z, "f": None} if isinstance(z, dict) else z for z in d.get("SIDE", [])]}
+        nove = json.loads(text)
+        assert stejne(bez_f(puvodni), bez_f(nove)) and len(fakta(puvodni)) == len(fakta(nove)) \
+            and all(zkratka(a) == zkratka(b) and (not isinstance(a, str) or CITACE.findall(a) == CITACE.findall(b))
+                    for a, b in zip(fakta(puvodni), fakta(nove))), \
+            "oprava by změnila i jiné údaje – nic jsem neuložil, nahlas to prosím (poznamky_pro_skill.md)"
+        tmp = path + ".tmp"
+        with open(tmp, "w", encoding="utf-8", newline="\n") as f:
+            f.write(text)
+        os.replace(tmp, path)
+    return zmeny
+
+
 if __name__ == "__main__":
     root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
     if sys.argv[1:] == ["prevod"]:
@@ -243,5 +304,13 @@ if __name__ == "__main__":
         print("\n".join(zmeny))
         if zmeny and not zkouska:
             print("Fakta z textu (data narození, sňatky, úmrtí) přepiš do f ručně; pak python3 -I tools/kontrola.py.")
+    elif sys.argv[1:2] == ["cp"]:
+        zkouska = "--nanecisto" in sys.argv
+        zmeny = cp(os.path.join(root, "data"), ulozit=not zkouska)
+        print((f"{'Změnil bych' if zkouska else 'Upraveno'} {len(zmeny)} faktů (citace „…“ beze změny):" if zmeny
+               else "Fakta už píšou dům jako „Obec čp. N“, není co měnit."))
+        print("\n".join(zmeny))
+        if zmeny and not zkouska:
+            print("Pak python3 -I tools/kontrola.py a ulož do gitu jako samostatnou změnu.")
     else:
         sys.exit(__doc__)
