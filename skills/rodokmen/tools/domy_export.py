@@ -149,10 +149,10 @@ def main():
         for i, s in enumerate(p.get("side", [])):
             if isinstance(s, dict):
                 sn = s.get("name") or ""
-                m = re.match(r"(.*?)\s*\(([^)]*)\)$", sn)
-                si = {"slug": p["slug"], "name": m.group(1) if m else sn, "years": m.group(2) if m else "",
+                m = re.match(r"(.*?)\s*\(([^)]*)\)$", sn)   # starší projekty mají roky ve jméně, nové v years
+                si = {"slug": p["slug"], "name": m.group(1) if m else sn, "years": s.get("years") or (m.group(2) if m else ""),
                       "rel": f"{p.get('rel', '')} {name}".strip(), "rod": item["rod"], "bocni": f"pribuzny-{i}"}
-                texty.append((s.get("text") or "", si, {}))
+                texty += [(t, si, {}) for t in s.get("facts", []) + [s.get("text") or ""]]
         plne = [z for t, _, _ in texty for z in zminky(t)]
         vychozi = max({o for o, _ in plne}, key=[o for o, _ in plne].count) if plne else obec_norm(" ".join(t for t, _, _ in texty))
         for t, kdo, kam in texty:
