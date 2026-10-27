@@ -161,7 +161,8 @@ jako ostatní datové soubory:
   "odkaz": "https://aron.vychodoceskearchivy.cz/apu/…/dao/…/file/…"}]
 ```
 - `klic`: malá písmena bez diakritiky, `obec_druh_kdo_rok` (druh: krest, snatek, umrti, index, scitani…). Je to i název obrázku.
-- `druh`: N, O, Z, I (index/rejstřík), S (sčítání), J (jiný pramen).
+- `druh`: N, O, Z, I (index/rejstřík), S (sčítání), J (jiný pramen: noviny, soupis, rodinný doklad). U rodinného dokladu
+  (křestní list, dopis od rodiny) `odkaz` není – `kontrola.py` ho u `J` nevyžaduje; u novin a jiných online pramenů ho doplň.
 - `datum` jako v češtině („14. 2. 1890“, „3/1867“, „1797“) – web podle něj řadí.
 
 ## `svazky.json`
