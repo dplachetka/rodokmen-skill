@@ -39,12 +39,13 @@ _dostupny = False
 
 
 def dostupnost():
-    """Rychlý test (10 s), jestli ARON odpovídá – jinak by stahování viselo minuty (90 s × 4 pokusy)."""
+    """Test (30 s), jestli ARON odpovídá – jinak by stahování viselo minuty (90 s × 4 pokusy).
+    Úvodní stránka se při zátěži načítá i 20 s, kratší limit hlásil výpadek, i když ARON běžel."""
     global _dostupny
     if _dostupny:
         return
     try:
-        urllib.request.urlopen(WEB, timeout=10).read(1)
+        urllib.request.urlopen(WEB, timeout=30).read(1)
     except urllib.error.HTTPError as e:
         if e.code < 500:          # server odpovídá (jen jiná stránka) – to stačí
             _dostupny = True
@@ -52,7 +53,7 @@ def dostupnost():
         sys.exit(f"ARON teď neodpovídá (chyba serveru {e.code}). Zkuste to za chvíli, nebo stáhněte svazek ručně "
                  "v prohlížeči (reference/portaly.md → ARON, celé svazky).")
     except OSError:
-        sys.exit("ARON teď neodpovídá (žádná odpověď do 10 s). Zkuste to za chvíli, nebo stáhněte svazek ručně "
+        sys.exit("ARON teď neodpovídá (žádná odpověď do 30 s). Zkuste to za chvíli, nebo stáhněte svazek ručně "
                  "v prohlížeči (reference/portaly.md → ARON, celé svazky).")
     _dostupny = True
 
