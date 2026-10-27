@@ -177,6 +177,9 @@ Pravidla, která chrání kvalitu (naučená na skutečném projektu):
   Hlavně u předků, kteří stojí na jediném zápisu (`doc` s jedním klíčem v `r`), a u jmen s „(?)“. Ne jako samostatné
   velké kolo, ale průběžně, když v knize jsi. Opravu zapiš do přepisu, zápisu, osoby i deníku. (Skutečná oprava:
   nejasné „Fröhlichová“ bylo ve druhém zápisu čitelně „Bičíková“.)
+- **Datum narození hledej u každého předka**, i když věk ze sňatku nebo úmrtí dává „asi 1756“ a láká jít o generaci výš.
+  Chybí-li, zapiš do deníku proč (kniha chybí, nenalezeno v rozsahu …, rodina přišla odjinud / mimo farnost) – ať se
+  příští sezení nevrací do týchž knih.
 - **Nic nedomýšlej.** Nejisté čtení „(?)“, rozpory zapiš do `ISSUES`. Písaři se pletli (jména sourozenců, věk, Anna/Františka).
 - **Čti celý zápis včetně okrajů** – pozdější poznámky o úmrtí, sňatku, legitimaci bývají nejcennější.
 - **Rodina přes čísla domů**: stejné číslo popisné a řemeslo přes generace je silná stopa; v knize hledej celé domácnosti.
