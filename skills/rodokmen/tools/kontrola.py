@@ -2,6 +2,7 @@
 """Kontrola konzistence dat rodokmenu. Spouštějte po každé větší změně a před stavbou webu.
 
 Použití: kontrola.py
+        kontrola.py --cp   jen vypíše fakta, která píšou dům jako „Obec č. N“ (správně „Obec čp. N“, reference/data.md)
 Vypíše CHYBY (rozbijí web nebo jsou věcně špatně) a UPOZORNĚNÍ (něco chybí, doplnit).
 Návratový kód 1, pokud jsou chyby.
 """
@@ -23,6 +24,15 @@ def jload(name, default):
 
 
 STAVY = ("doc", "prob", "fam", "mh", "unk")
+UP, LO = "A-ZÁČĎÉĚÍŇÓŘŠŤÚŮÝŽ", "a-záčďéěíňóřšťúůýž"
+# dům jinak než „Obec čp. N“: „Houdkovice č. 33“, „v Holicích č. p. 5“, „Kostelec n. O. č. 12“ (ne „č.ev.“, ne „čp.“)
+CP_JINAK = re.compile(rf"[{UP}][{LO}]*\.?(?:\s\([^)]*\))?\s+č\.(?:\s?p\.)?\s?\d+")
+CITACE = re.compile(r"„[^“”\"]*(?:[“”\"]|$)|\"[^\"]*(?:\"|$)")
+
+
+def mimo_citace(text):
+    """Text s citacemi („…“) nahrazenými mezerami – citace zůstávají doslova; neuzavřená sahá do konce textu."""
+    return CITACE.sub(lambda m: " " * len(m.group(0)), text)
 
 
 def rok_narozeni(y, facts, name):
@@ -106,6 +116,20 @@ def main():
             print("CHYBA:", e)
         sys.exit("Opravte tvar data/osoby.json (reference/data.md), jinak nepůjde ani npm run data.")
     P, SIDE, LINES, SAME = ns.get("P", {}), ns.get("SIDE", []), ns.get("LINES", {}), ns.get("SAME", {})
+    # podle faktů nástroje spojují osobu s domem (mapa domů, stare-adresy) – „č. 33“ nemusí poznat
+    cp_jinak = [(kde, f, m.group(0))
+                for kde, fakta in [(f"osoba {k} ({p.get('n')})", p.get("f", [])) for k, p in P.items()]
+                + [(f"boční příbuzný {s.get('n')} (u P {s.get('k')})", s.get("f", [])) for s in SIDE]
+                for f in fakta for m in CP_JINAK.finditer(mimo_citace(f))]
+    if "--cp" in sys.argv:
+        for kde, f in dict.fromkeys((kde, f) for kde, f, _ in cp_jinak):
+            print(f"{kde}: {f}")
+        sys.exit(0)
+    if cp_jinak:
+        priklady = "; ".join(f"{kde}: „{u}“" for kde, _, u in cp_jinak[:3])
+        warn.append(f"fakta s domem „Obec č. N“: {len({(kde, f) for kde, f, _ in cp_jinak})} (u {len({kde for kde, _, _ in cp_jinak})} osob) "
+                    f"– přepiš na „Obec čp. N“, citace „…“ nech doslova (reference/data.md); např. {priklady}; "
+                    f"všechna: python3 -I tools/kontrola.py --cp")
     zaz = jload("zaznamy.json", [])
     svazky, prep, hl = jload("svazky.json", {}), jload("prepisy.json", {}), jload("zvyrazneni.json", {})
     keys = [z.get("klic") for z in zaz]

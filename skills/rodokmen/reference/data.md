@@ -117,6 +117,11 @@ jako ostatní datové soubory:
   `"asi 1720–1785"`, `"1680 – před 1740"`, `"† 1940"` když známe jen úmrtí; nic nevíme → `""`).
 - `f` fakta: začínají `*` (narození), `×` (sňatek), `†` (úmrtí) nebo jsou volný text (řemeslo, bydliště).
   Názvy obcí ve faktech používá mapa (`mista.json` → `re`).
+  **Dům vždy jako „Obec čp. N“** (`* 14. 2. 1890 Holice čp. 112`, i skloňované „v Holicích čp. 112“), ne „č. 112“ –
+  podle faktů nástroje spojují osobu s domem (mapa domů, skill stare-adresy). Ve faktu jen dům této osoby, jeden dům
+  na fakt; jiné nebo sporné číslo (rodinný strom, dům sourozence či kmotra) patří do `note`. I v `note`, `t` a ve shrnutí
+  zápisů piš „čp.“. **Citace „…“ a přepisy (`prepisy.json`) zůstávají doslova** („No 112“, „N° 112“, „č. 112“).
+  `kontrola.py` hlásí fakta s „Obec č. N“ (všechna: `kontrola.py --cp`).
 - `r` klíče zápisů ze `zaznamy.json`. `st` viz `matriky.md`: `doc` přečteno v matrice, `prob` pravděpodobné,
   `fam` od rodiny (i strom, který si rodina vede sama, např. GEDCOM z jejího MyHeritage), `mh` cizí strom z internetu, `unk`.
 - `note` proč je údaj nejistý, rozpory, odkud se vzal. Žijící lidé: jen jméno a rok narození, `"note": "Žijící – údaje jen základní."`
