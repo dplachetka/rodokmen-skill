@@ -20,14 +20,19 @@ v archivu ani online ale ještě není. Zapiš do `archivni_dotazy.md`.
 
 ## Jak vypadá hledání v praxi
 1. **Obec → farnost.** Malé vesnice patřily k faře v sousední obci; popis svazku vyjmenovává všechny obce farnosti.
-   Hledej obec v popisu svazku (`aron_search.py "Obec"`), ne jen v názvu.
-2. **Svazek podle roku a druhu.** Pozor na překryvy: jedna kniha pro více obcí, „duplikáty“, zvláštní knihy pro jednotlivé obce.
+   Hledej obec v popisu svazku (`aron_search.py "Obec"`), ne jen v názvu – a hledej i podle obce, ne jen podle fary
+   z pozdějšího zápisu: obec mohla mít vlastní matriku (filiální kostel, lokálie), i když list vydala mateřská fara.
+   Obec rozdělená mezi dvě fary má dvě řady knih, každou jen pro „svá“ čísla domů.
+2. **Svazek podle roku a druhu.** Pozor na překryvy: jedna kniha pro více obcí, zvláštní knihy pro jednotlivé obce.
+   **Druhopisy** (duplikáty pro děkanát nebo úřad, např. „T“ svazky v ZA Opava) mívají N, O a Z jednoho roku u sebe –
+   hodí se, když originál chybí, je nečitelný nebo velký.
 3. **Index, pak kniha.** Index řazený po písmenech a letech dá stránku/folio; snímek odhadni (snímek ≈ folio × 1 až 2) a dolaď.
    Starší rejstříky (18. stol.) občas ukazují o 1–4 strany vedle – když zápis na udané straně není, listuj kolem.
    Posun „snímek – strana“ se v knize mění (vložené listy, chybějící strany) – přečti číslo strany na náhledu a dopočítej.
    U starých far se vyplatí nejdřív najít **souhrnný index** přes víc desetiletí (např. N/O/Z 1636–1746) – dovede
    rychle až do 17. století. Rejstříky bývají podle **německého pravopisu**: česká jména na O a V hledej i pod W
    (Otava = Wotawa, Vávra = Wawra). Knihy pro více obcí bývají řazené po obcích, rejstřík na konci.
+   Velké fary mají rejstříky i jako **samostatné svazky** (např. rejstřík oddaných přes 300 let) – hledej je nejdřív.
    **Když matrika chybí** (není online nebo se nedochovala), zkus rejstřík – bývá vedený zvlášť a přežil i tam, kde kniha
    ne. Zápis v rejstříku dokládá datum, místo a otce; zapiš ho jako `prob` (opis, ne originál) a matriku zkus později.
    **Rejstřík s oddíly podle obcí:** čísla stran v rejstříku bývají strany *oddílu obce* (každá obec začíná znovu „Pag. 1“),
@@ -40,6 +45,10 @@ v archivu ani online ale ještě není. Zapiš do `archivni_dotazy.md`.
    s datem a jménem a slož je do mřížky (`magick … +append`, řádky `-append`); na jeden pohled je vidět, kde je hledaný
    rok nebo měsíc, a otevřeš jen ten snímek. Hotový nástroj: `python3 -I tools/nahledy.py <složka> pracovni/listy
    --snimky A-B [--oblast hlava|levy|scitani]` (u sčítání 1921 přední strany archů `--snimky 1-139/2`).
+   Staré knihy svázané z **ročních výtahů** (Extractus, Consignatio, 18. stol.) nemusí jít po sobě a ročníky chybí;
+   rok bývá jen v nadpisu výtahu. Než napíšeš „zápis tam není“, ověř hlavičky ročníků.
+   **Nejisté datum** (číslice z pozdější poznámky): nejdřív projdi všechny možné roky v domovské farnosti, teprve pak
+   okolní fary. (Skutečná chyba: „9?“ přečteno jako 97, prošlo se pět okolních far; sňatek byl doma o pět let dřív.)
 5. **Přečti celý zápis**, pak se podívej i na okolí (dvojčata, další děti stejných rodičů).
 6. **Sňatek se obvykle konal ve farnosti nevěsty** (v jejím bydlišti) – hledej ho nejdřív tam, pak ve faře ženicha.
    Nedaří se? Ve křtu dítěte bývá (Praha ~1880–1890) připsané datum a místo sňatku rodičů – ověř ho v oddaných.
@@ -81,7 +90,8 @@ v archivu ani online ale ještě není. Zapiš do `archivni_dotazy.md`.
 - Ženská příjmení v němčině bez „-ová“ (Maria Novak = Marie Nováková).
 - Názvy obcí mívají staré tvary, třeba s předsunutým „V“ („Volešnice“ = Olešnice); při hledání obce zkus i ty.
 - Kurent: dlouhé „ſ“ vypadá jako „f“, „e“ jako „n“, „h“ s kličkou dolů. Při nejistotě porovnej se stejným písmenem
-  jinde na stránce stejné ruky.
+  jinde na stránce stejné ruky – i u „divného“ příjmení (koncové „k“ psané skoro jako „r“: „-ek“ vypadá jako „-er“).
+  Slovo rozdělené přes konec řádku („Urlau-“ / „ber“) dočti na začátku dalšího řádku.
 - Daty bývají svátky (*Dominica*, *festum S. Joannis*) – v nejasných případech dopočítej.
 
 ### Slovníček (lat. / něm. → česky)
@@ -137,6 +147,8 @@ v archivu ani online ale ještě není. Zapiš do `archivni_dotazy.md`.
   „no matches found“; `echo ====` je chyba (`=` na začátku slova). Složitější smyčky pouštěj přes `bash -c '…'`.
 - ImageMagick: seznam souborů předávej jako jednotlivé argumenty, ne jednou proměnnou s mezerami.
   `files=$(ls …); for f in $files` v zsh nedělí na řádky – použij `for f in $D/*.jpg`.
+  `-annotate` potřebuje písmo: `-font /System/Library/Fonts/Supplemental/Arial.ttf` (bez něj spadne na „unable to read
+  font“; totéž `montage` s popisky) – pořadí výřezů raději vypiš zvlášť.
 - **ImageMagick `-crop 40%x12%+53%+11%` nedělá, co čekáš:** procenta platí jen pro šířku a výšku výřezu, posun `+53%+11%`
   se bere v pixelech (výřez pak vyjde z levého horního rohu). Posun spočítej v pixelech z `magick identify -format "%w %h"`,
   nebo použij `vyrez.py` / `overit.py` (zlomky 0–1).
@@ -144,7 +156,6 @@ v archivu ani online ale ještě není. Zapiš do `archivni_dotazy.md`.
   snímky a `magick` vyrobí stovky výstupů. Vždy celý jedinečný prefix (`*<KÓD SVAZKU>_00NNN_*`).
 - **Pomocníci a cena:** u menších úkolů (rejstřík, ~10 snímků) čti sám, bez pomocníka. Na celou knihu pomocník
   `ctenar-matrik` (Sonnet, u těžkých knih Opus; kontaktní listy, viz `SKILL.md`) – celé snímky jeden po druhém jsou nejdražší cesta.
-  `-annotate` potřebuje písmo: `-font /System/Library/Fonts/Supplemental/Arial.ttf`.
 - Ověření čtení: `python3 -I tools/overit.py <snímek> x0,y0,x1,y1 pracovni/over [v]` (zlomky 0–1, ne pixely) – zápis rozdělený na dvě poloviny
   zmenšené na 1900 px (dvoustrana je jinak nečitelná).
 - Výřez pro web (`vyrez.py`) dělej jen na **čtený zápis** (případně s hlavičkou sloupců), ne na celou dvoustranu –
@@ -161,9 +172,9 @@ v archivu ani online ale ještě není. Zapiš do `archivni_dotazy.md`.
   Po instalaci přes winget je `magick` v PATH až po restartu Claude Code. Písmo pro `-annotate`: `-font C:/Windows/Fonts/arial.ttf`.
 - Limit délky příkazové řádky je 32 767 znaků – stovky souborů (dlaždic) v jednom příkazu `magick` neprojdou
   (WinError 206); skládej po řádcích.
-- Skripty `.sh` přes Git Bash (`bash tools/…`). Markdown a JSON neupravuj `sed -i` (escapy v Git Bash rozbijí soubor),
-  ale nástrojem pro úpravu souborů nebo Pythonem (`newline="\n"`, u JSON `ensure_ascii=False, indent=1` jako nástroje;
-  `osoby.json` má jeden řádek na osobu – viz `reference/data.md`).
+- Skripty `.sh` přes Git Bash (`bash tools/…`). Markdown a JSON nikdy neupravuj `sed -i` (escapy v Git Bash rozbijí
+  soubor) – data zapisuj podle pravidla „Zápis do dat“ v SKILL.md (`osoby.json` má jeden řádek na osobu – viz
+  `reference/data.md`).
 - Windows nerozlišuje velikost písmen v názvech (`o_29.jpg` = `O_29.jpg`) – náhled a plné rozlišení odliš předponou
   (`nahled_`, `plne_`), jinak se přepíšou.
 - Datové soubory zapisuj v UTF-8 **bez BOM** (Windows PowerShell 5.1 s `-Encoding UTF8` přidá BOM a soubory `.json` pak nejdou načíst).

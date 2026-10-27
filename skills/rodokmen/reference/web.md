@@ -38,7 +38,9 @@ Náhled spouštěj na pozadí a uživateli pošli odkaz. Vzhled si ověř sám (
   proto ať ji uživatel nepoužívá jako heslo jinde. Bez odpovědi nasazení (`npm run nasadit`, `kontejner`, `deploy-caprover`)
   skončí chybou; otevřený web jen výslovně přes `"otevreny": true` v `prihlaseni`.
   Je to lehká ochrana proti náhodným návštěvníkům, ne bankovní zabezpečení – citlivé věci na web nepatří.
-- `citlive_schvaleno` = citlivé údaje, které uživatel schválil ke zveřejnění (`kontrola.py` je pak nehlásí; na web nejde), viz `soukromi.md`.
+- `citlive_schvaleno` = citlivé údaje, které uživatel schválil ke zveřejnění (`kontrola.py` je pak nehlásí; na web nejde):
+  místo a slovo (`"osoba 26: nemanželsk"`, `"*: dluh"`) nebo úryvek textu s hlášeným slovem (`"oběsil se ve stodole"`;
+  když se text změní, hlásí se znovu), viz `soukromi.md`.
 - `uvod.foto` = klíč obrázku ve `vyrezy/` (ulož přes `vyrez.py`).
 - `pribeh`: `menu` a `tlacitko` pojmenuj podle hlavního rodu („Příběh Novákových“), `rod` = číslo rodu (8–15).
   Bez vyplněného `uvod` ukáže úvodní stránka aspoň název a `lead` příběhu. Viz `pribehy.md`.
@@ -46,7 +48,9 @@ Náhled spouštěj na pozadí a uživateli pošli odkaz. Vzhled si ověř sám (
 
 ## Zveřejnění na Netlify (výchozí, zdarma)
 1. Uživatel si založí účet na netlify.com (stačí přihlášení přes Google/GitHub) – udělá sám.
-2. Přihlášení CLI (otevře prohlížeč) – dej uživateli: `! cd web && npx -y netlify-cli@latest login`
+2. Přihlášení CLI (otevře prohlížeč) – dej uživateli: `! cd web && npx -y netlify-cli@latest login`.
+   Když `!` nejde (cloudové prostředí): `npx -y netlify-cli@latest login --request "Rodokmen"` vypíše odkaz a číslo
+   lístku – uživatel odkaz otevře a schválí, pak `npx -y netlify-cli@latest login --check <lístek>`.
 3. Založení webu a propojení složky (interaktivní, jednou) – dej uživateli:
    `! cd web && npx -y netlify-cli@latest sites:create` (zvolí tým a název → adresa `https://<název>.netlify.app`),
    případně `npx netlify-cli link`, pokud web už existuje. Je-li uživatel už přihlášený, jde web založit i bez dotazů

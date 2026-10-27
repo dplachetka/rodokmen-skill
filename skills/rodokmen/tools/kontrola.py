@@ -201,12 +201,14 @@ def main():
     citlive = re.compile(r"sebevra|vzal[a]? si život|oběsil|zastřelil[a]? se|utopil[a]? se|alkohol|vězen|kriminál|"
                          r"rozvod|rozvedl|psychiatr|léčebn|duševn|rakovin|nemanželsk|cizoložst|dluh|exekuc|interrupc|potrat", re.I)
 
-    # Nedávné = osoba narozená 1870 a později (její potomci žijí); bez roku narození podle roků v textu.
+    # Nedávné = osoba narozená 1870 a později (její potomci žijí); bez roku narození podle roků v textu (posledních ~100 let).
     # Staré matriční údaje (nemanželské dítě v 18. stol.) nevadí, ani když poznámka zmíní sčítání 1921.
+    hranice = datetime.date.today().year - 100
+
     def recent(text, narozen=None, vychozi=False):
         if narozen:
             return narozen >= 1870
-        return vychozi or any(int(y) >= 1900 for y in re.findall(r"\b(19\d\d|20\d\d)\b", text))
+        return vychozi or any(int(y) >= hranice for y in re.findall(r"\b(19\d\d|20\d\d)\b", text))
     otazka = lambda x: re.sub(r"[:\s]+", " ", (x if isinstance(x, str) else x[0]))[:40].strip()   # stálý název i po přidání otázek
     texty = [(f"otázka {otazka(x)}", x if isinstance(x, str) else " ".join(x), None, False) for x in ns.get("ISSUES", [])]
     for k, p in P.items():
@@ -225,18 +227,32 @@ def main():
     for f in ("zajimavosti.md", "pribeh.md"):
         if os.path.exists(os.path.join(DATA, f)):
             texty += [(f, odst, None, False) for odst in open(os.path.join(DATA, f), encoding="utf-8").read().split("\n\n")]
-    # co uživatel výslovně schválil ke zveřejnění: web.json → "citlive_schvaleno": ["osoba 26: nemanželsk", "*: dluh", "ISSUES 3"]
-    schvaleno = {s.strip().lower() for s in cfg.get("citlive_schvaleno", [])}
-    for kde, text, narozen, vychozi in texty:
-        m = citlive.search(text)
-        if not m or not recent(text, narozen, vychozi):
-            continue
+    # co uživatel výslovně schválil ke zveřejnění, web.json → "citlive_schvaleno", dvojí tvar:
+    # místo a slovo ("osoba 26: nemanželsk", "*: dluh", jen místo "osoba 26" = všechna slova v něm),
+    # nebo úryvek textu se slovem ("oběsil se ve stodole") – platí jen pro to místo v textu; po změně textu se hlásí znovu
+    schvaleno = [s.strip() for s in (cfg.get("citlive_schvaleno") if isinstance(cfg.get("citlive_schvaleno"), list) else [])
+                 if isinstance(s, str) and len(s.strip()) >= 3]
+    schvaleno_mala = {s.lower() for s in schvaleno}
+
+    def schvalene(kde, text, m):
         slovo = m.group(0).lower()
-        if {kde.lower(), f"{kde.lower()}: {slovo}", f"*: {slovo}"} & schvaleno:
+        if {kde.lower(), f"{kde.lower()}: {slovo}", f"*: {slovo}"} & schvaleno_mala:
+            return True
+        for s in schvaleno:
+            i = text.find(s)
+            while i >= 0:
+                if i <= m.start() and m.end() <= i + len(s):
+                    return True
+                i = text.find(s, i + 1)
+        return False
+    for kde, text, narozen, vychozi in texty:
+        if not recent(text, narozen, vychozi):
             continue
-        warn.append(f"CITLIVÉ ({kde}): „…{text[max(0, m.start() - 40):m.end() + 40].strip()}…“ – jde na web; zeptej se uživatele, "
-                    f"jestli to tam smí být (reference/soukromi.md). Schválí-li to, přidej do data/web.json "
-                    f"\"citlive_schvaleno\": \"{kde}: {slovo}\"")
+        m = next((m for m in citlive.finditer(text) if not schvalene(kde, text, m)), None)
+        if m:
+            warn.append(f"CITLIVÉ ({kde}): „…{text[max(0, m.start() - 40):m.end() + 40].strip()}…“ – jde na web; zeptej se uživatele, "
+                        f"jestli to tam smí být (reference/soukromi.md). Schválí-li to, přidej do data/web.json "
+                        f"\"citlive_schvaleno\": \"{kde}: {m.group(0).lower()}\" (nebo úryvek textu s tím slovem)")
 
     if not os.path.exists(os.path.join(DATA, "pribeh.md")) and LINES:
         hlavni = min(LINES)
