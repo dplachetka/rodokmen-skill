@@ -55,6 +55,14 @@ Adresy u nevyzkoušených portálů ověř při prvním použití (portály se m
 - `trebon.py snimek <id_knihy> <snímek> pracovni/x.jpg [nahled]`, `trebon.py svazek <id_knihy>` (do `svazky.json`).
 - Trvalý odkaz: `https://digi.ceskearchivy.cz/<id_knihy>/<snímek>`.
 - Některé fary mají knihy po vesnicích, které nejsou v seznamu svazků místa (Vacov → Žár) – hledej podle titulků knih fary.
+- **Evangelické matriky** stránka místa často neukáže: ukazuje jen matriky původců s vazbou na místo (u Humpolce
+  římskokatolická fara a Církev čs.), přestože evangelické originály jsou v SOA Třeboň. Hledej je zvlášť – na portálu
+  podle evangelického sboru, nebo na FamilySearch (katalog podle místa, sekce níže).
+- **Původní rejstříky** (svazky „index N/O/Z“, ne dobrovolnické) `trebon.py rejstrik` nevrátí – čti je jako obrázky:
+  oddíl písmene najdi přes `snimek … nahled` na pár místech, stáhni jen snímky toho písmene a pojmenuj je
+  jako ze stažení ARON (`x_TREBON00_00012_.jpg` = snímek 12), aby je `nahledy.py` očíslovaly podle snímku. Rejstřík odkazuje na stranu knihy, ne na snímek
+  (ověř na jednom zápisu, např. snímek ≈ strana + 2).
+- `trebon.py snimek` u celých listů trvá dlouho (11 snímků přes 2 minuty) – víc snímků pouštěj na pozadí.
 - **Civilní matriky (1920–1945) lidí bez vyznání** jsou v knihách okresních úřadů (např. Tábor, kniha 12304) a mají
   dobrovolnický rejstřík (`trebon.py rejstrik 12304 N`). Dobrá cesta, když farní matrika mlčí. V `svazky "Obec"`
   se neukážou (patří okresu, ne obci) – id knihy najdi na portálu.

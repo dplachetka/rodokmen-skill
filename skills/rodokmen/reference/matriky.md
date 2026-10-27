@@ -62,7 +62,10 @@ v archivu ani online ale ještě není. Zapiš do `archivni_dotazy.md`.
    toho najdeš křest hned.
 7. **Rodina v katolické matrice chybí? Zkus evangelickou nebo židovskou.** Po toleranci (1781) vedly vlastní matriky
    evangelické sbory (a. v. i h. v.), jeden sbor pokrýval desítky obcí; v ARONu mají signatury „R …“ a `aron_search.py`
-   je najde podle obce. Ve východních Čechách časté (Rychnovsko, Dobrušsko, Opočensko). Židovské matriky viz `portaly.md`.
+   je najde podle obce. Ve východních Čechách časté (Rychnovsko, Dobrušsko, Opočensko), na Vysočině také (Humpolec,
+   Pelhřimovsko). **Po ~1849 katolické knihy evangelíky neobsahují** – ani jejich sňatky a úmrtí, přestože formulář má
+   sloupec pro „nekatolíky“. U evangelické rodiny hledej rovnou evangelické knihy; nejsou-li online, dej dotaz do
+   archivu (`archivni_dotazy.md`). Archivní portál je nemusí ukázat u obce (SOA Třeboň, viz `portaly.md`). Židovské matriky viz `portaly.md`.
    Ve 20. století (1920–1945) zkus i **civilní matriky** lidí bez vyznání u okresních úřadů (vyzkoušeno v SOA Třeboň, viz `portaly.md`).
    Že jde o člověka bez vyznání, prozradí **sčítání 1921** (sloupec náboženství, případně datum výstupu z církve).
 8. **Čti i kmotry a svědky.** Kmotra „manželka Jana X, zahradníka z č. 6“ u cizího křtu bývá jediná stopa, že se rodina
