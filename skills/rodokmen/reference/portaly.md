@@ -362,10 +362,29 @@ Nástroje pro ně hotové nejsou. Postupuj takto a výsledek zapiš do `STAV.md`
    a postup zapiš do `STAV.md`. Poznatek zapiš i do `poznamky_pro_skill.md` (pro správce skillu).
 
 ## Starší prameny (17.–18. století)
-- **Soupis poddaných podle víry 1651** – celé rodiny s věkem, po krajích; edice Národního archivu jako PDF
-  (nacr.cz, hledej „Soupis poddaných podle víry“ + kraj). Fulltext v PDF, příjmení často bez diakritiky / s jinou ortografií
-  (Šaršoun → „Šaroun“, dlouhé ſ jako f). Ves je v rámci panství; poznamenej si stránku edice.
-- **Berní rula 1654** – jen hospodáři s půdou; edice a rejstříky v knihovnách (Kramerius/DNNT).
+- **Soupis poddaných podle víry 1651** – celé rodiny s věkem, po krajích. Edice Národního archivu jsou zdarma jako PDF:
+  `https://www.nacr.cz/wp-content/uploads/2019/02/<Kraj>_cele_H_zamceno.pdf` (některé v `2019/01/`; stránka edice
+  nacr.cz → „Soupis poddaných podle víry z roku 1651“ + kraj). Vyšly Bechynsko, Berounsko, Boleslavsko, Chrudimsko,
+  Hradecko-Bydzovsko, Kourimsko, Loketsko, Plzensko, Rakovnicko, Zatecko; Čáslavsko jen v Krameriovi; Prácheňsko,
+  Litoměřicko, Slánsko, Kladsko a Chebsko se nedochovaly.
+  `pdftotext -layout` dá text v posunutém kódování (ì = ě, è = č, ø = ř, š a ž chybí) – hledej bez háčků („Ostaovice“)
+  a i jiné ortografie (Šaršoun → „Šaroun“, dlouhé ſ jako f). Ves začíná řádkem „Ves …“ / „Ve vsi …“, panství je nad ní
+  („Majitel:“). Stránku na web: `pdftoppm -f N -l N -r 220 -png` a `vyrez.py` na PNG; zápis druhu `J` se stránkou edice.
+- **Berní rula 1654** – jen hospodáři s půdou. Edice (sv. 1–34 a **generální rejstřík ke všem svazkům**) je v MZK
+  Kramerius (`https://api.kramerius.mzk.cz/search/api/client/v7.0/search`, režim DNNT): seznam svazků dá dotaz
+  `title.search:"berní rula" AND level:0`, fulltext ve svazku `root.pid:"uuid:…" AND text_ocr:Prijmeni*` vrací **čísla
+  stran i bez přihlášení**. Text a obraz stránky jen po přihlášení čtenáře (NK, eduID) – stránku ať otevře a pošle
+  uživatel. Některé svazky jsou jen ve studovně knihovny.
+- **Rychlé hledání příjmení po celé zemi v 17. století** (pár minut): grep ve všech PDF soupisu 1651 + fulltext
+  generálního rejstříku berní ruly → seznam vsí a stran, kde se příjmení vyskytuje. Teprve pak čti konkrétní stránky.
+- **Urbáře panství z 1650. let** zapisují celé rodiny s věkem (hospodář, žena, děti, čeleď) – mezi soupisem 1651
+  a prvními matrikami skoro jako sčítání. Malé vsi bývají uvnitř oddílu sousední vsi („Z Ostašovic“ v oddílu Křivice) –
+  hledej i podnadpisy. **Okrajové poznámky** u hospodářů jsou jména pozdějších držitelů gruntu: nezaměňuj je s obyvateli
+  roku zápisu, ale využij je ke spojení gruntu přes dvě generace. Urbáře SOA Zámrsk jsou na FamilySearch (sekce výše),
+  SOA Praha v eBadatelně (archiválie).
+- **První tereziánský katastr** (vizitace 1713–1722, jména hospodářů po vsích) je v digitální badatelně Národního
+  archivu (digitalnibadatelna.nacr.cz). Má ochranu proti robotům – čte jen uživatel a posílá snímky. Svazky kraje jsou
+  po panstvích abecedně (A–F, G–K …), Č bývá psáno „Tsch“. Na FamilySearch je jen tištěná edice.
 - **Gruntovní (pozemkové) knihy** – převody domů z otce na syna; online jen část (SOA Plzeň téměř vše, SOA Praha část,
   ostatní spíš badatelna). Fond „Velkostatek <panství>“.
 - **Mapy stabilního katastru (1824–43)** – kde stál dům s číslem popisným: Archiv ČÚZK na **ags.cuzk.gov.cz/archiv/**
