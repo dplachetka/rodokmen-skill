@@ -8,7 +8,7 @@ Matriky jsou online u osmi státních archivů – podle toho, **kde předci ži
 | SOA Praha | střední Čechy | eBadatelna – ebadatelna.soapraha.cz | **ano – nástroj `ebadatelna.py`** (i urbáře a gruntovní knihy) |
 | SOA Plzeň | západní Čechy | Porta fontium – portafontium.eu | **ano – nástroj `portafontium.py`** |
 | SOA Třeboň | jižní Čechy | digi.ceskearchivy.cz | **ano – nástroj `trebon.py`** |
-| SOA Litoměřice | severní Čechy | Digitální badatelna – digi.soalitomerice.cz | **částečně – `soal_zoomify.py`** (knihu najdi v prohlížeči) |
+| SOA Litoměřice | severní Čechy | Digitální badatelna – digi.soalitomerice.cz | **částečně – `soal_zoomify.py`** (knihu najdi v prohlížeči; při výpadku FamilySearch) |
 | AHMP | hl. m. Praha | katalog.ahmp.cz (Pragapublica) | **ano – `ahmp_search.sh`, `ahmp_scan.py`** |
 | MZA Brno | jižní Morava, Vysočina z části | Acta Publica – www.mza.cz/actapublica | částečně – v prohlížeči (postup níže) |
 | ZA Opava | severní Morava a Slezsko, Olomoucko a Litovelsko | Digitální badatelna – digi.archives.cz/da/ | **částečně – `soal_zoomify.py`** (jen s prohlížečem, CAPTCHU řeší uživatel) |
@@ -106,17 +106,41 @@ Adresy u nevyzkoušených portálů ověř při prvním použití (portály se m
   a farností je mnoho – bez přesného data a farnosti (z úmrtí/sňatku nebo od rodiny) je hledání velmi drahé.
 
 ## SOA Litoměřice (severní Čechy) – `tools/soal_zoomify.py`
-- Digitální badatelna digi.soalitomerice.cz má na vstupu automatické ověření (asi 15 s „počítání“) → knihu a snímek
-  najdi v prohlížeči. V síťovém provozu pak najdi adresu `…/zoomify/cz/archives/CZ-214000010/matriky/<cesta>/ImageProperties.xml`.
-- Snímky stahuj nástrojem: `python3 -I tools/soal_zoomify.py <cesta> 0 pracovni/x.jpg` (0 = plné rozlišení, 1 = poloviční).
+- **Dostupnost:** digitální badatelna `https://digi.soalitomerice.cz/digitalnibadatelna/` bývá i dny mimo provoz – vrací 404
+  (výchozí stránka Tomcatu), nebo HTTP 200 s textem „Aplikace 'Vademecum' je z technických důvodů dočasně mimo provoz“.
+  Kód 200 tedy neznamená „funguje“, podívej se na text. Mezitím zkus FamilySearch (níže – mnoho matrik i sčítání SOA
+  Litoměřice tam je), jinak e-mail badatelna@soalitomerice.cz.
+- Na vstupu je automatické ověření (asi 15 s „počítání“) → knihu a snímek hledej v prohlížeči.
+- **Hledání:** do pole hledání psaní na souřadnice nefunguje; funguje JavaScript
+  `patternTxt.value = "Obec"; form.querySelector('.inputSubmit').click()`. Typ „Matriky“ ale vyber kliknutím **před**
+  hledáním, jinak se ztratí. Obec a období: ve „Specifickém filtru“ Datum od–do, počet na stránku 99 (select
+  `pageRecords`; nastavení přes JavaScript se nemusí uložit – výsledky pak mají další stránky
+  `vysledekList?page=2&actualRow=&actualUuid=`). Záznam bez „digi. sada“ není digitalizovaný.
+- **Farnost podle vsi:** hledání názvu vsi s typem „Matriky“ vrátí knihy fary, kam ves patří, i s místními částmi
+  („Pytlíkovský Mlýn“ → fara Jablonec u Mimoně). Stejnojmenné vsi rozliší okres v zápisu („hejtm. Mimoňské“).
+  Rejstříky bývají samostatné svazky (např. „I-O“) a odkazují i na knihy, které online chybí.
+- **Dva druhy záznamů matrik:**
+  - *Starší digitalizace* (id záznamu s dvojtečkami, `09ddd7cea03b9b8d:…`): obrázky pod
+    `…/CZ-214000010/NAD-856/dao/images/<složka>/<uuid>.jpg` (u jiných knih `…/matriky/<cesta>`) a **každý snímek má jiné
+    uuid**. Adresu snímku n vrátí `fetch('/digitalnibadatelna/showZoomifySeparate?imageNumberSeparate=<n>&myEntityUuid='
+    + encodeURIComponent(id))` – HTML s plnou adresou; id je v odkazu `vysledekDetail/<id>` v seznamu výsledků. Číslo
+    za koncem knihy vrátí poslední snímek – tak zjistíš délku knihy. Mapu snímek → adresa si ukládej do
+    `pracovni/<kniha>/mapa.json`, ať se na žádný snímek neptáš dvakrát. Rok najdi půlením (2–3 snímky), pak čti jen potřebný úsek.
+  - *Knihy končící kolem 1949* (id 32 hex znaků, „sign. pův. …“) jsou **většinou jen v katalogu, bez snímků** („Záznam
+    neobsahuje obrazové přílohy“). Když snímky mají, nese každý náhled id v atributu `hodnota` a adresu obrázku vrátí
+    `fetch('/digitalnibadatelna/showZoomify/<id záznamu>/<id snímku>')`.
+- **Past:** detail otevřený jen adresou `vysledekDetail/<id>` ukáže náhledy *jiné* knihy (podle pořadí v posledních
+  výsledcích hledání) – přidej `?page=<pořadí ve výsledcích>` a zkontroluj signaturu.
+- Snímky pak stahuj nástrojem: `python3 -I tools/soal_zoomify.py "<celá adresa obrázku>" 0 pracovni/x.jpg` (0 = plné
+  rozlišení, 1 = poloviční). Adresu otevřeného snímku najdeš i v síťovém provozu (požadavek na `…/ImageProperties.xml`).
   Obrázkový server neomezuje a cookies nepotřebuje.
-- **POZOR: po zhruba 100 rychlých požadavcích na stránky aplikace (prohlížení snímků, detail výsledku) archiv zablokuje
-  přístup na 30 minut.** V prohlížeči proto jen najdi knihu a cestu k obrázkům, pak už jen nástroj. Pomocníkům to napiš do zadání.
-- **Seznam matrik obce a období:** do hledání obec, typ „Matriky“, ve „Specifickém filtru“ Datum od–do, počet na stránku 99.
-  Záznam bez „digi. sada“ není digitalizovaný.
-- **Část knih má obrázky jinde** (`…/CZ-214000010/NAD-<číslo>/dao/images/…` místo `…/matriky/…`) – pak dej nástroji
-  **celou adresu** obrázku. Adresu snímku vrátí i dotaz `fetch('/digitalnibadatelna/showZoomifySeparate?imageNumberSeparate=<n>&myEntityUuid=<id záznamu>')`
-  (id záznamu je v odkazu `vysledekDetail/<id>` v seznamu výsledků); rok najdi půlením (2–3 snímky), pak čti jen potřebný úsek.
+- **POZOR na blokování** (jen stránky aplikace – detail, prohlížení, `showZoomify…`; obrázky ne): po zhruba 100 rychlých
+  požadavcích archiv zablokuje přístup na 30 minut. Za sezení prošlo bez blokace ~80 dotazů `showZoomifySeparate`
+  s pauzou 0,8 s. V prohlížeči proto jen najdi knihu a adresy obrázků, pak už jen nástroj. Pomocníkům to napiš do zadání.
+- **Čísla snímků i stran se liší od FamilySearch** (táž kniha: pag. 135 v SOA = pag. 168 na FamilySearch).
+- **Kniha v seznamu matrik fary chybí** (např. narození vsi po 1860)? Nejspíš je mladší než 100 let a leží na matričním
+  úřadě. Sňatky a úmrtí 1921–1949 bývají „v archivu“, ale nedigitalizované – navrhni rodinné doklady nebo žádost
+  o výpis (`archivni_dotazy.md`).
 - **Kroniky** (ne matriky) jsou pod `…/ximage/kroniky/zoomify/…/CZ-<kód SOkA>/kroniky/dao/images/…`; naskenovaná je jen
   menšina (v seznamu výsledků je poznáš podle odkazu na obrázky).
 - **Sčítací operáty** jsou pod `…/ximage/operaty/…`. Tempo 1 dotaz za 6–10 s blokaci nevyvolalo (stovky dotazů za 2 h).
