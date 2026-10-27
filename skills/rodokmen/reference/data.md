@@ -201,10 +201,15 @@ nebo dotaz s větší obcí či okresem. U **víceznačných názvů** (Podolí,
 nechá uložený: `mista.py pridej "Voděrady" "" "Voděrady, okres Rychnov nad Kněžnou"` (bez dotazu se uložená obec nehledá znovu).
 
 ## `domy/` – domy předků na mapě (volitelné)
-`data/domy/domy.geojson` a `data/domy/vyrezy/` jsou výstup skillu **stare-adresy** (`mapa.py`, polohy domů „obec čp.“
-podle stabilního katastru). Export z nich udělá stránku `/domy/` a propojí domy s osobami a zápisy podle zmínek
-„Obec čp. N“ ve faktech, poznámkách, `SIDE` a souhrnech zápisů. Adresy, které na mapě chybí, zapíše do
-`data/domy/chybi.txt` – podklad pro další kolo geokódování. Bez `domy.geojson` se stránka v menu neukáže.
+Složka skillu **stare-adresy** (polohy domů „obec čp.“ podle stabilního katastru): `data/domy/adresy.json` – adresy
+a co bylo přečteno na skicách (výzkum, patří do gitu; založí ho `z_rodokmenu.py . data/domy/adresy.json`),
+`data/domy/vyrezy/` – výřezy skic a `data/domy/domy.geojson` – poloha domů pro web, vytvoří ho
+`mapa.py data/domy data/domy/adresy.json`. Podklady mapy (`podklady/`, `cache/` – desítky MB), `index.html`,
+`files.json` a `chybi.txt` git ignoruje, dají se kdykoli vytvořit znovu.
+Export z `domy.geojson` udělá stránku `/domy/` a propojí domy s osobami podle zmínek „Obec čp. N“ ve faktech `f`
+předků a bočních příbuzných (poznámky se nečtou – bývá v nich i dům sourozence nebo kmotra) a se zápisy podle jejich
+shrnutí. Adresy, které na mapě chybí, zapíše do `data/domy/chybi.txt` – podklad pro další kolo geokódování.
+Bez `domy.geojson` se stránka v menu neukáže.
 
 ## `dokumenty.json` – rodinné fotky a dokumenty na webu
 `[{"img": "foto_svatba_1919", "popis": "Svatba Jana a Josefy, Holice 1919.", "osoby": [8, 9]}]`

@@ -3,8 +3,8 @@
 a web/src/data/site.json, zapíše web/src/data/domy.json a zkopíruje výřezy skic do web/public/domy/vyrezy/.
 Volá ho tools/export_web.py; bez data/domy/domy.geojson zapíše prázdný domy.json a stránka Domy se v menu neukáže.
 
-Zmínky „<obec> čp. <číslo>“ (i skloněné „v Holicích čp. 12“) hledá ve faktech a poznámkách předků, v textech
-bočních příbuzných (SIDE) a v souhrnech zápisů. Obec pozná podle data/mista.json (pole `re`, volitelně `zkratky`,
+Zmínky „<obec> čp. <číslo>“ (i skloněné „v Holicích čp. 12“) hledá ve faktech předků a bočních příbuzných (SIDE;
+bez faktů v jejich textu) a v souhrnech zápisů – poznámky se nečtou, bývá v nich i cizí dům. Obec pozná podle data/mista.json (pole `re`, volitelně `zkratky`,
 např. "zkratky": ["HL"] pro „HL čp. 12“) a podle obcí v domy.geojson; vzor `re` z mista.json má
 vždy přednost (u obcí, kde se kmen při skloňování mění: Praha → v Praze). Holé „v čp. 48“ přiřadí k obci, kterou
 osoba jinde zmiňuje nejčastěji. Přiřadí zmínky ke geokódovaným domům (odkazy oběma směry) a adresy, které
@@ -144,15 +144,17 @@ def main():
         name = p["name"]   # s "puvodni_jmena" v původním tvaru, jako všude na webu
         item = {"slug": p["slug"], "name": name, "years": p.get("years", ""), "rel": p.get("rel", ""), "rod": rod_of(p)}
         # (text, kdo v domě žil, kam zapsat odkaz osoba → dům); adresy bočních příbuzných patří jim, ne předkovi –
-        # u domu se ukážou jménem příbuzného s odkazem na jeho kartičku u předka, předkovi se dům nepřipíše
-        texty = [(t, item, osoby_domy) for t in p.get("facts", []) + [p.get("note") or ""]]
+        # u domu se ukážou jménem příbuzného s odkazem na jeho kartičku u předka, předkovi se dům nepřipíše.
+        # Jen z faktů: v poznámce bývá dům sourozence či kmotra, číslo z rejstříku jiné obce nebo odmítnuté číslo
+        # z rodinného stromu. Boční příbuzní bez faktů (starší projekty) jen podle textu t.
+        texty = [(t, item, osoby_domy) for t in p.get("facts", [])]
         for i, s in enumerate(p.get("side", [])):
             if isinstance(s, dict):
                 sn = s.get("name") or ""
                 m = re.match(r"(.*?)\s*\(([^)]*)\)$", sn)   # starší projekty mají roky ve jméně, nové v years
                 si = {"slug": p["slug"], "name": m.group(1) if m else sn, "years": s.get("years") or (m.group(2) if m else ""),
                       "rel": f"{p.get('rel', '')} {name}".strip(), "rod": item["rod"], "bocni": f"pribuzny-{i}"}
-                texty += [(t, si, {}) for t in s.get("facts", []) + [s.get("text") or ""]]
+                texty += [(t, si, {}) for t in s.get("facts") or [s.get("text") or ""]]
         plne = [z for t, _, _ in texty for z in zminky(t)]
         vychozi = max({o for o, _ in plne}, key=[o for o, _ in plne].count) if plne else obec_norm(" ".join(t for t, _, _ in texty))
         for t, kdo, kam in texty:

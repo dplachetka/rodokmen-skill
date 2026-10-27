@@ -68,12 +68,12 @@ def first(facts, sign):
 
 
 def place_of(text):
-    """„* 28. 7. 1870 Horní Lhota čp. 45“ → „Horní Lhota“."""
+    """„* 28. 7. 1870 Horní Lhota čp. 45“ (i „č. 45“, „č. p. 45“) → „Horní Lhota“."""
     m = re.search(DATE + r"\s+(.+)", text)
     if not m:
         return None
     rest = m.group(5)
-    rest = re.split(r"\s+čp\.|\s*\(|,|\s+–", rest)[0].strip()
+    rest = re.split(r"\s+čp?\.|\s*\(|,|\s+–", rest)[0].strip()
     return rest or None
 
 
