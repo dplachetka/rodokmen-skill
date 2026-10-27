@@ -35,8 +35,10 @@ def geocode(q, zeme=None):
 
 
 def main():
+    if len(sys.argv) > 1 and not (sys.argv[1] == "pridej" and 3 <= len(sys.argv) <= 5):
+        sys.exit(__doc__)
     cache = json.load(open(OUT, encoding="utf-8")) if os.path.exists(OUT) else {}
-    if len(sys.argv) > 2 and sys.argv[1] == "pridej":
+    if len(sys.argv) > 2:
         name = sys.argv[2]
         stem = re.escape(name.split()[0][:5]) if len(name.split()) == 1 else re.escape(name)
         e, vychozi = cache.setdefault(name, {}), f"{name}, Česko"
