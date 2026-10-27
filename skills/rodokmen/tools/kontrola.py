@@ -150,6 +150,15 @@ def main():
         if not s.get("y") and roky_ve_jmene(s.get("n", "")):
             warn.append(f"boční příbuzný '{s.get('n')}': roky jsou ve jméně – přesuň je do 'y' "
                         f"(python3 -I tools/nacti_osoby.py sourozenci)")
+        # sourozenec se má dát později převést na osobu s rodiči: pohlaví a u nevlastních společný rodič (data.md)
+        v, chybi = (s.get("v") or "").strip().lower(), []
+        if re.match(r"(nevlastní\s+)?sourozenec\b", v):
+            chybi.append("napiš bratr, nebo sestra (podle jména či zápisu)")
+        if re.match(r"nevlastní\s+(bratr|sestra|sourozenec)\b", v) and not re.search(r"\(stejn[áý] (matka|otec)\)", v):
+            chybi.append("podle křtu doplň společného rodiče: „(stejná matka)“, nebo „(stejný otec)“")
+        if chybi:
+            warn.append(f"boční příbuzný '{s.get('n')}' (u P {s.get('k')}), vztah „{s.get('v')}“: {'; '.join(chybi)} "
+                        f"– ať jde později převést na osobu s rodiči (reference/data.md)")
     bez_vztahu = [s.get("n", "?") for s in SIDE if not s.get("v")]
     if bez_vztahu:
         warn.append(f"{len(bez_vztahu)} bočních záznamů nemá vztah 'v' (např. {', '.join(bez_vztahu[:3])}) – na webu jsou ve skupině "
