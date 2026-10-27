@@ -7,6 +7,8 @@ Použití:
       dotaz pro OpenStreetMap (výchozí = "Název, Česko", když nic nenajde, zkusí Slovensko a další sousední země);
       historickou část obce, kterou mapa nezná, zadej jako celou obec; u víceznačných názvů (Podolí, Dub) přidej sousední obec:
       "Podolí, Odlochovice" – a ve výpisu vždy zkontroluj okres
+      u uložené obce změní jen to, co zadáš; jiný dotaz zahodí staré souřadnice a hledá znovu
+      (špatná stejnojmenná obec: mista.py pridej "Voděrady" "" "Voděrady, okres Rychnov nad Kněžnou")
   mista.py
       dohledá souřadnice u míst, která je ještě nemají (OpenStreetMap Nominatim, 1 dotaz za sekundu),
       a vypíše seznam. Když bod nesedí, opravte lat/lon v data/mista.json ručně.
@@ -37,8 +39,14 @@ def main():
     if len(sys.argv) > 2 and sys.argv[1] == "pridej":
         name = sys.argv[2]
         stem = re.escape(name.split()[0][:5]) if len(name.split()) == 1 else re.escape(name)
-        cache[name] = dict(cache.get(name, {}), re=sys.argv[3] if len(sys.argv) > 3 and sys.argv[3] else stem,
-                           dotaz=sys.argv[4] if len(sys.argv) > 4 else f"{name}, Česko")
+        e, vychozi = cache.setdefault(name, {}), f"{name}, Česko"
+        dotaz = sys.argv[4] if len(sys.argv) > 4 and sys.argv[4] else e.get("dotaz", vychozi)
+        if "lat" in e and dotaz != e.get("dotaz", vychozi):   # jiný dotaz (našla se stejnojmenná obec jinde): hledej znovu
+            for k in ("lat", "lon", "osm"):
+                e.pop(k, None)
+            print("NOVÝ DOTAZ:", name, "→", dotaz, "– hledám znovu")
+        e["re"] = sys.argv[3] if len(sys.argv) > 3 and sys.argv[3] else e.get("re", stem)
+        e["dotaz"] = dotaz
     for name, e in cache.items():
         if "lat" not in e:
             g = geocode(e.get("dotaz") or f"{name}, Česko")

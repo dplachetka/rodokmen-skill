@@ -186,6 +186,8 @@ Hypotéza: `"hypoteza": true, "rod": 8`. Když OpenStreetMap obec nenajde („Ž
 nebo dotaz s větší obcí či okresem. U **víceznačných názvů** (Podolí, Dub, Lhota) vezme OpenStreetMap kteroukoli ves
 („Podolí, Česko“ = Podolí u Brna) – v posledním sloupci výpisu zkontroluj okres a dej dotaz se sousední obcí
 (`mista.py pridej "Podolí" "Podol" "Podolí, Odlochovice"`). Místopis nejlíp zná rodina – když si nejsi jistý, zeptej se.
+Špatnou obec oprav stejným příkazem s novým dotazem – jiný dotaz zahodí staré souřadnice a hledá znovu, prázdný výraz `""`
+nechá uložený: `mista.py pridej "Voděrady" "" "Voděrady, okres Rychnov nad Kněžnou"` (bez dotazu se uložená obec nehledá znovu).
 
 ## `dokumenty.json` – rodinné fotky a dokumenty na webu
 `[{"img": "foto_svatba_1919", "popis": "Svatba Jana a Josefy, Holice 1919.", "osoby": [8, 9]}]`
