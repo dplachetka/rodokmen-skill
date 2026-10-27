@@ -39,7 +39,8 @@ Adresy u nevyzkoušených portálů ověř při prvním použití (portály se m
 - Obec nenalezena? Zkus název **bez přívlastku** („Lhota“ místo „Horní Lhota“) a starý název. Starší matriky
   (před ~1784) bývají ve faře sousedního města; indexy fary mají oddíly po vesnicích
   („Copulati Gross Lhota“).
-- Ber ohled na server: stahuj jen to, co čteš; žádné hromadné stahování celých svazků.
+- Ber ohled na server: nástrojem (`aron_img.py`) stahuj jen snímky, které čteš – celý svazek po snímcích nestahuj.
+  Potřebuješ-li ho celý, ať ho uživatel stáhne tlačítkem v prohlížeči (viz „Celé svazky ručně“ výše).
 
 ## SOA Třeboň (digi.ceskearchivy.cz) – `tools/trebon.py`, bez prohlížeče
 - `trebon.py misto "Obec"` → id místa. Diakritiku a mezery nástroj odstraní sám (portál zná jen „RatiborskeHory“).
@@ -261,8 +262,13 @@ Nástroje pro ně hotové nejsou. Postupuj takto a výsledek zapiš do `STAV.md`
 - **Berní rula 1654** – jen hospodáři s půdou; edice a rejstříky v knihovnách (Kramerius/DNNT).
 - **Gruntovní (pozemkové) knihy** – převody domů z otce na syna; online jen část (SOA Plzeň téměř vše, SOA Praha část,
   ostatní spíš badatelna). Fond „Velkostatek <panství>“.
-- **Mapy stabilního katastru (1824–43)** – kde stál dům s číslem popisným: archivnimapy.cuzk.cz (Archiv ČÚZK).
-  Na **císařských otiscích** chybí u části listů barvy a čísla domů. Lepší jsou **indikační skici**: mají čísla domů
+- **Mapy stabilního katastru (1824–43)** – kde stál dům s číslem popisným: Archiv ČÚZK na **ags.cuzk.gov.cz/archiv/**
+  (stará adresa archivnimapy.cuzk.cz vrací 404). Najdi katastrální území, klikni do mapy a vyber druh mapy (indikační
+  skica, originální mapa stabilního katastru, katastrální mapa); list se otevře v prohlížeči map.
+  **Past:** černá čísla v budovách na katastrálních mapách jsou **čísla stavebních parcel, ne čísla popisná**. Čísla
+  stavebních parcel se drží často dodnes – přes RÚIAN (adresní místo „Obec čp.“ → stavební objekt → parcela) najdeš
+  dům i na pozdější a dnešní mapě; dům ale mohl být zbořen a postaven se stejným čp. jinde.
+  Na **císařských otiscích** chybí u části listů barvy a čísla domů. Lepší jsou **indikační skici**: mají čísla domů (červeně)
   a u pozemků jméno majitele („N. 13“ = patří k domu čp. 13). Dům bez pozemků mimo ves = domkář bez polí.
   Jméno majitele samotného domu bývá jen v písemném operátu (archiv, ne online). Výřezy map patří na web k rodině.
 - **Dnešní adresa domu** podle čísla popisného: RÚIAN (ČÚZK, vrstva AdresniMisto). Pozor, staré centrum mívá od 19. století
