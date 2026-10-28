@@ -86,7 +86,8 @@
    "r": [
     "ukazka_krest_jan_novak_1890",
     "ukazka_snatek_jan_novak_josefa_pokorna_1919"
-   ]
+   ],
+   "sour": "hotovo"
   },
   "9": {
    "n": "Josefa Pokorná",
@@ -113,7 +114,8 @@
    ],
    "r": [
     "holice_umrti_vaclav_kral_1961"
-   ]
+   ],
+   "sour": "hotovo"
   },
   "11": {
    "n": "Ludmila Hrubá",
@@ -3383,6 +3385,33 @@
    "v": "učeň",
    "y": "* 1905",
    "t": "Kovářský učeň v kovárně Jana Nováka, Holice čp. 112, podle sčítání 1921. Nepříbuzný.",
+   "r": []
+  },
+  {
+   "k": 10,
+   "n": "Josef Král",
+   "v": "bratr",
+   "y": "1891–1891",
+   "st": "fam",
+   "f": [
+    "* 1891 Holice čp. 41",
+    "† 1891 Holice (3 měsíce)"
+   ],
+   "t": "Starší bratr Václava, zemřel jako kojenec.",
+   "r": []
+  },
+  {
+   "k": 10,
+   "n": "Anna Králová",
+   "v": "sestra",
+   "y": "1896–1978",
+   "st": "fam",
+   "f": [
+    "* 1896 Holice čp. 41",
+    "× 1919 Holice Josef Málek",
+    "† 1978 Holice"
+   ],
+   "t": "Sestra Václava, provdaná Málková.",
    "r": []
   },
   {

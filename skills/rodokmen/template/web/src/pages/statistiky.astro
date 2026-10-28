@@ -15,8 +15,33 @@ const person = (r) => `<a href="${href.person(r.slug)}">${esc(r.name)}</a>`;
 const wedM = st.snatek_vek.M, wedF = st.snatek_vek.F;
 const allWed = [...wedM.list, ...wedF.list];
 const youngestBride = wedF.list[0], oldestGroom = wedM.list[wedM.list.length - 1];
+const d = st.doziti, deti = st.deti, roz = st.manzele_rozdil;
+const pl = (n, a, b, c) => (n === 1 ? a : n >= 2 && n <= 4 ? b : c);
+const proc = (a, b) => (b ? Math.round((100 * a) / b) : 0);
+const w = (v, max) => (max ? (100 * v) / max : 0);
+const asi = (r) => (r.asi ? '≈' : '');
+const lived = (r) => `${person(r)} (${asi(r)}${r.val})`;
+const mirrorMax = (rows) => Math.max(1, ...rows.map((r) => Math.max(r.M, r.F)));
+// prázdná pásma na krajích (nikdo pod 40 nebo nad 90 let) se nekreslí
+const trim = (rows) => {
+  const any = (r) => r.M || r.F, i = rows.findIndex(any), j = rows.findLastIndex(any);
+  return i < 0 ? [] : rows.slice(i, j + 1);
+};
+const wedBands = trim(st.snatek_pasma), lifeBands = trim(d.pasma);
+// osa pro průměry podle století: od nejnižšího po nejvyšší průměr, zaokrouhleno na pět let
+const axis = (rows) => {
+  const v = rows.flatMap((r) => [r.M, r.F]).filter((x) => x != null);
+  const lo = Math.floor((Math.min(...v) - 2) / 5) * 5, hi = Math.ceil((Math.max(...v) + 2) / 5) * 5;
+  return { lo, hi, at: (x) => (100 * (x - lo)) / (hi - lo), ticks: Array.from({ length: (hi - lo) / 5 + 1 }, (_, i) => lo + 5 * i) };
+};
+const wedAxis = st.snatek_stoleti.length ? axis(st.snatek_stoleti) : null;
+const lifeAxis = d.stoleti.length ? axis(d.stoleti) : null;
+const brideYoung = wedF.list.filter((r) => r.val < 20).length;
+const parents = (x) => [x.father, x.mother].filter(Boolean).map(person).join(' a ');
+const famMax = maxOf(deti.rozdeleni);
 ---
 <Base title="Statistiky">
+<div class="stat-page">
   <h1>Rodokmen v číslech</h1>
   <p class="lead">Co prozrazují matriky o celé rodině najednou – řemesla, místa, věk při svatbě, délka života i víra.
     Počítá se jen z údajů, které o předcích opravdu máme, takže čísla jsou orientační.</p>
@@ -67,17 +92,28 @@ const youngestBride = wedF.list[0], oldestGroom = wedM.list[wedM.list.length - 1
   </div>
 
   <h2>Svatby</h2>
+  {allWed.length > 0 && <div class="stat-tiles">
+    {wedM.prumer != null && <div class="tile"><b>{cz(wedM.prumer)}</b><span><i class="sw sw-m"></i>průměrný věk ženicha</span></div>}
+    {wedF.prumer != null && <div class="tile"><b>{cz(wedF.prumer)}</b><span><i class="sw sw-f"></i>průměrný věk nevěsty</span></div>}
+    {roz.prumer != null && <div class="tile"><b>{cz(Math.abs(roz.prumer))}</b><span>let byl {roz.prumer >= 0 ? 'muž' : 'žena'} v průměru starší</span></div>}
+  </div>}
   <div class="grid2">
     <div class="card">
-      <h3>Věk při sňatku</h3>
-      <p>Ženichové v průměru <b>{cz(wedM.prumer)} let</b>, nevěsty <b>{cz(wedF.prumer)} let</b>
-        <span class="muted">({allWed.length} sňatků se známým věkem).</span></p>
-      {youngestBride && <p>Nejmladší nevěsta: <Fragment set:html={person(youngestBride)} /> – {youngestBride.val} let.</p>}
-      {oldestGroom && <p>Nejstarší ženich: <Fragment set:html={person(oldestGroom)} /> – {oldestGroom.val} let.</p>}
-      <details><summary>Všichni ženichové a nevěsty</summary>
-        <p><strong>Ženichové:</strong> <Fragment set:html={wedM.list.map((r) => `${person(r)} (${r.val})`).join(', ')} /></p>
-        <p><strong>Nevěsty:</strong> <Fragment set:html={wedF.list.map((r) => `${person(r)} (${r.val})`).join(', ')} /></p>
-      </details>
+      <h3>Kolik jim bylo</h3>
+      {allWed.length ? <>
+        <div class="mirror" role="table" aria-label="Věk při sňatku: počet ženichů a nevěst">
+          <div class="mhead" role="row"><span role="columnheader"><i class="sw sw-m"></i>ženichové</span><span role="columnheader">věk</span><span role="columnheader"><i class="sw sw-f"></i>nevěsty</span></div>
+          {wedBands.map((r) => (
+            <div class="mrow" role="row">
+              <span class="side l" role="cell" title={`ženichové ${r.name} let: ${r.M}`}><span class="n">{r.M || ''}</span><span class="fill-m" style={`width:${w(r.M, mirrorMax(wedBands))}%`}></span></span>
+              <span class="mid" role="cell">{r.name}</span>
+              <span class="side" role="cell" title={`nevěsty ${r.name} let: ${r.F}`}><span class="fill-f" style={`width:${w(r.F, mirrorMax(wedBands))}%`}></span><span class="n">{r.F || ''}</span></span>
+            </div>
+          ))}
+        </div>
+        <p class="muted small">{allWed.length} sňatků se známým věkem, u každého předka jen první zapsaný sňatek.
+          {brideYoung > 0 && <> Mladších dvaceti let bylo {brideYoung} z {wedF.list.length} nevěst.</>}</p>
+      </> : <p class="muted">Zatím nemáme dost údajů.</p>}
     </div>
     <div class="card">
       <h3>V kterém měsíci se brali</h3>
@@ -93,15 +129,112 @@ const youngestBride = wedF.list[0], oldestGroom = wedM.list[wedM.list.length - 1
         a v masopustu (leden, únor); v adventu a v postě se zpravidla neoddávalo a v létě byla práce na poli.</p>
     </div>
   </div>
+  {allWed.length > 0 && <div class="card wide-card">
+    <h3>Brali se mladí?</h3>
+    <p>Ženichům bylo v průměru <b>{cz(wedM.prumer)} let</b>, nevěstám <b>{cz(wedF.prumer)} let</b>.
+      Pro srovnání: dnes se v Česku poprvé žení muži zhruba ve 33 letech a ženy se vdávají zhruba ve 30.
+      Na venkově 19. století se muži obvykle ženili mezi 25 a 30 lety a dívky se vdávaly o pár let dřív –
+      svatba čekala, až bude z čeho žít (převzít usedlost, vyučit se, našetřit).</p>
+    {roz.pocet > 0 && <p set:html={`Z ${roz.pocet} manželských párů byl starší muž u ${roz.muz_starsi}, žena u ${roz.zena_starsi}`
+      + (roz.stejne > 0 ? ` a stejně staří byli ${roz.stejne}.` : '.')
+      + (roz.nejvetsi && Math.abs(roz.nejvetsi.val) >= 8 ? ` Největší rozdíl, ${Math.abs(roz.nejvetsi.val)} let, měli ${person(roz.nejvetsi.muz)}
+        a ${person(roz.nejvetsi.zena)} – velký rozdíl často znamená, že se vdovec oženil znovu.` : '')} />}
+    {wedAxis && st.snatek_stoleti.length > 1 && <>
+      <p class="muted small">Průměrný věk při sňatku podle století, kdy se brali:</p>
+      <div class="dumb" role="table" aria-label="Průměrný věk při sňatku podle století">
+        {st.snatek_stoleti.map((r) => (
+          <div class="drow" role="row">
+            <span class="dlbl" role="rowheader">{r.name} <span class="muted">({r.pocet})</span></span>
+            <span class="dtrack" role="cell">
+              {r.M != null && r.F != null && <span class="dline" style={`left:${wedAxis.at(Math.min(r.M, r.F))}%;width:${wedAxis.at(Math.max(r.M, r.F)) - wedAxis.at(Math.min(r.M, r.F))}%`}></span>}
+              {r.M != null && <span class="dot-m" style={`left:${wedAxis.at(r.M)}%`} title={`ženichové: ${cz(r.M)} let`}></span>}
+              {r.F != null && <span class="dot-f" style={`left:${wedAxis.at(r.F)}%`} title={`nevěsty: ${cz(r.F)} let`}></span>}
+            </span>
+            <span class="dval" role="cell"><i class="sw sw-m"></i>{cz(r.M)} · <i class="sw sw-f"></i>{cz(r.F)}</span>
+          </div>
+        ))}
+        <div class="drow daxis" aria-hidden="true"><span></span><span class="dtrack">{wedAxis.ticks.map((t) => <span class="tick" style={`left:${wedAxis.at(t)}%`}>{t}</span>)}</span><span class="dval muted">let</span></div>
+      </div>
+    </>}
+    {youngestBride && <p>Nejmladší nevěsta: <Fragment set:html={person(youngestBride)} /> – {asi(youngestBride)}{youngestBride.val} let.</p>}
+    {oldestGroom && <p>Nejstarší ženich: <Fragment set:html={person(oldestGroom)} /> – {asi(oldestGroom)}{oldestGroom.val} let.</p>}
+    <details><summary>Všichni ženichové a nevěsty</summary>
+      <p><strong>Ženichové:</strong> <Fragment set:html={wedM.list.map(lived).join(', ')} /></p>
+      <p><strong>Nevěsty:</strong> <Fragment set:html={wedF.list.map(lived).join(', ')} /></p>
+      <p class="muted small">≈ věk spočítaný jen z let, bez přesného data narození.</p>
+    </details>
+  </div>}
 
-  <h2>Rodiče a děti</h2>
+  <h2>Rodiny a děti</h2>
+  {deti.rodin > 0 && <>
+    <div class="stat-tiles">
+      <div class="tile"><b>{cz(deti.prumer)}</b><span>dětí průměrně v rodině</span></div>
+      {deti.nejvic && <div class="tile"><b>{deti.nejvic.pocet}</b><span>dětí v nejpočetnější rodině</span></div>}
+      <div class="tile"><b>{proc(deti.zemrelo, deti.deti)} %</b><span>dětí zemřelo v dětství (nejméně)</span></div>
+    </div>
+    <div class="grid2">
+      <div class="card">
+        <h3>Kolik měli dětí</h3>
+        <div class="fam" style={`grid-template-columns:repeat(${deti.rozdeleni.length},1fr)`} role="table" aria-label="Počet rodin podle počtu dětí">
+          {deti.rozdeleni.map((r) => (
+            <div class="mcol" role="row" title={`${r.count} ${pl(r.count, 'rodina', 'rodiny', 'rodin')} s ${r.name} ${pl(+r.name, 'dítětem', 'dětmi', 'dětmi')}`}>
+              <span class="fcount" role="cell">{r.count || ''}</span>
+              <span class="mbar" style={`height:${r.count ? w(r.count, famMax) : 0}%`}></span>
+              <span class="mlbl" role="rowheader">{r.name}</span>
+            </div>
+          ))}
+        </div>
+        <p class="muted small">Počet rodin (sloupce) podle počtu dětí (pod sloupci).</p>
+        <p>V {deti.rodin} {pl(deti.rodin, 'rodině', 'rodinách', 'rodinách')}, kde známe všechny sourozence předka,
+          se narodilo {deti.deti} dětí – průměrně <b>{cz(deti.prumer)}</b> na rodinu.
+          {deti.nejvic && <> Nejvíc dětí, {deti.nejvic.pocet}, měli <Fragment set:html={parents(deti.nejvic)} />.</>}</p>
+      </div>
+      <div class="card">
+        <h3>Kolik dětí se dožilo dospělosti</h3>
+        <div class="stack fate" role="img" aria-label={`Zemřelo v dětství ${deti.zemrelo}, dožilo se dospělosti ${deti.prezilo}, nevíme ${deti.nevime}`}>
+          {[['zemrelo', 'zemřelo v dětství'], ['prezilo', 'dožilo se dospělosti'], ['nevime', 'nevíme']].filter(([k]) => deti[k] > 0).map(([k, t]) => (
+            <span class={`seg f-${k}`} style={`flex:${deti[k]}`} title={`${t}: ${deti[k]}`}>{deti[k]}</span>
+          ))}
+        </div>
+        <p class="legend small"><span><i class="sw f-zemrelo"></i>zemřelo před 15. narozeninami</span>
+          <span><i class="sw f-prezilo"></i>dožilo se dospělosti</span><span><i class="sw f-nevime"></i>nevíme</span></p>
+        <p>Nejméně <b>{deti.zemrelo}</b> z {deti.deti} dětí ({proc(deti.zemrelo, deti.deti)} %) zemřelo dřív, než mu bylo patnáct{deti.kojenci > 0 && <>, z toho {deti.kojenci} před prvními narozeninami</>}.
+          {deti.nevime > 0 && <> U {deti.nevime} dětí ale nevíme, co s nimi bylo dál (úmrtí sourozenců se v matrikách často nedohledávají),
+          takže skutečné číslo bylo nejspíš vyšší.</>}</p>
+        <p class="muted small">Pro srovnání: zhruba do konce 19. století zemřelo v Čechách před prvními narozeninami asi každé
+          čtvrté až páté dítě; pod deset procent klesla kojenecká úmrtnost až po druhé světové válce.</p>
+      </div>
+    </div>
+    {deti.stoleti.length > 1 && <div class="card wide-card">
+      <h3>Podle století, kdy se děti narodily</h3>
+      <div class="bars">
+        {deti.stoleti.map((c) => (
+          <div class="bar-row fate-row">
+            <span class="lbl">{c.name}<span class="muted small"> · {c.rodin} {pl(c.rodin, 'rodina', 'rodiny', 'rodin')}, ∅ {cz(c.prumer)} dítěte</span></span>
+            <span class="stack fate thin" role="img" aria-label={`${c.name}: zemřelo v dětství ${c.zemrelo}, dožilo se dospělosti ${c.prezilo}, nevíme ${c.nevime}`}>
+              {[['zemrelo', 'zemřelo v dětství'], ['prezilo', 'dožilo se dospělosti'], ['nevime', 'nevíme']].filter(([k]) => c[k] > 0).map(([k, t]) => (
+                <span class={`seg f-${k}`} style={`flex:${c[k]}`} title={`${t}: ${c[k]}`}></span>
+              ))}
+            </span>
+            <span class="val">{c.zemrelo} z {c.deti} ({proc(c.zemrelo, c.deti)} %)</span>
+          </div>
+        ))}
+      </div>
+    </div>}
+    {deti.zemreli.length > 0 && <details class="card wide-card"><summary>Děti, které zemřely v dětství ({deti.zemreli.length})</summary>
+      <ul class="small">
+        {deti.zemreli.map((z) => <li>{z.name}{z.rok && <> (* {z.rok})</>} – {z.kojenec ? 'do prvního roku' : z.vek != null ? `${z.vek} ${pl(z.vek, 'rok', 'roky', 'let')}` : 'v dětství'};
+          dítě <Fragment set:html={parents(z)} /></li>)}
+      </ul>
+    </details>}
+  </>}
   <div class="grid2">
     <div class="card">
       <h3>Věk rodičů při narození dítěte z rodokmenu</h3>
       <p>Otcové v průměru <b>{cz(st.rodice_vek.M.prumer)} let</b>, matky <b>{cz(st.rodice_vek.F.prumer)} let</b>.
-        {st.rodice_vek.M.prumer && st.rodice_vek.F.prumer && <>Jedna generace tak u nás trvá zhruba {Math.round((st.rodice_vek.M.prumer + st.rodice_vek.F.prumer) / 2)} let.</>}</p>
+        {st.rodice_vek.M.prumer && st.rodice_vek.F.prumer && <> Jedna generace tak u nás trvá zhruba {Math.round((st.rodice_vek.M.prumer + st.rodice_vek.F.prumer) / 2)} let.</>}</p>
       {st.rodice_vek.F.nejstarsi && <p>Nejstarší matka: <Fragment set:html={person(st.rodice_vek.F.nejstarsi.parent)} /> – {st.rodice_vek.F.nejstarsi.val} let
-        (dcera <Fragment set:html={person(st.rodice_vek.F.nejstarsi.child)} />).</p>}
+        (dítě <Fragment set:html={person(st.rodice_vek.F.nejstarsi.child)} />).</p>}
       {st.rodice_vek.F.nejmladsi && <p>Nejmladší matka: <Fragment set:html={person(st.rodice_vek.F.nejmladsi.parent)} /> – {st.rodice_vek.F.nejmladsi.val} let.</p>}
     </div>
     {(st.nemanzelske.length > 0 || st.legitimace.length > 0) && <div class="card">
@@ -113,19 +246,59 @@ const youngestBride = wedF.list[0], oldestGroom = wedM.list[wedM.list.length - 1
   </div>
 
   <h2>Jak dlouho žili</h2>
-  {st.doziti.list.length ? (
+  {d.list.length ? (
     <>
-      <p>U {st.doziti.list.length} předků známe přesné datum narození i úmrtí; dožili se v průměru <b>{cz(st.doziti.prumer)} let</b>.
-        {st.doziti.list.length > 15 && <span class="muted">Nejdéle žijících patnáct:</span>}</p>
-      <div class="bars">
-        {st.doziti.list.slice(0, 15).map((r) => (
-          <div class="bar-row">
-            <span class="lbl" set:html={person(r)} />
-            <span class="bar"><span class="fill" style={`width:${pct(r.val, 100)}%`}></span></span>
-            <span class="val">{r.val} let</span>
-          </div>
-        ))}
+      <div class="stat-tiles">
+        {d.M.prumer != null && <div class="tile"><b>{cz(d.M.prumer)}</b><span><i class="sw sw-m"></i>let se v průměru dožili muži</span></div>}
+        {d.F.prumer != null && <div class="tile"><b>{cz(d.F.prumer)}</b><span><i class="sw sw-f"></i>let se v průměru dožily ženy</span></div>}
       </div>
+      <p>U {d.M.pocet} {pl(d.M.pocet, 'muže', 'mužů', 'mužů')} a {d.F.pocet} {pl(d.F.pocet, 'ženy', 'žen', 'žen')} z rodokmenu známe narození i úmrtí
+        (bez přesných dat počítáme z let nebo z věku zapsaného při úmrtí).
+        Předci se z podstaty věci dožili dospělosti – jinak by neměli děti. Proto je průměr vyšší než tehdejší
+        „střední délka života“, kterou srážela dětská úmrtnost.
+        {d.M.prumer != null && d.F.prumer != null && d.F.prumer < d.M.prumer - 2 && <> Ženy umíraly dřív než muži – v minulosti často při porodu nebo krátce po něm.</>}</p>
+      <div class="grid2">
+        <div class="card">
+          <h3>V kolika letech umírali</h3>
+          <div class="mirror" role="table" aria-label="Věk při úmrtí: počet mužů a žen">
+            <div class="mhead" role="row"><span role="columnheader"><i class="sw sw-m"></i>muži</span><span role="columnheader">věk</span><span role="columnheader"><i class="sw sw-f"></i>ženy</span></div>
+            {lifeBands.map((r) => (
+              <div class="mrow" role="row">
+                <span class="side l" role="cell" title={`muži ${r.name} let: ${r.M}`}><span class="n">{r.M || ''}</span><span class="fill-m" style={`width:${w(r.M, mirrorMax(lifeBands))}%`}></span></span>
+                <span class="mid" role="cell">{r.name}</span>
+                <span class="side" role="cell" title={`ženy ${r.name} let: ${r.F}`}><span class="fill-f" style={`width:${w(r.F, mirrorMax(lifeBands))}%`}></span><span class="n">{r.F || ''}</span></span>
+              </div>
+            ))}
+          </div>
+        </div>
+        <div class="card">
+          <h3>Nejdéle žili</h3>
+          <ol class="small">{d.list.slice(0, 5).map((r) => <li><Fragment set:html={person(r)} /> – {asi(r)}{r.val} let</li>)}</ol>
+          <details><summary>Všichni ({d.list.length})</summary>
+            <p class="small"><strong>Muži:</strong> <Fragment set:html={d.list.filter((r) => r.sex === 'M').map(lived).join(', ')} /></p>
+            <p class="small"><strong>Ženy:</strong> <Fragment set:html={d.list.filter((r) => r.sex === 'F').map(lived).join(', ')} /></p>
+            <p class="muted small">≈ věk spočítaný jen z let nebo podle zápisu o úmrtí.</p>
+          </details>
+        </div>
+      </div>
+      {lifeAxis && d.stoleti.length > 1 && <div class="card wide-card">
+        <h3>Podle století narození</h3>
+        <div class="dumb" role="table" aria-label="Průměrný věk dožití podle století narození">
+          {d.stoleti.map((r) => (
+            <div class="drow" role="row">
+              <span class="dlbl" role="rowheader">{r.name} <span class="muted">({r.pocet})</span></span>
+              <span class="dtrack" role="cell">
+                {r.M != null && r.F != null && <span class="dline" style={`left:${lifeAxis.at(Math.min(r.M, r.F))}%;width:${lifeAxis.at(Math.max(r.M, r.F)) - lifeAxis.at(Math.min(r.M, r.F))}%`}></span>}
+                {r.M != null && <span class="dot-m" style={`left:${lifeAxis.at(r.M)}%`} title={`muži: ${cz(r.M)} let`}></span>}
+                {r.F != null && <span class="dot-f" style={`left:${lifeAxis.at(r.F)}%`} title={`ženy: ${cz(r.F)} let`}></span>}
+              </span>
+              <span class="dval" role="cell"><i class="sw sw-m"></i>{cz(r.M)} · <i class="sw sw-f"></i>{cz(r.F)}</span>
+            </div>
+          ))}
+          <div class="drow daxis" aria-hidden="true"><span></span><span class="dtrack">{lifeAxis.ticks.map((t) => <span class="tick" style={`left:${lifeAxis.at(t)}%`}>{t}</span>)}</span><span class="dval muted">let</span></div>
+        </div>
+        <p class="muted small">V závorce počet předků; u století s pár lidmi je průměr hodně náhodný.</p>
+      </div>}
     </>
   ) : <p class="muted">Zatím nemáme dost údajů.</p>}
 
@@ -161,6 +334,7 @@ const youngestBride = wedF.list[0], oldestGroom = wedM.list[wedM.list.length - 1
       </div>
     </div>
   </div>
+</div>
 </Base>
 
 <style>
@@ -186,5 +360,53 @@ const youngestBride = wedF.list[0], oldestGroom = wedM.list[wedM.list.length - 1
   .mbar { width: 100%; background: var(--accent); border-radius: 3px 3px 0 0; min-height: 2px; }
   .mlbl { font-size: 0.7rem; color: var(--muted); margin-top: 0.2rem; }
   .small { font-size: 0.85rem; }
-  @media (max-width: 560px) { .bar-row { grid-template-columns: 6.5rem 1fr auto; } }
+  /* muži a ženy: modrá a cihlová (ověřeno i pro barvoslepé), čísla vždy i textem */
+  .stat-page { --men: #2a6fa8; --women: #c0602f; --died: #6e3b1c; --lived: #d6c2a3; }
+  .sw { display: inline-block; width: 0.65rem; height: 0.65rem; border-radius: 2px; margin-right: 0.3rem; vertical-align: baseline; }
+  .sw-m { background: var(--men); }
+  .sw-f { background: var(--women); }
+  .wide-card { margin-top: 0.8rem; }
+  .mirror { display: grid; gap: 4px; font-size: 0.88rem; }
+  .mhead, .mrow { display: grid; grid-template-columns: 1fr 4.6rem 1fr; gap: 0.5rem; align-items: center; }
+  .mhead { color: var(--muted); font-size: 0.8rem; }
+  .mhead span:first-child { text-align: right; }
+  .mhead span:nth-child(2), .mid { text-align: center; color: var(--muted); white-space: nowrap; }
+  .side { display: flex; align-items: center; gap: 0.3rem; height: 1rem; }
+  .side.l { justify-content: flex-end; }
+  .fill-m, .fill-f { display: block; height: 100%; max-width: calc(100% - 1.6rem); }
+  .fill-m { background: var(--men); border-radius: 4px 0 0 4px; }
+  .fill-f { background: var(--women); border-radius: 0 4px 4px 0; }
+  .side .n { color: var(--muted); font-size: 0.8rem; min-width: 1.2rem; }
+  .side.l .n { text-align: right; }
+  .dumb { display: grid; gap: 0.45rem; margin: 0.4rem 0 0.8rem; max-width: 46rem; font-size: 0.9rem; }
+  .drow { display: grid; grid-template-columns: minmax(7rem, 10rem) 1fr 7.5rem; gap: 0.7rem; align-items: center; }
+  .dtrack { position: relative; height: 1rem; border-bottom: 1px solid var(--line); }
+  .daxis .dtrack { border: 0; height: 1.1rem; }
+  .dline { position: absolute; top: calc(50% - 1px); height: 2px; background: var(--muted); opacity: 0.5; }
+  .dot-m, .dot-f { position: absolute; top: 50%; width: 0.75rem; height: 0.75rem; border-radius: 50%; transform: translate(-50%, -50%); box-shadow: 0 0 0 2px var(--paper); }
+  .dot-m { background: var(--men); }
+  .dot-f { background: var(--women); }
+  .tick { position: absolute; transform: translateX(-50%); font-size: 0.72rem; color: var(--muted); }
+  .dval { font-size: 0.82rem; white-space: nowrap; }
+  .fam { display: grid; gap: 3px; height: 140px; align-items: end; }
+  .fam .mcol { justify-content: flex-end; }
+  .fcount { font-size: 0.7rem; color: var(--muted); }
+  .fate { gap: 2px; background: var(--paper); margin: 0.4rem 0 0.4rem; }
+  .fate .seg { text-align: center; }
+  .fate.thin { margin: 0; height: 0.9rem; border-radius: 4px; }
+  .f-zemrelo { background: var(--died); color: #fff; }
+  .f-prezilo { background: var(--lived); color: var(--ink); }
+  .f-nevime { background: repeating-linear-gradient(45deg, #eeeae3 0 4px, #ddd6ca 4px 6px); color: var(--muted); }
+  .legend { display: flex; flex-wrap: wrap; gap: 0.3rem 1rem; color: var(--muted); margin: 0 0 0.6rem; }
+  .fate-row { grid-template-columns: minmax(9rem, 18rem) 1fr auto; }
+  .fate-row .lbl .small { font-size: 0.8rem; }
+  .fate.thin .seg { padding: 0; }
+  @media (max-width: 560px) {
+    .bar-row { grid-template-columns: 6.5rem 1fr auto; }
+    .fate-row { grid-template-columns: 1fr auto; }
+    .fate-row .stack { grid-column: 1 / -1; grid-row: 2; }
+    .drow { grid-template-columns: 5.5rem 1fr; }
+    .drow .dval { grid-column: 2; }
+    .mhead, .mrow { grid-template-columns: 1fr 3.8rem 1fr; }
+  }
 </style>

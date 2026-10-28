@@ -49,9 +49,12 @@ Náhled spouštěj na pozadí a uživateli pošli odkaz. Vzhled si ověř sám (
   „Catharina Nowakin / Kateřina Nováková“). Výchozí je dnešní spisovná podoba; původní tvar je pak jen řádkem na stránce osoby.
 
 ## Stránky Statistiky a Domy
-- **Statistiky** (`/statistiky/`, `tools/statistiky.py`): povolání, věk dožití a při sňatku, měsíce svateb, generační
-  odstup, místa narození, křestní jména, víra, zápisy podle druhu a archivu. Počítá se jen z faktů přímých předků –
-  čím jednotnější zápis faktů (`* 12. 3. 1873 Obec čp. 5`, `× …`, `† …`, řemeslo samostatně), tím lepší čísla.
+- **Statistiky** (`/statistiky/`, `tools/statistiky.py`): povolání, věk dožití (muži a ženy, podle století narození),
+  věk při sňatku (rozložení, podle století, věkový rozdíl manželů), měsíce svateb, počet dětí v rodině a dětská úmrtnost,
+  generační odstup, místa narození, křestní jména, víra, zápisy podle druhu a archivu. Počítá se z faktů přímých předků –
+  čím jednotnější zápis faktů (`* 12. 3. 1873 Obec čp. 5`, `× …`, `† …` s věkem ze zápisu, řemeslo samostatně), tím lepší
+  čísla. Děti v rodině a dětská úmrtnost jen z rodin, kde má předek `"sour": "hotovo"`: děti = předek a jeho sourozenci
+  `bratr`/`sestra`; dětství přežil, kdo má sňatek, povolání nebo údaj aspoň 15 let po narození, jinak „nevíme“.
 - **Domy** (`/domy/`, `tools/domy_export.py`): mapa domů předků z výstupu skillu stare-adresy (viz `data.md` → `domy/`).
   Podklad ČÚZK (mapa / letecký snímek), domy shluknuté podle obcí, barva podle rodu, v okénku lidé, kteří v domě
   žili (přímí předci první, boční příbuzní s odkazem na kartičku u předka), výřez skici a jedna věta o jistotě polohy.

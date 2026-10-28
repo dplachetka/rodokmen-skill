@@ -2,9 +2,11 @@
 """Statistiky rodokmenu pro web: čte web/src/data/site.json (předky a zápisy z exportu) a zapíše
 web/src/data/statistiky.json. Volá ho tools/export_web.py na konci exportu; jde spustit i samostatně.
 
-Počítá se jen z faktů předků (pole `facts`), boční příbuzní se nepočítají:
-  narození „* 12. 3. 1873 Obec čp. 5“, úmrtí „† 14. 5. 1902“, sňatek „× 28. 1. 1897 Obec Jméno“,
-  věk „(24 let při sňatku)“, povolání podle klíčových slov, církve podle slov „církev, vyznání“.
+Počítá se z faktů předků (pole `facts`): narození „* 12. 3. 1873 Obec čp. 5“ (i jen rok „* 1873“), úmrtí „† 14. 5. 1902“
+(i s věkem „† 1902 (54 let)“), sňatek „× 28. 1. 1897 Obec Jméno“, věk „(24 let při sňatku)“, povolání podle klíčových slov,
+církve podle slov „církev, vyznání“. Bez přesného data se věk počítá z let a je jen přibližný (na webu „≈“).
+Počet dětí v rodině a dětská úmrtnost jen z rodin, kde má předek "sour": "hotovo" (všichni sourozenci dohledáni):
+děti = předek a jeho vlastní sourozenci (`bratr`, `sestra`, ne nevlastní ani nejistí).
 """
 import json, os, re, sys
 from collections import Counter, defaultdict
@@ -63,6 +65,64 @@ def parse_date(text):
         return None
 
 
+def when(facts, sign, y=""):
+    """Datum narození (sign „*“) nebo úmrtí („†“) z faktů, jinak rok z faktu; z let y („1888–1889“, „* 1931“) jen bez faktu.
+    Vrací (date nebo None, rok, přesné) nebo None. Nejisté údaje („† před 1840“, „po“, „mezi“, „asi 1761–1766“) se přeskočí."""
+    fs = first(facts, sign)
+    for f in fs:
+        if re.match(r".\s*(?:asi\s+)?(?:před|po|mezi|\?|\[)", f) or re.search(r"\d{4}\s*[–-]\s*\d{4}", f[:30]):
+            continue
+        d = parse_date(f)
+        if d:
+            return d[0], d[0].year, not d[1]
+        m = re.search(r"(?<!\d)(\d{4})(?!\d)", f)
+        if m:
+            return None, int(m.group(1)), False
+    if fs:
+        return None
+    y = re.sub(r"\s*[–-]\s*", "–", (y or "").strip())
+    if sign == "*" and not y.startswith(("†", "?", "žil", "po ", "před ", "mezi")):
+        m = re.match(r"(?:\*\s*)?(?:asi\s+|kolem\s+|≈)?(\d{4})", y)
+        if m:
+            return None, int(m.group(1)), False
+    if sign == "†":
+        m = re.search(r"(?:–|†\s*)(?:asi\s+|≈)?(\d{4})(?!\d|\s*/|\s*\(?\?)", y)
+        if m:
+            return None, int(m.group(1)), False
+    return None
+
+
+def age_hint(facts):
+    """Věk ze zápisu o úmrtí: „† 11. 5. 1768 (8 dní)“ → 0, „† 1873 Obec, 54 let, souchotiny“ → 54; jinak None."""
+    for f in first(facts, "†"):
+        m = re.search(r"(?<![\d.])(\d{1,3})\s*(?:let|roků|roky|rok)\b(?!\s+při)", f)
+        if m:
+            return int(m.group(1))
+        if re.search(r"(?<![\d.])\d{1,2}\s*(?:dn|den|týd|měs|hod)", f):
+            return 0
+    return None
+
+
+def life_age(b, d, facts):
+    """Věk při úmrtí: (věk, přesný) z narození b a úmrtí d (výstupy when), nebo z věku v zápisu; jinak None."""
+    if b and d and b[2] and d[2]:
+        return age(b[0], d[0]), True
+    h = age_hint(facts)
+    if h is not None:
+        return h, False
+    if b and d and d[1] >= b[1]:
+        return d[1] - b[1], False
+    return None
+
+
+def avg(vals):
+    return round(sum(vals) / len(vals), 1) if vals else None
+
+
+def stoleti(year):
+    return f"{(year - 1) // 100 + 1}. století"
+
+
 def first(facts, sign):
     return [f for f in facts if f.startswith(sign)]
 
@@ -93,7 +153,7 @@ def main():
             r["val"] = extra
         return r
 
-    born, died = {}, {}
+    born, died, byear = {}, {}, {}
     for p in anc:
         b = next((parse_date(f) for f in first(p["facts"], "*") if parse_date(f)), None)
         d = next((parse_date(f) for f in first(p["facts"], "†") if parse_date(f)), None)
@@ -101,38 +161,62 @@ def main():
             born[p["slug"]] = b[0]
         if d:
             died[p["slug"]] = d[0]
+        bw = when(p["facts"], "*", p.get("y"))
+        if bw:
+            byear[p["slug"]] = bw[1]
+    sex_of = lambda p: p.get("sex") or ("M" if p["k"] % 2 == 0 else "F")
 
-    # věk dožití
+    # věk dožití (předci – všichni se dožili dospělosti, jinak by neměli děti); bez přesných dat přibližně
     life = []
-    for s, d in died.items():
-        if s in born:
-            life.append(ref(bys[s], age(born[s], d)))
+    for p in anc:
+        la = life_age(when(p["facts"], "*", p.get("y")), when(p["facts"], "†", p.get("y")), p["facts"])
+        if la and 14 <= la[0] <= 110:
+            r = ref(p, la[0])
+            r["sex"], r["asi"], r["rok"] = sex_of(p), not la[1], byear.get(p["slug"])
+            life.append(r)
     life.sort(key=lambda r: -r["val"])
+    PASMA_ZIVOT = ["do 39", "40–49", "50–59", "60–69", "70–79", "80–89", "90 a víc"]
+    pasmo_zivot = lambda v: PASMA_ZIVOT[min(max(v // 10 - 3, 0), 6)]
 
     # sňatky: věk a měsíc
     wed_age = {"M": [], "F": []}
     months = Counter()
     seen = set()
     for p in anc:
-        sex = p.get("sex") or ("M" if p["k"] % 2 == 0 else "F")
+        sex = sex_of(p)
         for f in first(p["facts"], "×"):
             w = parse_date(f)
-            if not w:
+            wy = w[0].year if w else int(m.group(1)) if (m := re.match(r"×\s*(\d{4})\b", f)) else None
+            if not wy:
                 continue
-            key = (w[0], place_of(f))
-            if key not in seen:
-                seen.add(key)
-                months[w[0].month] += 1
-            a = None
-            if p["slug"] in born:
+            if w:
+                key = (w[0], place_of(f))
+                if key not in seen:
+                    seen.add(key)
+                    months[w[0].month] += 1
+            a, asi = None, False
+            if w and p["slug"] in born:
                 a = age(born[p["slug"]], w[0])
             else:
                 m = next((re.search(r"(\d+) let při sňatku", g) for g in p["facts"] if "let při sňatku" in g), None)
                 if m:
                     a = int(m.group(1))
+                elif p["slug"] in byear:
+                    a, asi = wy - byear[p["slug"]], True
             if a is not None and 14 <= a <= 80:
-                wed_age[sex].append(ref(p, a))
+                r = ref(p, a)
+                r["asi"], r["rok"] = asi, wy
+                wed_age[sex].append(r)
             break   # jen první (nejstarší zapsaný) sňatek
+    PASMA_SNATEK = ["do 19", "20–24", "25–29", "30–34", "35–39", "40 a víc"]
+    pasmo_snatek = lambda v: PASMA_SNATEK[min(max(v // 5 - 3, 0), 5)]
+
+    # věkový rozdíl manželů (rodiče předka, oba se známým rokem narození): kladný = muž starší
+    couple = []
+    for p in anc:
+        f, m = bys.get(p.get("father")), bys.get(p.get("mother"))
+        if f and m and f["slug"] in byear and m["slug"] in byear and (f["slug"], m["slug"]) not in {(c["muz"]["slug"], c["zena"]["slug"]) for c in couple}:
+            couple.append({"muz": ref(f), "zena": ref(m), "val": byear[m["slug"]] - byear[f["slug"]]})
 
     # věk otce a matky při narození dítěte (generační odstup)
     gap = {"M": [], "F": []}
@@ -143,6 +227,71 @@ def main():
             s = p.get(par)
             if s and s in born:
                 gap[sex].append({"parent": ref(bys[s]), "child": ref(p), "val": age(born[s], born[p["slug"]])})
+
+    # počet dětí a dětská úmrtnost: rodiny předků s dohledanými sourozenci ("sour": "hotovo")
+    def child(name, sex, facts, y, text, ancestor):
+        b, d = when(facts, "*", y), when(facts, "†", y)
+        la = life_age(b, d, facts)
+        hint = re.search(r"zemřel[a]?\s+(?:jako\s+|v\s+|krátce\s+|hned\s+)?(malý|malá|dítě|dětství|novorozen|kojen|po\s+narození)", text or "", re.I)
+        osud = "prezil" if ancestor else None
+        if not osud and la is not None:
+            osud = "zemrel" if la[0] < 15 else "prezil"
+        if not osud and hint:
+            osud = "zemrel"
+        if not osud and b:   # stopa dospělého života: sňatek, povolání, fakt nebo „po 1895“ aspoň 15 let po narození
+            later = [int(x) for f in facts if not f.startswith(("*", "†")) for x in re.findall(r"(?<!\d)(1[5-9]\d\d|20\d\d)(?!\d)", f)]
+            later += [int(x) for x in re.findall(r"po\s+(\d{4})", y or "")]
+            if first(facts, "×") or any(v - b[1] >= 15 for v in later) or \
+                    any(rx.search(f) for f in facts if not f.startswith(("*", "†")) for rx, _, _ in POVOLANI_RE):
+                osud = "prezil"
+        # do prvních narozenin: věk 0 (i rozdíl let 0 – narozen a zemřel týž rok), bez let „zemřel jako novorozenec“
+        kojenec = osud == "zemrel" and (la[0] == 0 if la else not re.match(r"malý|malá|dítě|dětství", hint.group(1)))
+        return {"name": name, "sex": sex, "rok": b[1] if b else None, "osud": osud or "nevime", "kojenec": kojenec,
+                "vek": la[0] if la and osud == "zemrel" else None}
+
+    fams = {}
+    for p in people:
+        if p.get("k", 0) < 1 or not p.get("family") or p["name"].startswith(("otec ", "matka ")):
+            continue
+        fam = fams.setdefault(p["family"], {"father": p.get("father"), "mother": p.get("mother"), "kids": [], "done": True, "jmena": set()})
+        fam["done"] &= p.get("sibStatus") == "done"
+        fam["kids"].append(child(p["name"], sex_of(p), p["facts"], p.get("y"), "", True))
+        fam["jmena"].add((p.get("modern") or p["name"], (p.get("born") or "")[:4]))
+        for e in p.get("side", []):
+            rel = (e.get("rel") or "").strip().lower()
+            if e.get("kind") != "sib":
+                continue
+            if rel not in ("bratr", "sestra"):   # „sourozenci“ za víc lidí – počet dětí neznáme
+                fam["done"] = False
+                continue
+            fam["sibs"] = fam.get("sibs", []) + [(e, "M" if rel == "bratr" else "F")]
+    families_done = []
+    for fid, fam in fams.items():
+        if not fam["done"]:
+            continue
+        for e, sex in fam.get("sibs", []):
+            if (e["name"], (e.get("born") or "")[:4]) in fam["jmena"]:   # sourozenec, který je zároveň předkem
+                continue
+            fam["kids"].append(child(e["name"], sex, e.get("facts", []), e.get("years", ""), e.get("text", ""), False))
+        roky = [c["rok"] for c in fam["kids"] if c["rok"]]
+        families_done.append({"id": fid, "father": ref(bys[fam["father"]]) if fam["father"] in bys else None,
+                              "mother": ref(bys[fam["mother"]]) if fam["mother"] in bys else None,
+                              "kids": fam["kids"], "rok": min(roky) if roky else None})
+    kids_all = [c for f in families_done for c in f["kids"]]
+
+    def umrtnost(kids):
+        n = Counter(c["osud"] for c in kids)
+        return {"deti": len(kids), "zemrelo": n["zemrel"], "kojenci": sum(c["kojenec"] for c in kids),
+                "prezilo": n["prezil"], "nevime": n["nevime"]}
+
+    by_cent = defaultdict(list)
+    for f in families_done:
+        if f["rok"]:
+            by_cent[f["rok"]].append(f)
+    cent_rows = defaultdict(list)
+    for y, fs in by_cent.items():
+        cent_rows[stoleti(y)] += fs
+    biggest = max(families_done, key=lambda f: len(f["kids"]), default=None)
 
     # povolání
     occ = defaultdict(list)
@@ -218,9 +367,31 @@ def main():
         "povolani": occ_list,
         "povolani_skupiny": [{"name": k, "count": v} for k, v in groups.most_common()],
         "mista": [{"name": k, "count": v} for k, v in places.most_common(15)],
-        "doziti": {"list": life, "prumer": round(sum(r["val"] for r in life) / len(life), 1) if life else None},
-        "snatek_vek": {s: {"list": sorted(v, key=lambda r: r["val"]), "prumer": round(sum(r["val"] for r in v) / len(v), 1) if v else None}
-                       for s, v in wed_age.items()},
+        "doziti": {"list": life, "prumer": avg([r["val"] for r in life]),
+                   **{sx: {"prumer": avg([r["val"] for r in life if r["sex"] == sx]), "pocet": sum(r["sex"] == sx for r in life)} for sx in "MF"},
+                   "pasma": [{"name": b, **{sx: sum(r["sex"] == sx and pasmo_zivot(r["val"]) == b for r in life) for sx in "MF"}} for b in PASMA_ZIVOT],
+                   "stoleti": [{"name": c, **{sx: avg([r["val"] for r in life if r["sex"] == sx and r["rok"] and stoleti(r["rok"]) == c]) for sx in "MF"},
+                                "pocet": sum(1 for r in life if r["rok"] and stoleti(r["rok"]) == c)}
+                               for c in sorted({stoleti(r["rok"]) for r in life if r["rok"]}, key=lambda c: int(c.split(".")[0]))]},
+        "snatek_vek": {s: {"list": sorted(v, key=lambda r: r["val"]), "prumer": avg([r["val"] for r in v])} for s, v in wed_age.items()},
+        "snatek_pasma": [{"name": b, **{sx: sum(pasmo_snatek(r["val"]) == b for r in wed_age[sx]) for sx in "MF"}} for b in PASMA_SNATEK],
+        "snatek_stoleti": [{"name": c, **{sx: avg([r["val"] for r in wed_age[sx] if stoleti(r["rok"]) == c]) for sx in "MF"},
+                            "pocet": sum(stoleti(r["rok"]) == c for sx in "MF" for r in wed_age[sx])}
+                           for c in sorted({stoleti(r["rok"]) for sx in "MF" for r in wed_age[sx]}, key=lambda c: int(c.split(".")[0]))],
+        "manzele_rozdil": {"prumer": avg([c["val"] for c in couple]), "pocet": len(couple),
+                           "muz_starsi": sum(c["val"] > 0 for c in couple), "zena_starsi": sum(c["val"] < 0 for c in couple),
+                           "stejne": sum(c["val"] == 0 for c in couple),
+                           "nejvetsi": max(couple, key=lambda c: abs(c["val"])) if couple else None},
+        "deti": {"rodin": len(families_done), "prumer": avg([len(f["kids"]) for f in families_done]),
+                 "nejvic": {"father": biggest["father"], "mother": biggest["mother"], "pocet": len(biggest["kids"])} if biggest else None,
+                 "rozdeleni": [{"name": str(n), "count": sum(len(f["kids"]) == n for f in families_done)}
+                               for n in range(1, max((len(f["kids"]) for f in families_done), default=0) + 1)],
+                 **umrtnost(kids_all),
+                 "stoleti": [{"name": c, "rodin": len(fs), "prumer": avg([len(f["kids"]) for f in fs]), **umrtnost([k for f in fs for k in f["kids"]])}
+                             for c, fs in sorted(cent_rows.items(), key=lambda x: int(x[0].split(".")[0]))],
+                 "zemreli": sorted(({"name": c["name"], "rok": c["rok"], "vek": c["vek"], "kojenec": c["kojenec"],
+                                     "father": f["father"], "mother": f["mother"]}
+                                    for f in families_done for c in f["kids"] if c["osud"] == "zemrel"), key=lambda x: x["rok"] or 9999)},
         "snatek_mesice": [{"name": MESICE[m - 1], "count": months.get(m, 0)} for m in range(1, 13)],
         "rodice_vek": {s: {"prumer": round(sum(x["val"] for x in v) / len(v), 1) if v else None,
                            "nejmladsi": min(v, key=lambda x: x["val"]) if v else None,
@@ -235,7 +406,7 @@ def main():
     }
     json.dump(out, open(OUT, "w", encoding="utf-8", newline="\n"), ensure_ascii=False, indent=1)
     print(f"statistiky: {len(anc)} předků, {len(life)} s věkem dožití, {sum(len(v) for v in wed_age.values())} s věkem při sňatku, "
-          f"{len(occ_list)} povolání")
+          f"{len(occ_list)} povolání, {len(families_done)} rodin s dohledanými sourozenci ({len(kids_all)} dětí)")
 
 
 if __name__ == "__main__":
