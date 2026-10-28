@@ -39,6 +39,14 @@ const lifeAxis = d.stoleti.length ? axis(d.stoleti) : null;
 const brideYoung = wedF.list.filter((r) => r.val < 20).length;
 const parents = (x) => [x.father, x.mother].filter(Boolean).map(person).join(' a ');
 const famMax = maxOf(deti.rozdeleni);
+// jména: muži i ženy na společné škále; tabulka podle století – sytost podle největšího podílu v tabulce,
+// sloupce s méně než deseti lidmi (náhodné podíly) škálu neurčují
+const nameMax = Math.max(1, ...st.jmena.M.map((n) => n.count), ...st.jmena.F.map((n) => n.count));
+const heatMax = Object.fromEntries(['M', 'F'].map((sx) => {
+  const pocet = st.jmena_stoleti.pocet[sx], ok = pocet.some((n) => n >= 10);
+  return [sx, Math.max(0.01, ...st.jmena_stoleti[sx].flatMap((n) =>
+    n.counts.map((v, i) => (pocet[i] && (pocet[i] >= 10 || !ok) ? v / pocet[i] : 0))))];
+}));
 ---
 <Base title="Statistiky">
 <div class="stat-page">
@@ -303,10 +311,58 @@ const famMax = maxOf(deti.rozdeleni);
   ) : <p class="muted">Zatím nemáme dost údajů.</p>}
 
   <h2>Nejčastější jména</h2>
+  <p class="muted">Předci a jejich sourozenci – {st.jmena_pocet.M} mužů a {st.jmena_pocet.F} žen.</p>
   <div class="grid2">
-    <div class="card"><h3>Muži</h3><p>{st.jmena.M.map((n) => `${n.name} (${n.count}×)`).join(', ')}</p></div>
-    <div class="card"><h3>Ženy</h3><p>{st.jmena.F.map((n) => `${n.name} (${n.count}×)`).join(', ')}</p></div>
+    {[['M', 'Muži', 'fill-m'], ['F', 'Ženy', 'fill-f']].map(([sx, title, cls]) => (
+      <div class="card">
+        <h3><i class={`sw sw-${sx.toLowerCase()}`}></i>{title}</h3>
+        <div class="bars names">
+          {st.jmena[sx].map((n) => (
+            <div class="bar-row">
+              <span class="lbl">{n.name}</span>
+              <span class="bar plain"><span class={cls} style={`width:${w(n.count, nameMax)}%`}></span></span>
+              <span class="val">{n.count}×</span>
+            </div>
+          ))}
+        </div>
+      </div>
+    ))}
   </div>
+  {st.jmena_stoleti.stoleti.length > 1 && <>
+    <h3>Jak se jména měnila</h3>
+    <p class="muted small">Kolik procent chlapců a dívek narozených v daném století dostalo to jméno (čím sytější barva, tím častější).
+      V záhlaví počet lidí se známým rokem narození; u malých čísel je podíl hodně náhodný.</p>
+    <div class="grid2">
+      {[['M', 'Chlapci', 'var(--men)'], ['F', 'Dívky', 'var(--women)']].map(([sx, title, color]) => (
+        <div class="card heat-card">
+          <table class="heat">
+            <thead><tr><th>{title}</th>{st.jmena_stoleti.stoleti.map((c, i) => (
+              <th class={st.jmena_stoleti.pocet[sx][i] < 10 ? 'few' : ''}>{c.replace(' století', ' st.')}<br /><span class="muted">({st.jmena_stoleti.pocet[sx][i]})</span></th>))}</tr></thead>
+            <tbody>
+              {st.jmena_stoleti[sx].map((n) => (
+                <tr><th>{n.name}</th>{n.counts.map((v, i) => {
+                  const share = st.jmena_stoleti.pocet[sx][i] ? v / st.jmena_stoleti.pocet[sx][i] : 0;
+                  const k = Math.min(100, Math.round(100 * share / heatMax[sx]));
+                  return <td class={st.jmena_stoleti.pocet[sx][i] < 10 ? 'few' : ''} title={`${n.name}, ${st.jmena_stoleti.stoleti[i]}: ${v} z ${st.jmena_stoleti.pocet[sx][i]}`}
+                    style={v ? `background:color-mix(in srgb, ${color} ${Math.max(8, k)}%, var(--paper));color:${k > 55 ? '#fff' : 'var(--ink)'}` : ''}>
+                    {v ? `${Math.round(100 * share)} %` : '–'}</td>;
+                })}</tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      ))}
+    </div>
+  </>}
+  {st.jmeno_po_zemrelem.length > 0 && <div class="card wide-card">
+    <h3>Jméno po zemřelém sourozenci</h3>
+    <p>Když dítě zemřelo, dostal jeho jméno často další sourozenec – jméno tak v rodině „zůstalo“ (třeba po otci nebo kmotrovi).
+      V rodokmenu to známe {st.jmeno_po_zemrelem.length}×:</p>
+    <ul class="small">
+      {st.jmeno_po_zemrelem.map((x) => <li><b>{x.name}</b> * {x.prvni} († {x.kojenec ? 'do roka' : x.vek != null ? `${x.vek} ${pl(x.vek, 'rok', 'roky', 'let')}` : 'jako dítě'}) → {x.name} * {x.druhy};
+        rodiče <Fragment set:html={parents(x)} /></li>)}
+    </ul>
+  </div>}
 
   {st.vira.length > 0 && <>
   <h2>Víra</h2>
@@ -401,6 +457,15 @@ const famMax = maxOf(deti.rozdeleni);
   .fate-row { grid-template-columns: minmax(9rem, 18rem) 1fr auto; }
   .fate-row .lbl .small { font-size: 0.8rem; }
   .fate.thin .seg { padding: 0; }
+  .bar.plain { background: transparent; }
+  .bar .fill-m, .bar .fill-f { max-width: none; border-radius: 0 4px 4px 0; }
+  .names .bar-row { grid-template-columns: 6.5rem 1fr auto; }
+  .heat-card { overflow-x: auto; padding: 0.6rem; }
+  .heat { border-collapse: separate; border-spacing: 2px; width: 100%; font-size: 0.85rem; }
+  .heat th { font-weight: 400; color: var(--muted); font-size: 0.78rem; text-align: center; }
+  .heat tbody th { text-align: left; color: var(--ink); font-size: 0.88rem; }
+  .heat td { text-align: center; padding: 0.3rem 0.2rem; border-radius: 3px; color: var(--muted); }
+  .heat .few { opacity: 0.6; }
   @media (max-width: 560px) {
     .bar-row { grid-template-columns: 6.5rem 1fr auto; }
     .fate-row { grid-template-columns: 1fr auto; }

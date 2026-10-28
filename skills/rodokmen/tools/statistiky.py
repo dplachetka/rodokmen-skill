@@ -2,7 +2,7 @@
 """Statistiky rodokmenu pro web: čte web/src/data/site.json (předky a zápisy z exportu) a zapíše
 web/src/data/statistiky.json. Volá ho tools/export_web.py na konci exportu; jde spustit i samostatně.
 
-Počítá se z faktů předků (pole `facts`): narození „* 12. 3. 1873 Obec čp. 5“ (i jen rok „* 1873“), úmrtí „† 14. 5. 1902“
+Počítá se z faktů předků (pole `facts`; jména i ze sourozenců): narození „* 12. 3. 1873 Obec čp. 5“ (i jen rok „* 1873“), úmrtí „† 14. 5. 1902“
 (i s věkem „† 1902 (54 let)“), sňatek „× 28. 1. 1897 Obec Jméno“, věk „(24 let při sňatku)“, povolání podle klíčových slov,
 církve podle slov „církev, vyznání“. Bez přesného data se věk počítá z let a je jen přibližný (na webu „≈“).
 Počet dětí v rodině a dětská úmrtnost jen z rodin, kde má předek "sour": "hotovo" (všichni sourozenci dohledáni):
@@ -247,7 +247,7 @@ def main():
         # do prvních narozenin: věk 0 (i rozdíl let 0 – narozen a zemřel týž rok), bez let „zemřel jako novorozenec“
         kojenec = osud == "zemrel" and (la[0] == 0 if la else not re.match(r"malý|malá|dítě|dětství", hint.group(1)))
         return {"name": name, "sex": sex, "rok": b[1] if b else None, "osud": osud or "nevime", "kojenec": kojenec,
-                "vek": la[0] if la and osud == "zemrel" else None}
+                "vek": la[0] if la and osud == "zemrel" else None, "umrti": d[1] if d else None}
 
     fams = {}
     for p in people:
@@ -255,7 +255,7 @@ def main():
             continue
         fam = fams.setdefault(p["family"], {"father": p.get("father"), "mother": p.get("mother"), "kids": [], "done": True, "jmena": set()})
         fam["done"] &= p.get("sibStatus") == "done"
-        fam["kids"].append(child(p["name"], sex_of(p), p["facts"], p.get("y"), "", True))
+        fam["kids"].append(child(p.get("modern") or p["name"], sex_of(p), p["facts"], p.get("y"), "", True))
         fam["jmena"].add((p.get("modern") or p["name"], (p.get("born") or "")[:4]))
         for e in p.get("side", []):
             rel = (e.get("rel") or "").strip().lower()
@@ -264,19 +264,18 @@ def main():
             if rel not in ("bratr", "sestra"):   # „sourozenci“ za víc lidí – počet dětí neznáme
                 fam["done"] = False
                 continue
-            fam["sibs"] = fam.get("sibs", []) + [(e, "M" if rel == "bratr" else "F")]
-    families_done = []
+            fam.setdefault("sibs", []).append((e, "M" if rel == "bratr" else "F"))
+    families_all = []
     for fid, fam in fams.items():
-        if not fam["done"]:
-            continue
         for e, sex in fam.get("sibs", []):
             if (e["name"], (e.get("born") or "")[:4]) in fam["jmena"]:   # sourozenec, který je zároveň předkem
                 continue
             fam["kids"].append(child(e["name"], sex, e.get("facts", []), e.get("years", ""), e.get("text", ""), False))
         roky = [c["rok"] for c in fam["kids"] if c["rok"]]
-        families_done.append({"id": fid, "father": ref(bys[fam["father"]]) if fam["father"] in bys else None,
-                              "mother": ref(bys[fam["mother"]]) if fam["mother"] in bys else None,
-                              "kids": fam["kids"], "rok": min(roky) if roky else None})
+        families_all.append({"id": fid, "father": ref(bys[fam["father"]]) if fam["father"] in bys else None,
+                             "mother": ref(bys[fam["mother"]]) if fam["mother"] in bys else None,
+                             "kids": fam["kids"], "rok": min(roky) if roky else None, "done": fam["done"]})
+    families_done = [f for f in families_all if f["done"]]
     kids_all = [c for f in families_done for c in f["kids"]]
 
     def umrtnost(kids):
@@ -284,13 +283,10 @@ def main():
         return {"deti": len(kids), "zemrelo": n["zemrel"], "kojenci": sum(c["kojenec"] for c in kids),
                 "prezilo": n["prezil"], "nevime": n["nevime"]}
 
-    by_cent = defaultdict(list)
+    cent_rows = defaultdict(list)
     for f in families_done:
         if f["rok"]:
-            by_cent[f["rok"]].append(f)
-    cent_rows = defaultdict(list)
-    for y, fs in by_cent.items():
-        cent_rows[stoleti(y)] += fs
+            cent_rows[stoleti(f["rok"])].append(f)
     biggest = max(families_done, key=lambda f: len(f["kids"]), default=None)
 
     # povolání
@@ -321,13 +317,49 @@ def main():
                 places[pl] += 1
                 break
 
-    # křestní jména
-    names = {"M": Counter(), "F": Counter()}
+    # křestní jména předků a jejich sourozenců (i nevlastních), celkem a podle století narození
+    def given(name):
+        fn = (name or "").split()[0] if (name or "").split() else ""
+        return fn if fn[:1].isupper() and fn.rstrip(".").isalpha() and not fn.endswith(".") else None
+
+    named = []   # (jméno, pohlaví, rok narození)
     for p in anc:
-        sex = p.get("sex") or ("M" if p["k"] % 2 == 0 else "F")
-        fn = (p.get("modern") or p["name"]).split()[0]
-        if fn[0].isupper() and fn not in ("Pozn.",):
-            names[sex][fn] += 1
+        named.append((given(p.get("modern") or p["name"]), sex_of(p), byear.get(p["slug"])))
+    anc_names = {(p.get("modern") or p["name"], (p.get("born") or "")[:4]) for p in anc}
+    for p in people:
+        if p.get("k", 0) < 1:
+            continue
+        for e in p.get("side", []):
+            rel = (e.get("rel") or "").lower()
+            sx = "M" if "bratr" in rel else "F" if "sestra" in rel else None
+            if not sx or rel.split()[0] in ("bratři", "sestry") or (e["name"], (e.get("born") or "")[:4]) in anc_names:
+                continue
+            b = when(e.get("facts", []), "*", e.get("years", ""))
+            named.append((given(e["name"]), sx, b[1] if b else None))
+    named = [x for x in named if x[0]]
+    names = {sx: Counter(n for n, s2, _ in named if s2 == sx) for sx in "MF"}
+    cents = Counter(stoleti(y) for _, _, y in named if y)
+    cents = sorted((c for c, n in cents.items() if n >= 5), key=lambda c: int(c.split(".")[0]))
+    names_cent = {"stoleti": cents,
+                  "pocet": {sx: [sum(1 for _, s2, y in named if s2 == sx and y and stoleti(y) == c) for c in cents] for sx in "MF"}}
+    for sx in "MF":
+        top = [n for n, _ in names[sx].most_common(8)]
+        names_cent[sx] = [{"name": n, "counts": [sum(1 for n2, s2, y in named if n2 == n and s2 == sx and y and stoleti(y) == c)
+                                                 for c in cents]} for n in top]
+
+    # jméno po sourozenci, který zemřel jako malý (další dítě téhož pohlaví dostalo stejné jméno)
+    po_zemrelem = []
+    for f in families_all:
+        kids = sorted((c for c in f["kids"] if c["rok"]), key=lambda c: c["rok"])
+        for i, a in enumerate(kids):
+            if a["osud"] != "zemrel" or not given(a["name"]):
+                continue
+            b = next((c for c in kids[i + 1:] if c["sex"] == a["sex"] and given(c["name"]) == given(a["name"])
+                      and c["rok"] >= (a["umrti"] or a["rok"])), None)
+            if b:
+                po_zemrelem.append({"name": given(a["name"]), "prvni": a["rok"], "vek": a["vek"], "kojenec": a["kojenec"],
+                                    "druhy": b["rok"], "father": f["father"], "mother": f["mother"]})
+    po_zemrelem.sort(key=lambda x: x["prvni"])
 
     # víra a církve
     faith = []
@@ -396,7 +428,10 @@ def main():
         "rodice_vek": {s: {"prumer": round(sum(x["val"] for x in v) / len(v), 1) if v else None,
                            "nejmladsi": min(v, key=lambda x: x["val"]) if v else None,
                            "nejstarsi": max(v, key=lambda x: x["val"]) if v else None, "pocet": len(v)} for s, v in gap.items()},
-        "jmena": {s: [{"name": k, "count": v} for k, v in c.most_common(8)] for s, c in names.items()},
+        "jmena": {s: [{"name": k, "count": v} for k, v in c.most_common(10)] for s, c in names.items()},
+        "jmena_pocet": {s: sum(c.values()) for s, c in names.items()},
+        "jmena_stoleti": names_cent,
+        "jmeno_po_zemrelem": po_zemrelem,
         "vira": faith,
         "nemanzelske": illeg,
         "legitimace": legit,
