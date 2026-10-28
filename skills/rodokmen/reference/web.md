@@ -53,7 +53,8 @@ Náhled spouštěj na pozadí a uživateli pošli odkaz. Vzhled si ověř sám (
   věk při sňatku (rozložení, podle století, věkový rozdíl manželů), vzdálenost rodišť manželů (souřadnice z `mista.json`),
   měsíce svateb, počet dětí v rodině, dětská úmrtnost a pořadí předka mezi sourozenci, povolání i podle století,
   generační odstup, místa narození, křestní jména předků i sourozenců (celkem, podíly podle století, jméno po zemřelém
-  sourozenci), víra, zápisy podle druhu a archivu. Počítá se z faktů přímých předků –
+  sourozenci), měsíce narození a úmrtí, rozestupy mezi dětmi a věk matky, ovdovění a nový sňatek, příčiny úmrtí
+  (jen souhrn bez jmen, skupiny podle slov ve faktu „† …“), víra, zápisy podle druhu a archivu. Počítá se z faktů přímých předků –
   čím jednotnější zápis faktů (`* 12. 3. 1873 Obec čp. 5`, `× …`, `† …` s věkem ze zápisu, řemeslo samostatně), tím lepší
   čísla. Děti v rodině a dětská úmrtnost jen z rodin, kde má předek `"sour": "hotovo"`: děti = předek a jeho sourozenci
   `bratr`/`sestra`; dětství přežil, kdo má sňatek, povolání nebo údaj aspoň 15 let po narození, jinak „nevíme“.

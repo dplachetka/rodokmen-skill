@@ -44,6 +44,22 @@ const km = st.snatek_km, kmFar = km.nejdal.filter((x) => x.km >= 10).slice(0, 3)
 const por = st.poradi;
 const porRows = por.M.map((r, i) => ({ name: r.name, M: r.count, F: por.F[i].count })).filter((r) => r.M || r.F);
 const sonsKnown = por.syn.reduce((a, x) => a + x.count, 0);
+// měsíce (2. pád), rozestupy, úmrtí, příčiny, ovdovění
+const MESIC2 = { 'leden': 'lednu', 'únor': 'únoru', 'březen': 'březnu', 'duben': 'dubnu', 'květen': 'květnu', 'červen': 'červnu', 'červenec': 'červenci',
+  'srpen': 'srpnu', 'září': 'září', 'říjen': 'říjnu', 'listopad': 'listopadu', 'prosinec': 'prosinci' };
+const mesice = (m) => {
+  if (m < 24) return `${Math.round(m)} ${pl(Math.round(m), 'měsíc', 'měsíce', 'měsíců')}`;
+  const r = Math.round(m / 6) / 2;   // po půl roce
+  return Number.isInteger(r) ? `${r} ${pl(r, 'rok', 'roky', 'let')}` : `${cz(r)} roku`;
+};
+const byCount = (arr, f) => [...arr].sort((a, b) => f(b) - f(a));
+const narTotal = st.mesice_narozeni.reduce((a, m) => a + m.count, 0);
+const narMax = { name: MESIC2[byCount(st.mesice_narozeni, (m) => m.count)[0].name] }, narMin = { name: MESIC2[byCount(st.mesice_narozeni, (m) => -m.count)[0].name] };
+const umrTotal = st.mesice_umrti.reduce((a, m) => a + m.deti + m.ostatni, 0);
+const umrMax = Math.max(1, ...st.mesice_umrti.map((m) => m.deti + m.ostatni));
+const umrNej = { name: MESIC2[byCount(st.mesice_umrti, (m) => m.deti + m.ostatni)[0].name] };
+const rozd = st.rozestupy, pric = st.priciny, vdov = st.vdovstvi;
+const pricMax = Math.max(1, ...pric.skupiny.map((g) => g.deti + g.dospeli));
 // jména: muži i ženy na společné škále; tabulka podle století – sytost podle největšího podílu v tabulce,
 // sloupce s méně než deseti lidmi (náhodné podíly) škálu neurčují
 const nameMax = Math.max(1, ...st.jmena.M.map((n) => n.count), ...st.jmena.F.map((n) => n.count));
@@ -228,6 +244,13 @@ const heatMax = Object.fromEntries(['M', 'F'].map((sx) => {
       <Fragment set:html={kmFar.map((x) => `${person(x.muz)} (${esc(x.odkud)}) a ${person(x.zena)} (${esc(x.kam)}) – ${String(Math.round(x.km))} km${x.rok ? `, ${x.rok}` : ''}`).join('; ')} />.</p>}
     <p class="muted small">Vzdušnou čarou mezi rodišti podle mapy míst; páry, u kterých obec na mapě chybí, se nepočítají.</p>
   </div>}
+  {vdov.M + vdov.F > 0 && <div class="card wide-card">
+    <h3>Ovdovění a nový sňatek</h3>
+    <p>Znovu se {vdov.M === 1 ? 'oženil 1 předek' : `oženilo ${vdov.M} předků`}{vdov.F > 0 && <> a {vdov.F === 1 ? 'vdala 1 předkyně' : `vdalo ${vdov.F} předkyň`}</>}.
+      Hospodářství i malé děti potřebovaly hospodyni a hospodáře, proto se vdovci a vdovy často brali znovu už za několik měsíců.</p>
+    {vdov.list.length > 0 && <p class="small">Kde známe den úmrtí partnera i nového sňatku:{' '}
+      <Fragment set:html={vdov.list.map((x) => `${person(x)} za ${mesice(x.mesice)}`).join(', ')} />.</p>}
+  </div>}
 
   <h2>Rodiny a děti</h2>
   {deti.rodin > 0 && <>
@@ -329,6 +352,38 @@ const heatMax = Object.fromEntries(['M', 'F'].map((sx) => {
     </div>}
   </>}
   <div class="grid2">
+    {narTotal > 0 && <div class="card">
+      <h3>V kterém měsíci se rodili</h3>
+      <div class="months">
+        {st.mesice_narozeni.map((m, i) => (
+          <div class="mcol" title={`${m.name}: ${m.count}`}>
+            <span class="mbar" style={`height:${pct(m.count, maxOf(st.mesice_narozeni))}%`}></span>
+            <span class="mlbl">{MS[i]}</span>
+          </div>
+        ))}
+      </div>
+      <p class="small">Nejvíc dětí se narodilo v {narMax.name}, nejméně v {narMin.name}{' '}
+        <span class="muted">({narTotal} předků a sourozenců s přesným datem)</span>. Dítě bylo počato zhruba o devět měsíců dřív –
+        počty narození tak prozrazují i to, kdy bylo na poli nejvíc práce a kdy se slavilo.</p>
+    </div>}
+    {rozd.pocet > 0 && <div class="card">
+      <h3>Jak rychle šly děti po sobě</h3>
+      <div class="bars narrow">
+        {st.rozestupy.pasma.map((b) => (
+          <div class="bar-row">
+            <span class="lbl">{b.name}</span>
+            <span class="bar"><span class="fill" style={`width:${b.count ? w(b.count, maxOf(st.rozestupy.pasma)) : 0}%`}></span></span>
+            <span class="val">{b.count}</span>
+          </div>
+        ))}
+      </div>
+      <p class="small">Mezi dvěma sourozenci bylo nejčastěji {mesice(rozd.median)}.
+        {rozd.po_kojenci.pocet > 2 && <> Když dítě zemřelo jako kojenec, přišel další sourozenec dřív – zhruba za {mesice(rozd.po_kojenci.median)}:
+          matka přestala kojit, a mohla tak znovu otěhotnět.</>}
+        {rozd.dvojcata > 0 && <> Dvojčata se narodila {rozd.dvojcata}×.</>}</p>
+      {st.matka_vek.pocet > 0 && <p class="small">Matky měly první dítě v průměru ve {cz(st.matka_vek.prvni)} letech a poslední ve {cz(st.matka_vek.posledni)}.
+        {st.matka_vek.nejstarsi && <> Nejpozději: <Fragment set:html={person(st.matka_vek.nejstarsi.matka)} />, poslední z {st.matka_vek.nejstarsi.deti} dětí ve {st.matka_vek.nejstarsi.posledni} letech.</>}</p>}
+    </div>}
     <div class="card">
       <h3>Věk rodičů při narození dítěte z rodokmenu</h3>
       <p>Otcové v průměru <b>{cz(st.rodice_vek.M.prumer)} let</b>, matky <b>{cz(st.rodice_vek.F.prumer)} let</b>.
@@ -401,6 +456,49 @@ const heatMax = Object.fromEntries(['M', 'F'].map((sx) => {
       </div>}
     </>
   ) : <p class="muted">Zatím nemáme dost údajů.</p>}
+  <div class="grid2 wide-card">
+    {umrTotal > 0 && <div class="card">
+      <h3>V kterém měsíci umírali</h3>
+      <div class="months">
+        {st.mesice_umrti.map((m, i) => (
+          <div class="mcol" title={`${m.name}: děti ${m.deti}, ostatní ${m.ostatni}`}>
+            <span class="mstack" style={`height:${w(m.deti + m.ostatni, umrMax)}%`}>
+              {m.ostatni > 0 && <span class="m-ost" style={`flex:${m.ostatni}`}></span>}
+              {m.deti > 0 && <span class="m-deti" style={`flex:${m.deti}`}></span>}
+            </span>
+            <span class="mlbl">{MS[i]}</span>
+          </div>
+        ))}
+      </div>
+      <p class="legend small"><span><i class="sw m-deti"></i>děti do 15 let</span><span><i class="sw m-ost"></i>ostatní</span></p>
+      <p class="small">Nejvíc lidí zemřelo v {umrNej.name} <span class="muted">({umrTotal} úmrtí s přesným datem)</span>.
+        Dospělí umírali častěji koncem zimy a na jaře – nemoci plic a hlad před novou úrodou –, malé děti i v létě na průjmy.</p>
+    </div>}
+    {pric.zname > 0 && <div class="card">
+      <h3>Na co umírali</h3>
+      <div class="bars narrow">
+        {pric.skupiny.map((g) => (
+          <div class="bar-row" title={`${g.name}: děti ${g.deti}, dospělí ${g.dospeli}`}>
+            <span class="lbl">{g.name}</span>
+            <span class="bar pric-bar">
+              {g.deti > 0 && <span class="m-deti" style={`width:${w(g.deti, pricMax)}%`}></span>}
+              {g.dospeli > 0 && <span class="m-ost" style={`width:${w(g.dospeli, pricMax)}%`}></span>}
+            </span>
+            <span class="val">{g.deti + g.dospeli}</span>
+          </div>
+        ))}
+      </div>
+      <p class="legend small"><span><i class="sw m-deti"></i>děti do 15 let</span><span><i class="sw m-ost"></i>ostatní</span></p>
+      <p class="small">Příčinu známe u {pric.zname} z {pric.umrti} úmrtí – do matrik se zapisovala až od roku 1784
+        a jen tak, jak ji popsal farář nebo ohledač mrtvol.</p>
+      <details class="small"><summary>Co znamenají staré názvy</summary>
+        <p><b>Souchotiny, ubývání</b> – tuberkulóza plic. <b>Vodnatelnost</b> – otoky při selhání srdce nebo ledvin.
+          <b>Horká nemoc, nervová horečka</b> – nejčastěji břišní tyfus. <b>Zimnice</b> – horečka se zimnicí, často malárie nebo jiná infekce.
+          <b>Psotník</b> – křeče malých dětí při horečce nebo infekci. <b>Omladnice</b> – horečka po porodu (infekce).
+          <b>Marasmus, sešlost věkem</b> – celkové vyčerpání ve stáří. <b>Slabost</b> – u novorozenců nedonošenost nebo vrozená slabost.</p>
+      </details>
+    </div>}
+  </div>
 
   <h2>Nejčastější jména</h2>
   <p class="muted">Předci a jejich sourozenci – {st.jmena_pocet.M} mužů a {st.jmena_pocet.F} žen.</p>
@@ -601,6 +699,14 @@ const heatMax = Object.fromEntries(['M', 'F'].map((sx) => {
   .g-prob { background: #c9a272; }
   .g-jine { background: repeating-linear-gradient(45deg, #c9a272 0 2px, #f3e6d4 2px 5px); }
   .g-chybi { background: var(--line); }
+  .mstack { display: flex; flex-direction: column; width: 100%; min-height: 2px; gap: 2px; }
+  .mstack > span { display: block; width: 100%; }
+  .mstack > span:first-child { border-radius: 3px 3px 0 0; }
+  .m-deti { background: var(--died); }
+  .m-ost { background: #c9a272; }
+  .pric-bar { display: flex; gap: 2px; background: transparent; }
+  .pric-bar > span { display: block; height: 100%; }
+  .pric-bar > span:first-child { border-radius: 4px 0 0 4px; }
   @media (max-width: 560px) {
     .bar-row { grid-template-columns: 6.5rem 1fr auto; }
     .fate-row { grid-template-columns: 1fr auto; }
