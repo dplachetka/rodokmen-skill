@@ -66,13 +66,19 @@ const heatMax = Object.fromEntries(['M', 'F'].map((sx) => {
   </div>
 
   <h2>Kolik předků známe v každé generaci</h2>
-  <p class="muted">Každá generace má dvakrát víc předků než ta předchozí. Šedá část ukazuje, kolik jich ještě chybí.</p>
+  <p class="muted">Každá generace má dvakrát víc předků než ta předchozí. Šedá část ukazuje, kolik jich ještě chybí;
+    barva říká, jak jistě o nich víme.</p>
+  <p class="legend small"><span><i class="sw g-doc"></i>doloženo matrikou</span><span><i class="sw g-prob"></i>pravděpodobné</span>
+    <span><i class="sw g-jine"></i>od rodiny nebo z cizího rodokmenu</span><span><i class="sw g-chybi"></i>zatím nevíme</span></p>
   <div class="bars">
     {st.generace.map((g) => (
       <div class="bar-row">
         <span class="lbl">{g.gen === 0 ? (root.modern || root.name).split(' ')[0] : g.gen === 1 ? 'rodiče' : g.gen === 2 ? 'prarodiče' : `${g.gen}. generace`}</span>
-        <span class="bar"><span class="fill" style={`width:${pct(g.pocet, g.max)}%`}></span></span>
-        <span class="val">{g.pocet} z {g.max}</span>
+        <span class="bar gen-bar" title={`doloženo ${g.doc}, pravděpodobně ${g.prob}, od rodiny nebo z cizího rodokmenu ${g.jine}, chybí ${g.max - g.pocet}`}>
+          {[['doc', g.doc], ['prob', g.prob], ['jine', g.jine]].filter(([, v]) => v).map(([k, v]) => (
+            <span class={`g-${k}`} style={`width:${Math.max(0.6, (100 * v) / g.max)}%`}></span>))}
+        </span>
+        <span class="val">{g.pocet} z {g.max}{g.doc > 0 && g.doc < g.pocet && <span class="muted"> · doloženo {g.doc}</span>}</span>
       </div>
     ))}
   </div>
@@ -461,11 +467,28 @@ const heatMax = Object.fromEntries(['M', 'F'].map((sx) => {
   <h2>Odkud to víme</h2>
   <div class="grid2">
     <div class="card"><h3>Druhy zápisů</h3>
-      <p>{st.zapisy_druh.map((d) => `${d.name}: ${d.count}`).join(' · ')}</p>
-      <p>{st.zapisy_portal.map((d) => `${d.name}: ${d.count}`).join(' · ')}</p>
+      <div class="bars narrow">
+        {st.zapisy_druh.map((d) => (
+          <div class="bar-row">
+            <span class="lbl">{d.name}</span>
+            <span class="bar"><span class="fill" style={`width:${pct(d.count, maxOf(st.zapisy_druh))}%`}></span></span>
+            <span class="val">{d.count}</span>
+          </div>
+        ))}
+      </div>
+      <h3 class="sub">Kde jsme je našli</h3>
+      <div class="bars narrow">
+        {st.zapisy_portal.map((d) => (
+          <div class="bar-row">
+            <span class="lbl">{d.name}</span>
+            <span class="bar"><span class="fill" style={`width:${pct(d.count, maxOf(st.zapisy_portal))}%`}></span></span>
+            <span class="val">{d.count}</span>
+          </div>
+        ))}
+      </div>
     </div>
     <div class="card"><h3>Z jakého období</h3>
-      <div class="bars">
+      <div class="bars narrow">
         {st.zapisy_obdobi.map((d) => (
           <div class="bar-row">
             <span class="lbl">{d.name}</span>
@@ -568,6 +591,16 @@ const heatMax = Object.fromEntries(['M', 'F'].map((sx) => {
   .kid-m.kid-dead { border-color: var(--men); }
   .kid-f.kid-dead { border-color: var(--women); }
   .kid-me { width: 1rem; height: 1rem; box-shadow: 0 0 0 2px var(--paper), 0 0 0 4px var(--ink); }
+  /* jistota údajů: jeden odstín od tmavého (doloženo) po světlý šrafovaný (od rodiny) – čitelné i pro barvoslepé */
+  .bars.narrow .bar-row { grid-template-columns: 9rem 1fr auto; }
+  h3.sub { margin-top: 1.2rem; }
+  .gen-bar { display: flex; gap: 2px; }
+  .gen-bar > span { display: block; height: 100%; }
+  .gen-bar > span:first-child { border-radius: 4px 0 0 4px; }
+  .g-doc { background: var(--accent); }
+  .g-prob { background: #c9a272; }
+  .g-jine { background: repeating-linear-gradient(45deg, #c9a272 0 2px, #f3e6d4 2px 5px); }
+  .g-chybi { background: var(--line); }
   @media (max-width: 560px) {
     .bar-row { grid-template-columns: 6.5rem 1fr auto; }
     .fate-row { grid-template-columns: 1fr auto; }

@@ -449,12 +449,15 @@ def main():
     for r in recs:
         dr = r.get("kind") or r.get("druh") or ""
         druh[{"N": "křty a narození", "O": "sňatky", "Z": "úmrtí"}.get(dr, "jiné")] += 1
-        arch[r.get("portal") or "jiné"] += 1
+        arch[re.split(r"\s+[(–]", r.get("portal") or "jiné")[0].strip()] += 1   # „FamilySearch (katalog …) – …“ → FamilySearch
         y = re.findall(r"\d{4}", r.get("datum") or r.get("date") or "")
         if y:
             decades[int(y[-1]) // 50 * 50] += 1
 
     gens = Counter(p.get("gen", 0) for p in anc)
+    gens_st = defaultdict(Counter)   # generace → stav doložení (doc, prob; ostatní = od rodiny nebo z cizího stromu)
+    for p in anc:
+        gens_st[p.get("gen", 0)][p.get("st")] += 1
     years_b = sorted(born.values())
     out = {
         "prehled": {
@@ -466,7 +469,8 @@ def main():
             "prijmeni": len({(p.get("modern") or p["name"]).split()[-1].replace("ová", "") for p in anc}),
             "mist": len(places),
         },
-        "generace": [{"gen": g, "pocet": gens[g], "max": 2 ** g} for g in sorted(gens)],
+        "generace": [{"gen": g, "pocet": gens[g], "max": 2 ** g, "doc": gens_st[g]["doc"], "prob": gens_st[g]["prob"],
+                      "jine": gens[g] - gens_st[g]["doc"] - gens_st[g]["prob"]} for g in sorted(gens)],
         "povolani": occ_list,
         "povolani_skupiny": [{"name": k, "count": v} for k, v in groups.most_common()],
         "povolani_stoleti": [{"name": c, "pocet": sum(occ_cent[c].values()), "skupiny": [{"name": g, "count": occ_cent[c][g]} for g, _ in groups.most_common()]}

@@ -49,7 +49,7 @@ Náhled spouštěj na pozadí a uživateli pošli odkaz. Vzhled si ověř sám (
   „Catharina Nowakin / Kateřina Nováková“). Výchozí je dnešní spisovná podoba; původní tvar je pak jen řádkem na stránce osoby.
 
 ## Stránky Statistiky a Domy
-- **Statistiky** (`/statistiky/`, `tools/statistiky.py`): povolání, věk dožití (muži a ženy, podle století narození),
+- **Statistiky** (`/statistiky/`, `tools/statistiky.py`): předci v generacích podle doložení, povolání, věk dožití (muži a ženy, podle století narození),
   věk při sňatku (rozložení, podle století, věkový rozdíl manželů), vzdálenost rodišť manželů (souřadnice z `mista.json`),
   měsíce svateb, počet dětí v rodině, dětská úmrtnost a pořadí předka mezi sourozenci, povolání i podle století,
   generační odstup, místa narození, křestní jména předků i sourozenců (celkem, podíly podle století, jméno po zemřelém
