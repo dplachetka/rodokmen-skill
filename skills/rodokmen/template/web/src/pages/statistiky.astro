@@ -39,6 +39,11 @@ const lifeAxis = d.stoleti.length ? axis(d.stoleti) : null;
 const brideYoung = wedF.list.filter((r) => r.val < 20).length;
 const parents = (x) => [x.father, x.mother].filter(Boolean).map(person).join(' a ');
 const famMax = maxOf(deti.rozdeleni);
+const occTotal = st.povolani_skupiny.reduce((a, g) => a + g.count, 0);
+const km = st.snatek_km, kmFar = km.nejdal.filter((x) => x.km >= 10).slice(0, 3);
+const por = st.poradi;
+const porRows = por.M.map((r, i) => ({ name: r.name, M: r.count, F: por.F[i].count })).filter((r) => r.M || r.F);
+const sonsKnown = por.syn.reduce((a, x) => a + x.count, 0);
 // jména: muži i ženy na společné škále; tabulka podle století – sytost podle největšího podílu v tabulce,
 // sloupce s méně než deseti lidmi (náhodné podíly) škálu neurčují
 const nameMax = Math.max(1, ...st.jmena.M.map((n) => n.count), ...st.jmena.F.map((n) => n.count));
@@ -74,9 +79,13 @@ const heatMax = Object.fromEntries(['M', 'F'].map((sx) => {
 
   <h2>Čím se živili</h2>
   <p class="muted">Povolání předků tak, jak je zapsal farář (u každého počítáno jednou, u žen jen tam, kde je povolání uvedeno).</p>
-  <div class="stack">
+  <div class="bars groups">
     {st.povolani_skupiny.map((g) => (
-      <span class="seg" style={`flex:${g.count};background:${groupColor[g.name] || '#999'}`} title={`${g.name}: ${g.count}`}>{g.name} {g.count}</span>
+      <div class="bar-row">
+        <span class="lbl"><span class="dot" style={`background:${groupColor[g.name] || '#999'}`}></span>{g.name}</span>
+        <span class="bar"><span class="fill" style={`width:${pct(g.count, maxOf(st.povolani_skupiny))}%`}></span></span>
+        <span class="val">{g.count} ({proc(g.count, occTotal)} %)</span>
+      </div>
     ))}
   </div>
   <div class="occ">
@@ -87,6 +96,27 @@ const heatMax = Object.fromEntries(['M', 'F'].map((sx) => {
       </details>
     ))}
   </div>
+
+  {st.povolani_stoleti.length > 1 && <>
+    <h3>Jak se to měnilo</h3>
+    <p class="muted small">Kolik procent předků narozených v daném století se živilo v té skupině (čím sytější, tím víc).
+      V záhlaví počet předků se známým povoláním; u malých čísel je podíl hodně náhodný.</p>
+    <div class="card heat-card occ-heat">
+      <table class="heat">
+        <thead><tr><th></th>{st.povolani_stoleti.map((c) => <th class={c.pocet < 10 ? 'few' : ''}>{c.name.replace(' století', ' st.')}<br /><span class="muted">({c.pocet})</span></th>)}</tr></thead>
+        <tbody>
+          {st.povolani_skupiny.map((g, gi) => (
+            <tr><th><span class="dot" style={`background:${groupColor[g.name] || '#999'}`}></span>{g.name}</th>{st.povolani_stoleti.map((c) => {
+              const v = c.skupiny[gi]?.count || 0, share = c.pocet ? v / c.pocet : 0;
+              return <td class={c.pocet < 10 ? 'few' : ''} title={`${g.name}, ${c.name}: ${v} z ${c.pocet}`}
+                style={v ? `background:color-mix(in srgb, var(--accent) ${Math.max(8, Math.round(100 * share))}%, var(--paper));color:${share > 0.55 ? '#fff' : 'var(--ink)'}` : ''}>
+                {v ? `${Math.round(100 * share)} %` : '–'}</td>;
+            })}</tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  </>}
 
   <h2>Kde se narodili</h2>
   <div class="bars">
@@ -172,6 +202,26 @@ const heatMax = Object.fromEntries(['M', 'F'].map((sx) => {
       <p class="muted small">≈ věk spočítaný jen z let, bez přesného data narození.</p>
     </details>
   </div>}
+  {km.pocet > 0 && <div class="card wide-card">
+    <h3>Jak daleko si brali</h3>
+    <p>U {km.pocet} {pl(km.pocet, 'manželského páru', 'manželských párů', 'manželských párů')} víme, kde se narodil muž i žena.{' '}
+      <b>{proc(km.pasma[0].count, km.pocet)} %</b> si vzalo někoho ze stejné vsi
+      a {proc(km.pasma.slice(0, 3).reduce((a, b) => a + b.count, 0), km.pocet)} % z okruhu do deseti kilometrů – většinou
+      z vlastní nebo sousední farnosti.</p>
+    <div class="bars">
+      {km.pasma.map((b) => (
+        <div class="bar-row">
+          <span class="lbl">{b.name}</span>
+          <span class="bar"><span class="fill" style={`width:${b.count ? w(b.count, maxOf(km.pasma)) : 0}%`}></span></span>
+          <span class="val">{b.count}</span>
+        </div>
+      ))}
+    </div>
+    {km.stoleti.length > 1 && <p class="small">{km.stoleti.map((c) => `${c.name}: ze stejné vsi ${c.stejna} z ${c.pocet}, průměrně ${cz(c.prumer)} km`).join(' · ')}</p>}
+    {kmFar.length > 0 && <p class="small">Nejdál:
+      <Fragment set:html={kmFar.map((x) => `${person(x.muz)} (${esc(x.odkud)}) a ${person(x.zena)} (${esc(x.kam)}) – ${String(Math.round(x.km))} km${x.rok ? `, ${x.rok}` : ''}`).join('; ')} />.</p>}
+    <p class="muted small">Vzdušnou čarou mezi rodišti podle mapy míst; páry, u kterých obec na mapě chybí, se nepočítají.</p>
+  </div>}
 
   <h2>Rodiny a děti</h2>
   {deti.rodin > 0 && <>
@@ -235,6 +285,42 @@ const heatMax = Object.fromEntries(['M', 'F'].map((sx) => {
           dítě <Fragment set:html={parents(z)} /></li>)}
       </ul>
     </details>}
+    {por.list.length > 0 && <div class="card wide-card">
+      <h3>Kolikátý byl předek mezi sourozenci</h3>
+      <div class="grid2">
+        <div>
+          <div class="mirror" role="table" aria-label="Pořadí předka mezi sourozenci: muži a ženy">
+            <div class="mhead wide-mid" role="row"><span role="columnheader"><i class="sw sw-m"></i>muži</span><span role="columnheader"></span><span role="columnheader"><i class="sw sw-f"></i>ženy</span></div>
+            {porRows.map((r) => (
+              <div class="mrow wide-mid" role="row">
+                <span class="side l" role="cell" title={`muži – ${r.name}: ${r.M}`}><span class="n">{r.M || ''}</span><span class="fill-m" style={`width:${w(r.M, mirrorMax(porRows))}%`}></span></span>
+                <span class="mid" role="cell">{r.name}</span>
+                <span class="side" role="cell" title={`ženy – ${r.name}: ${r.F}`}><span class="fill-f" style={`width:${w(r.F, mirrorMax(porRows))}%`}></span><span class="n">{r.F || ''}</span></span>
+              </div>
+            ))}
+          </div>
+        </div>
+        <div>
+          {sonsKnown > 0 && <p>Mezi bratry, kteří nezemřeli jako malí, byl předek{' '}
+            {por.syn.filter((x) => x.count).map((x) => `${{ 'nejstarší': 'nejstarší', 'uprostřed': 'prostřední', 'nejmladší': 'nejmladší', 'jediné dítě': 'jediný' }[x.name]} ${x.count}×`).join(', ')}.</p>}
+          <p class="muted small">Kdo převzal grunt, se lišilo kraj od kraje i rodina od rodiny – někde nejstarší syn, jinde nejmladší
+            (rodiče tak mohli hospodařit déle a starší sourozenci se mezitím osamostatnili), a často ten, kdo se přiženil nebo vyplatil ostatní.</p>
+        </div>
+      </div>
+      <details><summary>Sourozenci předků v pořadí narození ({por.list.length})</summary>
+        <p class="legend small"><span><i class="kid kid-m"></i>chlapec</span><span><i class="kid kid-f"></i>dívka</span>
+          <span><i class="kid kid-m kid-dead"></i>zemřel(a) jako malý</span><span><i class="kid kid-m kid-me"></i>předek</span></p>
+        <div class="kids">
+          {por.list.map((x) => (
+            <div class="kids-row">
+              <span class="small" set:html={person(x)} />
+              <span class="kid-line" aria-label={`${x.pos}. z ${x.n} dětí`}>{x.deti.map((k) => (
+                <i class={`kid kid-${k.sex.toLowerCase()}${k.osud === 'zemrel' ? ' kid-dead' : ''}${k.predek ? ' kid-me' : ''}`}></i>))}</span>
+            </div>
+          ))}
+        </div>
+      </details>
+    </div>}
   </>}
   <div class="grid2">
     <div class="card">
@@ -464,8 +550,24 @@ const heatMax = Object.fromEntries(['M', 'F'].map((sx) => {
   .heat { border-collapse: separate; border-spacing: 2px; width: 100%; font-size: 0.85rem; }
   .heat th { font-weight: 400; color: var(--muted); font-size: 0.78rem; text-align: center; }
   .heat tbody th { text-align: left; color: var(--ink); font-size: 0.88rem; }
-  .heat td { text-align: center; padding: 0.3rem 0.2rem; border-radius: 3px; color: var(--muted); }
+  .heat td { text-align: center; padding: 0.3rem 0.2rem; border-radius: 3px; color: var(--muted); white-space: nowrap; }
   .heat .few { opacity: 0.6; }
+  .groups .bar-row { grid-template-columns: minmax(7rem, 11rem) 1fr auto; }
+  .occ-heat { max-width: 40rem; }
+  .occ-heat tbody th { white-space: nowrap; }
+  .mhead.wide-mid, .mrow.wide-mid { grid-template-columns: 1fr 6.5rem 1fr; }
+  .kids { display: grid; gap: 0.25rem; margin-top: 0.4rem; }
+  .kids-row { display: grid; grid-template-columns: minmax(9rem, 14rem) 1fr; gap: 0.6rem; align-items: center; }
+  .kid-line { display: flex; flex-wrap: wrap; gap: 3px; align-items: center; }
+  .kid { display: inline-block; width: 0.7rem; height: 0.7rem; border-radius: 50%; vertical-align: middle; margin-right: 0.25rem; }
+  .kid-line .kid { margin: 0; }
+  .legend .kid-me { margin: 0 0.5rem 0 0.25rem; }
+  .kid-m { background: var(--men); }
+  .kid-f { background: var(--women); }
+  .kid-dead { background: transparent; border: 2px solid var(--muted); }
+  .kid-m.kid-dead { border-color: var(--men); }
+  .kid-f.kid-dead { border-color: var(--women); }
+  .kid-me { width: 1rem; height: 1rem; box-shadow: 0 0 0 2px var(--paper), 0 0 0 4px var(--ink); }
   @media (max-width: 560px) {
     .bar-row { grid-template-columns: 6.5rem 1fr auto; }
     .fate-row { grid-template-columns: 1fr auto; }
@@ -473,5 +575,7 @@ const heatMax = Object.fromEntries(['M', 'F'].map((sx) => {
     .drow { grid-template-columns: 5.5rem 1fr; }
     .drow .dval { grid-column: 2; }
     .mhead, .mrow { grid-template-columns: 1fr 3.8rem 1fr; }
+    .mhead.wide-mid, .mrow.wide-mid { grid-template-columns: 1fr 5.5rem 1fr; }
+    .kids-row { grid-template-columns: 1fr; gap: 0.1rem; margin-bottom: 0.3rem; }
   }
 </style>

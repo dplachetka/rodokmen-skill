@@ -8,7 +8,7 @@ církve podle slov „církev, vyznání“. Bez přesného data se věk počít
 Počet dětí v rodině a dětská úmrtnost jen z rodin, kde má předek "sour": "hotovo" (všichni sourozenci dohledáni):
 děti = předek a jeho vlastní sourozenci (`bratr`, `sestra`, ne nevlastní ani nejistí).
 """
-import json, os, re, sys
+import json, math, os, re, sys
 from collections import Counter, defaultdict
 from datetime import date
 
@@ -19,6 +19,7 @@ for _s in (sys.stdout, sys.stderr):
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 SITE = os.path.join(ROOT, "web", "src", "data", "site.json")
 OUT = os.path.join(ROOT, "web", "src", "data", "statistiky.json")
+MISTA = os.path.join(ROOT, "data", "mista.json")
 
 DATE = r"(\d{1,2})\.\s*(?:\((\d{1,2})\.\?\)|(\d{1,2}))\.\s*(\d{4})"
 MESICE = ["leden", "únor", "březen", "duben", "květen", "červen", "červenec", "srpen", "září", "říjen", "listopad", "prosinec"]
@@ -229,7 +230,8 @@ def main():
                 gap[sex].append({"parent": ref(bys[s]), "child": ref(p), "val": age(born[s], born[p["slug"]])})
 
     # počet dětí a dětská úmrtnost: rodiny předků s dohledanými sourozenci ("sour": "hotovo")
-    def child(name, sex, facts, y, text, ancestor):
+    def child(name, sex, facts, y, text, ancestor, born_key=""):
+        """Dítě rodiny; ancestor = slug předka (ten se dospělosti dožil), u sourozence None."""
         b, d = when(facts, "*", y), when(facts, "†", y)
         la = life_age(b, d, facts)
         hint = re.search(r"zemřel[a]?\s+(?:jako\s+|v\s+|krátce\s+|hned\s+)?(malý|malá|dítě|dětství|novorozen|kojen|po\s+narození)", text or "", re.I)
@@ -247,7 +249,8 @@ def main():
         # do prvních narozenin: věk 0 (i rozdíl let 0 – narozen a zemřel týž rok), bez let „zemřel jako novorozenec“
         kojenec = osud == "zemrel" and (la[0] == 0 if la else not re.match(r"malý|malá|dítě|dětství", hint.group(1)))
         return {"name": name, "sex": sex, "rok": b[1] if b else None, "osud": osud or "nevime", "kojenec": kojenec,
-                "vek": la[0] if la and osud == "zemrel" else None, "umrti": d[1] if d else None}
+                "vek": la[0] if la and osud == "zemrel" else None, "umrti": d[1] if d else None,
+                "predek": ancestor, "born": born_key}
 
     fams = {}
     for p in people:
@@ -255,7 +258,7 @@ def main():
             continue
         fam = fams.setdefault(p["family"], {"father": p.get("father"), "mother": p.get("mother"), "kids": [], "done": True, "jmena": set()})
         fam["done"] &= p.get("sibStatus") == "done"
-        fam["kids"].append(child(p.get("modern") or p["name"], sex_of(p), p["facts"], p.get("y"), "", True))
+        fam["kids"].append(child(p.get("modern") or p["name"], sex_of(p), p["facts"], p.get("y"), "", p["slug"], p.get("born") or ""))
         fam["jmena"].add((p.get("modern") or p["name"], (p.get("born") or "")[:4]))
         for e in p.get("side", []):
             rel = (e.get("rel") or "").strip().lower()
@@ -270,7 +273,7 @@ def main():
         for e, sex in fam.get("sibs", []):
             if (e["name"], (e.get("born") or "")[:4]) in fam["jmena"]:   # sourozenec, který je zároveň předkem
                 continue
-            fam["kids"].append(child(e["name"], sex, e.get("facts", []), e.get("years", ""), e.get("text", ""), False))
+            fam["kids"].append(child(e["name"], sex, e.get("facts", []), e.get("years", ""), e.get("text", ""), None, e.get("born") or ""))
         roky = [c["rok"] for c in fam["kids"] if c["rok"]]
         families_all.append({"id": fid, "father": ref(bys[fam["father"]]) if fam["father"] in bys else None,
                              "mother": ref(bys[fam["mother"]]) if fam["mother"] in bys else None,
@@ -292,6 +295,7 @@ def main():
     # povolání
     occ = defaultdict(list)
     groups = Counter()
+    occ_cent = defaultdict(Counter)   # století narození → skupina povolání → počet
     for p in anc:
         found = []
         for f in p["facts"]:
@@ -305,7 +309,74 @@ def main():
             occ[(name, grp)].append(ref(p))
         if found:
             groups[found[0][1]] += 1
+            if p["slug"] in byear:
+                occ_cent[stoleti(byear[p["slug"]])][found[0][1]] += 1
     occ_list = sorted(({"name": n, "group": g, "people": v} for (n, g), v in occ.items()), key=lambda x: (-len(x["people"]), x["name"]))
+
+    # jak daleko si brali: vzdálenost rodišť manželů (rodiče předka) podle souřadnic z data/mista.json
+    mista = []
+    if os.path.exists(MISTA):
+        for nm, e in json.load(open(MISTA, encoding="utf-8")).items():
+            if "lat" in e and not e.get("hypoteza"):
+                mista.append((nm, re.compile(e.get("re") or re.escape(nm)), e["lat"], e["lon"]))
+
+    def rodiste(p):
+        """Místo z mista.json, které se ve faktu o narození objeví nejdřív (poznámky v závorce bývají až za ním)."""
+        for f in first(p["facts"], "*"):
+            hits = [(m.start(), nm, lat, lon) for nm, rx, lat, lon in mista if (m := rx.search(f))]
+            if hits:
+                return min(hits)[1:]
+        return None
+
+    def km(a, b):
+        la1, lo1, la2, lo2 = map(math.radians, (a[1], a[2], b[1], b[2]))
+        h = math.sin((la2 - la1) / 2) ** 2 + math.cos(la1) * math.cos(la2) * math.sin((lo2 - lo1) / 2) ** 2
+        return 2 * 6371 * math.asin(math.sqrt(h))
+
+    PASMA_KM = ["stejná obec", "do 5 km", "5–10 km", "10–20 km", "20–50 km", "přes 50 km"]
+    pasmo_km = lambda v: PASMA_KM[0 if v < 0.5 else 1 if v < 5 else 2 if v < 10 else 3 if v < 20 else 4 if v < 50 else 5]
+    pary, seen_par = [], set()
+    for p in anc:
+        f, m = bys.get(p.get("father")), bys.get(p.get("mother"))
+        if not f or not m or (f["slug"], m["slug"]) in seen_par:
+            continue
+        seen_par.add((f["slug"], m["slug"]))
+        a, b = rodiste(f), rodiste(m)
+        if not a or not b:
+            continue
+        stem = (m.get("modern") or m["name"]).split()[-1][:4]
+        wed = [x for x in first(f["facts"], "×") if stem in x] or first(f["facts"], "×") or first(m["facts"], "×")
+        wy = int(y.group(1)) if wed and (y := re.search(r"(?<!\d)(\d{4})(?!\d)", wed[0])) else \
+            byear[f["slug"]] + 27 if f["slug"] in byear else None
+        d = 0.0 if a[0] == b[0] else km(a, b)
+        pary.append({"muz": ref(f), "zena": ref(m), "odkud": a[0], "kam": b[0], "km": round(d, 1), "rok": wy})
+    pary.sort(key=lambda x: -x["km"])
+    km_cent = defaultdict(list)
+    for x in pary:
+        if x["rok"]:
+            km_cent[stoleti(x["rok"])].append(x)
+
+    # pořadí předka mezi sourozenci (jen rodiny s dohledanými sourozenci a známým pořadím narození všech dětí)
+    poradi = []
+    for f in families_done:
+        kids = f["kids"]
+        if any(not c["born"] for c in kids):
+            continue
+        kids = sorted(kids, key=lambda c: c["born"])
+        for i, c in enumerate(kids):
+            if not c["predek"]:
+                continue
+            same = [k for k in kids if k is not c and k["born"][:4] == c["born"][:4]]
+            if any(len(k["born"]) < 10 or len(c["born"]) < 10 for k in same):   # týž rok bez data – pořadí nejisté
+                continue
+            sons = [k for k in kids if k["sex"] == c["sex"] and k["osud"] != "zemrel"]   # bratři/sestry, kteří nezemřeli jako malí
+            poradi.append({**ref(bys[c["predek"]]), "sex": c["sex"], "pos": i + 1, "n": len(kids),
+                           "pos_pohl": sons.index(c) + 1, "n_pohl": len(sons),
+                           "deti": [{"sex": k["sex"], "osud": k["osud"], "predek": k is c} for k in kids]})
+
+    def misto_v_rade(pos, n):
+        return "jediné dítě" if n == 1 else "nejstarší" if pos == 1 else "nejmladší" if pos == n else "uprostřed"
+    PORADI = ["nejstarší", "uprostřed", "nejmladší", "jediné dítě"]
 
     # místa narození
     places = Counter()
@@ -398,6 +469,8 @@ def main():
         "generace": [{"gen": g, "pocet": gens[g], "max": 2 ** g} for g in sorted(gens)],
         "povolani": occ_list,
         "povolani_skupiny": [{"name": k, "count": v} for k, v in groups.most_common()],
+        "povolani_stoleti": [{"name": c, "pocet": sum(occ_cent[c].values()), "skupiny": [{"name": g, "count": occ_cent[c][g]} for g, _ in groups.most_common()]}
+                             for c in sorted(occ_cent, key=lambda c: int(c.split(".")[0])) if sum(occ_cent[c].values()) >= 3],
         "mista": [{"name": k, "count": v} for k, v in places.most_common(15)],
         "doziti": {"list": life, "prumer": avg([r["val"] for r in life]),
                    **{sx: {"prumer": avg([r["val"] for r in life if r["sex"] == sx]), "pocet": sum(r["sex"] == sx for r in life)} for sx in "MF"},
@@ -430,6 +503,15 @@ def main():
                            "nejstarsi": max(v, key=lambda x: x["val"]) if v else None, "pocet": len(v)} for s, v in gap.items()},
         "jmena": {s: [{"name": k, "count": v} for k, v in c.most_common(10)] for s, c in names.items()},
         "jmena_pocet": {s: sum(c.values()) for s, c in names.items()},
+        "snatek_km": {"pocet": len(pary), "median": sorted(x["km"] for x in pary)[len(pary) // 2] if pary else None,
+                      "pasma": [{"name": b, "count": sum(pasmo_km(x["km"]) == b for x in pary)} for b in PASMA_KM],
+                      "stoleti": [{"name": c, "pocet": len(v), "stejna": sum(x["km"] < 0.5 for x in v),
+                                   "do10": sum(x["km"] < 10 for x in v), "prumer": avg([x["km"] for x in v])}
+                                  for c, v in sorted(km_cent.items(), key=lambda x: int(x[0].split(".")[0]))],
+                      "nejdal": pary[:5]},
+        "poradi": {"list": sorted(poradi, key=lambda x: bys[x["slug"]]["k"]),
+                   **{sx: [{"name": k, "count": sum(misto_v_rade(x["pos"], x["n"]) == k for x in poradi if x["sex"] == sx)} for k in PORADI] for sx in "MF"},
+                   "syn": [{"name": k, "count": sum(misto_v_rade(x["pos_pohl"], x["n_pohl"]) == k for x in poradi if x["sex"] == "M")} for k in PORADI]},
         "jmena_stoleti": names_cent,
         "jmeno_po_zemrelem": po_zemrelem,
         "vira": faith,
