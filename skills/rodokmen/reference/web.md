@@ -43,12 +43,14 @@ Náhled spouštěj na pozadí a uživateli pošli odkaz. Vzhled si ověř sám (
   když se text změní, hlásí se znovu), viz `soukromi.md`.
 - `uvod.foto` = klíč obrázku ve `vyrezy/` (ulož přes `vyrez.py`).
 - `pribeh`: `menu` a `tlacitko` pojmenuj podle hlavního rodu („Příběh Novákových“), `rod` = číslo rodu (8–15).
+- `udalosti` (volitelné) = místní události pro časovou osu, např. `[{"od": 1842, "kratce": "požár Houdkovic", "text": "Vyhořela
+  polovina vsi."}]` (`do` u delších, `obdobi: true` u pozvolných dějů); přidají se ke společnému seznamu ve `web/src/lib/udalosti.js`.
   Bez vyplněného `uvod` ukáže úvodní stránka aspoň název a `lead` příběhu. Viz `pribehy.md`.
 - Šablona `web.json` je prázdná – název nastav hned, jak znáš příjmení výchozí osoby (`kontrola.py` hlásí zbytky ukázky).
 - `puvodni_jmena`: `true` = jména osob na webu a ve vějíři v původních tvarech ze zápisů (pole `zap` v `osoby.json`,
   „Catharina Nowakin / Kateřina Nováková“). Výchozí je dnešní spisovná podoba; původní tvar je pak jen řádkem na stránce osoby.
 
-## Stránky Statistiky a Domy
+## Stránky Statistiky, Domy a Časová osa
 - **Statistiky** (`/statistiky/`, `tools/statistiky.py`): předci v generacích podle doložení, povolání, věk dožití (muži a ženy, podle století narození),
   věk při sňatku (rozložení, podle století, věkový rozdíl manželů), vzdálenost rodišť manželů (souřadnice z `mista.json`),
   měsíce svateb, počet dětí v rodině, dětská úmrtnost a pořadí předka mezi sourozenci, povolání i podle století,
@@ -63,6 +65,10 @@ Náhled spouštěj na pozadí a uživateli pošli odkaz. Vzhled si ověř sám (
   žili (přímí předci první, boční příbuzní s odkazem na kartičku u předka), výřez skici a jedna věta o jistotě polohy.
   Na stránkách osob a zápisů jsou odkazy na domy. Výřezy skic na veřejném webu jen s citací archivu (podmínky
   v návodu stare-adresy).
+- **Časová osa** (`/casova-osa/`, `tools/casova_osa.py` → `osa.json`): pro každý rod (8–15) linie od výchozí osoby
+  po otcích zakladatele rodu, v řádku pár muž a žena, svatba, historické události (`web/src/lib/udalosti.js` + `udalosti`
+  z `web.json`). Chybějící roky odhadne (narození podle sňatku nebo dítěte, úmrtí „před“ / „žil ještě“) a kreslí čárkovaně –
+  čím víc dohledaných úmrtí, tím méně čárek. Zatím samostatná stránka (odkaz ze Statistik), v menu není.
 
 ## Zveřejnění na Netlify (výchozí, zdarma)
 1. Uživatel si založí účet na netlify.com (stačí přihlášení přes Google/GitHub) – udělá sám.

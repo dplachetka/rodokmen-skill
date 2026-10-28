@@ -1,0 +1,37 @@
+// Události pro časovou osu (/casova-osa/): české země, hlavně to, co zasáhlo venkov a matriky.
+// od–do roky (do jen u delších událostí), kratce = popisek v grafu, text = jedna věta pro čtenáře;
+// obdobi: true = pozvolný děj (vystěhovalectví) – v grafu jen tenká čára nahoře, ne pás přes celou osu.
+// Vlastní události projektu (požár vsi, povodeň, morová rána ve farnosti) patří do data/web.json → "udalosti",
+// ve stejném tvaru: [{"od": 1842, "kratce": "požár Houdkovic", "text": "Vyhořela polovina vsi."}].
+export default [
+  { od: 1618, do: 1648, kratce: 'třicetiletá válka', text: 'Vojska táhla zemí, vesnice pustly; Čechy přišly zhruba o třetinu obyvatel.' },
+  { od: 1651, kratce: 'soupis poddaných', text: 'Soupis poddaných podle víry – první seznam všech lidí na panstvích, i s věkem.' },
+  { od: 1654, kratce: 'berní rula', text: 'Soupis usedlostí, polí a dobytka pro daně; u každého hospodáře jméno a výměra.' },
+  { od: 1679, do: 1680, kratce: 'mor', text: 'Velká morová epidemie, v některých farnostech zemřela třetina lidí.' },
+  { od: 1680, kratce: 'selské povstání', text: 'Poddaní se bouřili proti robotě; vydán první robotní patent (nejvýš tři dny týdně).' },
+  { od: 1713, do: 1715, kratce: 'poslední mor', text: 'Poslední velká morová epidemie v Čechách; na památku stavěny morové sloupy.' },
+  { od: 1740, do: 1748, kratce: 'války o dědictví', text: 'Války o rakouské dědictví; pruská vojska v Čechách, Slezsko ztraceno.' },
+  { od: 1756, do: 1763, kratce: 'sedmiletá válka', text: 'Další válka s Pruskem – rekvizice, ubytovaní vojáci a nemoci na východě Čech.' },
+  { od: 1770, kratce: 'čísla domů', text: 'Při soupisu pro odvody dostaly domy čísla popisná – od té doby je matriky uvádějí.' },
+  { od: 1771, do: 1772, kratce: 'hladomor', text: 'Po neúrodě velký hladomor; zemřela asi desetina obyvatel Čech.' },
+  { od: 1775, kratce: 'selské povstání', text: 'Velké selské povstání proti robotě; nový robotní patent ji zmírnil.' },
+  { od: 1781, kratce: 'konec nevolnictví', text: 'Zrušení nevolnictví – poddaný se směl bez svolení ženit, stěhovat a učit řemeslu; toleranční patent povolil evangelíky.' },
+  { od: 1784, kratce: 'nové matriky', text: 'Matriky vedené podle jednotného vzoru, po obcích, s čísly domů a příčinou úmrtí.' },
+  { od: 1805, do: 1815, kratce: 'napoleonské války', text: 'Napoleonské války, bitva u Slavkova 1805; odvody mužů na vojnu a válečné daně.' },
+  { od: 1811, kratce: 'státní bankrot', text: 'Státní bankrot – papírové peníze ztratily čtyři pětiny hodnoty.' },
+  { od: 1831, do: 1832, kratce: 'cholera', text: 'První epidemie cholery v Čechách.' },
+  { od: 1848, kratce: 'konec roboty', text: 'Zrušení roboty – sedláci se stali vlastníky svých gruntů.' },
+  { od: 1850, kratce: 'obce a okresy', text: 'Vznikly samosprávné obce a okresy, úřady místo vrchnosti.' },
+  { od: 1850, do: 1914, obdobi: true, kratce: 'do Ameriky', text: 'Vystěhovalectví – desetitisíce lidí z Čech odešly za prací do Ameriky.' },
+  { od: 1866, kratce: '1866', text: 'Válka s Pruskem, bitva u Hradce Králové; s vojáky přišla cholera.' },
+  { od: 1869, kratce: 'povinná škola', text: 'Povinná osmiletá školní docházka.' },
+  { od: 1914, do: 1918, kratce: '1. světová válka', text: 'První světová válka – muži na frontě, rekvizice, nedostatek jídla.' },
+  { od: 1918, kratce: 'Československo', text: 'Vznik Československa; zároveň epidemie španělské chřipky.' },
+  { od: 1938, kratce: 'Mnichov', text: 'Mnichovská dohoda – pohraničí připadlo Německu.' },
+  { od: 1939, do: 1945, kratce: '2. světová válka', text: 'Okupace a druhá světová válka – totální nasazení, odboj, věznění.' },
+  { od: 1945, do: 1946, kratce: 'odsun Němců', text: 'Vysídlení Němců; do pohraničí přicházeli noví osídlenci.' },
+  { od: 1948, kratce: 'únor 1948', text: 'Komunistický převrat.' },
+  { od: 1949, do: 1960, kratce: 'kolektivizace', text: 'Kolektivizace – soukromá hospodářství sloučena do JZD, sedláci často pronásledováni.' },
+  { od: 1968, kratce: 'okupace 1968', text: 'Okupace vojsky Varšavské smlouvy.' },
+  { od: 1989, kratce: 'listopad 1989', text: 'Sametová revoluce a konec komunistického režimu.' },
+];
