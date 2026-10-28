@@ -5,6 +5,7 @@ dist
 # generuje tools/export_web.py (npm run data)
 src/data/site.json
 src/data/statistiky.json
+src/data/osa.json
 src/data/domy.json
 public/domy/
 src/generated/

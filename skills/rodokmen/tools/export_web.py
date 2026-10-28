@@ -423,11 +423,12 @@ def main():
     for f, link in dict.fromkeys(broken):
         print(f"POZOR: nefunkční odkaz {link}/ v {f} – oprav ho (adresy stránek jsou ve web/src/data/site.json)")
 
-    # stránky Statistiky a Domy se počítají z hotového site.json
+    # stránky Statistiky, Domy a Časová osa se počítají z hotového site.json
     sys.path.insert(0, TOOLS)
-    import statistiky, domy_export
+    import statistiky, domy_export, casova_osa
     statistiky.main()
     domy_export.main()
+    casova_osa.main()
 
 
 if __name__ == "__main__":

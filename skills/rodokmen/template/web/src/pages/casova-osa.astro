@@ -1,0 +1,179 @@
+---
+import Base from '../layouts/Base.astro';
+import osa from '../data/osa.json';
+import zakladni from '../lib/udalosti.js';
+import { config, href, root } from '../lib/data.js';
+
+// události: společné ze skillu a vlastní z web.json → "udalosti"; čísla platí pro všechny osy i pro seznam
+const udalosti = [...zakladni, ...(config.udalosti || [])]
+  .map((u) => ({ ...u, do: u.do || u.od }))
+  .sort((a, b) => a.od - b.od || b.do - a.do)
+  .map((u, i) => ({ ...u, n: i + 1 }));
+const roky = (u) => (u.do > u.od ? `${u.od}–${u.do}` : `${u.od}`);
+
+const W = 900, L = 175, R = W - 12, rowH = 36;
+const genLabel = (g) => (g === 0 ? (root.modern || root.name).split(' ')[0] : g === 1 ? 'rodiče' : g === 2 ? 'prarodiče' : `${g}. generace`);
+const firstName = (p) => (p ? p.name.split(/[ /]/)[0] : '');
+const life = (p) => `${p.name}: ${p.fb === 'a' ? 'asi ' : p.fb === '?' ? '? (odhad) ' : ''}${p.b}–${
+  { z: 'žije', p: `před ${p.d}`, o: `žil(a) ještě ${p.d}`, '?': '? (nevíme)', a: `asi ${p.d}`, '': p.d }[p.fd]}`;
+
+// jedna osa na rod: rozsah let, události v rozsahu rozložené do řádků značek, aby se čísla nepřekrývala
+const charts = osa.rody.map((rod) => {
+  const all = rod.rows.flatMap((r) => [r.m, r.f]).filter(Boolean);
+  const Y0 = Math.floor((Math.min(...all.map((p) => p.b)) - 10) / 50) * 50, Y1 = osa.dnes;
+  const x = (y) => L + ((y - Y0) * (R - L)) / (Y1 - Y0);
+  const evs = udalosti.filter((u) => u.do >= Y0 && u.od <= Y1);
+  const lanes = [];
+  const marks = evs.map((u) => {
+    const cx = x((u.od + u.do) / 2);
+    let lane = lanes.findIndex((last) => cx - last >= 19);
+    if (lane < 0) { lanes.push(cx); lane = lanes.length - 1; } else lanes[lane] = cx;
+    return { u, cx, lane };
+  });
+  const top = 14 + lanes.length * 19, bottom = top + rod.rows.length * rowH;
+  const ticks = [];
+  for (let y = Math.ceil(Y0 / 50) * 50; y <= Y1; y += 50) ticks.push(y);
+  return { rod, x, Y0, evs, marks, top, bottom, ticks, H: bottom + 26 };
+});
+---
+<Base title="Časová osa" wide>
+  <h1>Časová osa rodů</h1>
+  <p class="lead">Životy předků vedle sebe a v čase – kdo koho zažil a které události jejich život zasáhly.
+    Každý řádek je jedna generace: muž a jeho žena, kosočtverec je svatba. Čísla nahoře odkazují na události pod osou.</p>
+
+  {charts.length > 1 && <div class="rod-tabs" role="tablist" aria-label="Rod">
+    {charts.map((c, i) => (
+      <button type="button" role="tab" data-rod={c.rod.slug} aria-selected={i === 0 ? 'true' : 'false'}>
+        <span class="dot" style={`background:${c.rod.color}`}></span>{c.rod.name}
+      </button>
+    ))}
+  </div>}
+
+  <p class="legend small">
+    <span><i class="sw sw-m"></i>muž</span><span><i class="sw sw-f"></i>žena</span>
+    <span><i class="sw sw-dash"></i>nejisté nebo odhadnuté roky</span><span><i class="sw sw-wed"></i>svatba</span>
+    <span><i class="sw sw-ev"></i>událost</span>
+  </p>
+
+  {charts.map((c, ci) => (
+    <section class="card osa" id={`rod-${c.rod.slug}`} data-rod={c.rod.slug}>
+      <h2 class="osa-title"><a href={href.line(c.rod.slug)}>{c.rod.name}</a></h2>
+      <div class="osa-scroll">
+        <svg viewBox={`0 0 ${W} ${c.H}`} role="img" aria-label={`Časová osa rodu ${c.rod.name}`}>
+          {c.marks.map(({ u, cx, lane }) => {
+            const x0 = c.x(Math.max(u.od, c.Y0)), x1 = c.x(u.do), w = Math.max(1.5, x1 - x0);
+            return (
+              <g class="ev" data-tip={`${u.n}. ${roky(u)}: ${u.text}`} tabindex="0">
+                {u.obdobi
+                  ? <rect x={x0} y={c.top - 7} width={w} height="3" class="ev-period" />
+                  : <rect x={x0} y={c.top - 4} width={w} height={c.bottom - c.top + 4} class={u.do > u.od ? 'ev-band' : 'ev-line'} />}
+                <line x1={cx} x2={cx} y1={12 + lane * 19 + 8} y2={c.top - 4} class="ev-stem" />
+                <circle cx={cx} cy={12 + lane * 19} r="8.5" class="ev-dot" />
+                <text x={cx} y={12 + lane * 19 + 3.5} class="ev-num">{u.n}</text>
+                <title>{`${roky(u)}: ${u.kratce}`}</title>
+              </g>
+            );
+          })}
+          {c.ticks.map((t) => <>
+            <line x1={c.x(t)} x2={c.x(t)} y1={c.bottom} y2={c.bottom + 5} class="axis" />
+            <text x={c.x(t)} y={c.bottom + 19} class="tick">{t}</text>
+          </>)}
+          <line x1={L} x2={R} y1={c.bottom} y2={c.bottom} class="axis" />
+          {c.rod.rows.map((r, i) => {
+            const y = c.top + i * rowH + 10;
+            return (
+              <g>
+                <text x="0" y={y + 4} class="gen">{genLabel(r.gen)}</text>
+                <text x="0" y={y + 19} class="names">{[r.m, r.f].filter(Boolean).map(firstName).join(' a ')}</text>
+                {[[r.m, 'm', 0], [r.f, 'f', 11]].filter(([p]) => p).map(([p, s, dy]) => (
+                  <a href={href.person(p.slug)} data-tip={life(p)}>
+                    <line x1={c.x(p.b)} x2={Math.max(c.x(p.d), c.x(p.b) + 3)} y1={y + dy} y2={y + dy}
+                      class={`life life-${s}${p.fb === '?' || ['?', 'p', 'o'].includes(p.fd) ? ' dash' : ''}${p.fd === 'z' ? ' alive' : ''}`} />
+                    <title>{life(p)}</title>
+                  </a>
+                ))}
+                {r.svatba && r.m && r.f && (
+                  <rect x={c.x(r.svatba) - 4.5} y={y + 1} width="9" height="9" class="wed" transform={`rotate(45 ${c.x(r.svatba)} ${y + 5.5})`}
+                    data-tip={`Svatba ${r.svatba}: ${r.m.name} a ${r.f.name}`}><title>{`Svatba ${r.svatba}`}</title></rect>
+                )}
+              </g>
+            );
+          })}
+        </svg>
+      </div>
+      <p class="tip small" aria-live="polite">Najeďte na pruh, kosočtverec nebo číslo události.</p>
+    </section>
+  ))}
+  {!charts.length && <p class="muted">Zatím nemáme rody (data/osoby.json → LINES).</p>}
+
+  <h2>Události</h2>
+  <ol class="udalosti">
+    {udalosti.map((u) => <li value={u.n}><b>{roky(u)}</b> {u.kratce} – <span class="muted">{u.text}</span></li>)}
+  </ol>
+</Base>
+
+<script>
+  // přepínání rodů (bez JavaScriptu jsou vidět všechny osy pod sebou) a popisek pod osou při najetí
+  const tabs = document.querySelectorAll('.rod-tabs [data-rod]');
+  const show = (slug) => {
+    tabs.forEach((t) => t.setAttribute('aria-selected', String(t.dataset.rod === slug)));
+    document.querySelectorAll('section.osa').forEach((s) => (s.hidden = s.dataset.rod !== slug));
+  };
+  if (tabs.length) {
+    const want = location.hash.replace('#rod-', '');
+    show([...tabs].some((t) => t.dataset.rod === want) ? want : tabs[0].dataset.rod);
+    tabs.forEach((t) => t.addEventListener('click', () => { show(t.dataset.rod); history.replaceState(null, '', `#rod-${t.dataset.rod}`); }));
+  }
+  document.querySelectorAll('section.osa').forEach((s) => {
+    const tip = s.querySelector('.tip'), rest = tip.textContent;
+    s.querySelectorAll('[data-tip]').forEach((el) => {
+      const on = () => (tip.textContent = el.dataset.tip), off = () => (tip.textContent = rest);
+      el.addEventListener('mouseenter', on); el.addEventListener('focus', on);
+      el.addEventListener('mouseleave', off); el.addEventListener('blur', off);
+    });
+  });
+</script>
+
+<style>
+  .osa { --men: #2a6fa8; --women: #c0602f; margin-bottom: 1rem; }
+  .osa-title { margin: 0 0 0.3rem; border: 0; font-size: 1.2rem; }
+  .osa-title a { color: inherit; text-decoration: none; }
+  .osa-scroll { overflow-x: auto; }
+  .osa svg { display: block; width: 100%; min-width: 760px; font-family: var(--sans); }
+  .rod-tabs { display: flex; flex-wrap: wrap; gap: 0.4rem; margin: 1rem 0 0.6rem; }
+  .rod-tabs button { font: inherit; font-size: 0.9rem; border: 1px solid var(--line); background: var(--paper); color: var(--ink);
+    border-radius: 999px; padding: 0.2rem 0.8rem; cursor: pointer; display: inline-flex; align-items: center; gap: 0.35rem; }
+  .rod-tabs button[aria-selected='true'] { border-color: var(--accent); background: var(--accent-soft); }
+  .dot { width: 0.7rem; height: 0.7rem; border-radius: 50%; display: inline-block; }
+  .legend { display: flex; flex-wrap: wrap; gap: 0.3rem 1rem; color: var(--muted); margin: 0 0 0.6rem; }
+  .sw { display: inline-block; width: 0.9rem; height: 0.4rem; border-radius: 2px; margin-right: 0.3rem; vertical-align: middle; }
+  .sw-m { background: #2a6fa8; }
+  .sw-f { background: #c0602f; }
+  .sw-dash { height: 0; border-top: 2px dashed var(--muted); border-radius: 0; }
+  .sw-wed { width: 0.5rem; height: 0.5rem; background: var(--ink); transform: rotate(45deg); border-radius: 0; }
+  .sw-ev { height: 0.7rem; background: var(--muted); opacity: 0.3; }
+  .gen { font-size: 13px; fill: var(--ink); }
+  .names { font-size: 12px; fill: var(--muted); }
+  .tick { font-size: 12px; fill: var(--muted); text-anchor: middle; }
+  .axis { stroke: var(--muted); stroke-width: 0.6; }
+  .ev-band { fill: var(--muted); opacity: 0.13; }
+  .ev-line { fill: var(--muted); opacity: 0.35; }
+  .ev-period { fill: var(--muted); opacity: 0.5; }
+  .ev-stem { stroke: var(--muted); stroke-width: 0.6; opacity: 0.5; }
+  .ev-dot { fill: var(--paper); stroke: var(--muted); stroke-width: 1; }
+  .ev-num { font-size: 10px; fill: var(--ink); text-anchor: middle; }
+  .ev { cursor: default; outline: none; }
+  .ev:hover .ev-band, .ev:focus .ev-band { opacity: 0.28; }
+  .ev:hover .ev-line, .ev:focus .ev-line { opacity: 0.7; }
+  .ev:hover .ev-dot, .ev:focus .ev-dot { fill: var(--accent-soft); stroke: var(--accent); }
+  .life { stroke-width: 7; stroke-linecap: round; }
+  .life-m { stroke: var(--men); }
+  .life-f { stroke: var(--women); }
+  .life.dash { stroke-dasharray: 5 4; stroke-linecap: butt; }
+  .life.alive { opacity: 0.55; }
+  a:hover .life, a:focus .life { stroke-width: 9; }
+  .wed { fill: var(--ink); stroke: var(--paper); stroke-width: 1.5; }
+  .tip { color: var(--muted); min-height: 1.4rem; margin: 0.3rem 0 0; }
+  .udalosti { padding-left: 2rem; max-width: 52rem; }
+  .udalosti li { margin: 0.25rem 0; }
+</style>
